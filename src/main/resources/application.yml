@@ -1,0 +1,37 @@
+server:
+  port: 8080
+spring:
+  jpa:
+    jdbc:
+      time_zone: UTC
+      batch_size: 1000
+    show-sql: true
+    
+postgress-connection:
+  # jdbc-url: jdbc:postgresql://${DB_HOST:localhost}:5432/stockmanagement
+  jdbc-url: jdbc:postgresql://${DB_HOST:ec2-3-17-133-210.us-east-2.compute.amazonaws.com}:5432/stockmanagement
+  driver-class-name: org.postgresql.Driver
+  username: ${DB_USER:admin}
+  password: ${DB_PASS:admin}
+  maximum-pool-size: 10
+  connection-timeout: 50000
+  idle-timeout: 30000
+  minimum-idle: 30000
+  max-lifetime: 30000
+  keep-alive: 30000
+  hibernate:
+    ddl-auto: update
+    dialect: org.hibernate.dialect.PostgreSQLDialect
+    enable_lazy_load_no_trans: true
+
+application:
+  security:
+    jwt:
+      secret-key: 404E635266556A586E3272357538782F413F4428472B4B6250645367566B5970
+      expiration: 86400000 # a day
+      # expiration: 40 # a day
+      refresh-token:
+        expiration: 604800000 # 7 days
+
+# logging:
+#   config: classpath:log4j2.xml

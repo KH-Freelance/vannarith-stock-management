@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<Configuration xmlns="http://logging.apache.org/log4j/2.0/configuration">
+    <Properties>
+        <Property name="LOG_PATTERN">%d{yyyy-MM-dd'T'HH:mm:ss.SSSZ} %p : %m%n</Property>
+        <Property name="filePattern">${date:dd-MM-yyyy}</Property>
+        <Property name="apiFileNamePattern">./logs/api-logging.log</Property>
+        <Property name="apiBackupFileNamePattern">./logs/backup/${date:yyyy-MM}/api-%d{dd-MM-yyyy}.log</Property>
+    </Properties>
+
+    <Appenders>
+        <Console name="Console" target="SYSTEM_OUT">
+            <PatternLayout pattern="${LOG_PATTERN}" />
+        </Console>
+        <RollingFile name="api-log-conf"
+                fileName="${apiFileNamePattern}"
+                filePattern="${apiBackupFileNamePattern}">
+            <PatternLayout>
+                <pattern>${LOG_PATTERN}</pattern>
+            </PatternLayout>
+            <Policies>
+                <SizeBasedTriggeringPolicy size="5 GB" />
+                <TimeBasedTriggeringPolicy interval="1" modulate="true" />
+            </Policies>
+        </RollingFile>
+    </Appenders>
+
+    <Loggers>
+        <Root level="debug" additivity="false">
+            <AppenderRef ref="Console" level="info"/>
+        </Root>
+        <Logger name="api.log" level="debug" additivity="false">
+            <AppenderRef ref="api-log-conf" level="info"/>
+        </Logger>
+    </Loggers>
+</Configuration>
