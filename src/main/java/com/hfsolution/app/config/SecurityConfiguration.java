@@ -13,6 +13,10 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.security.web.authentication.logout.LogoutHandler;
+import org.springframework.web.cors.CorsConfiguration;
+import org.springframework.web.cors.CorsConfigurationSource;
+import org.springframework.web.cors.UrlBasedCorsConfigurationSource;
+import java.util.List;
 import com.hfsolution.app.filter.JwtAuthenticationFilter;
 import static com.hfsolution.feature.user.enums.Permission.ADMIN_CREATE;
 import static com.hfsolution.feature.user.enums.Permission.ADMIN_DELETE;
@@ -57,6 +61,7 @@ public class SecurityConfiguration {
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
         http
                 .csrf(AbstractHttpConfigurer::disable)
+                .cors(cors -> cors.configurationSource(corsConfigurationSource()))
                 .exceptionHandling(exceptionHandling ->
                 exceptionHandling
                     .accessDeniedHandler((request, response, accessDeniedException) -> {
@@ -71,7 +76,7 @@ public class SecurityConfiguration {
                                 
                                 
                                 // Endpoint for management and admin
-                                .requestMatchers("/users/**").hasAnyRole(MANAGER.name(),ADMIN.name())
+                                .requestMatchers("/user/**").hasAnyRole(MANAGER.name(),ADMIN.name())
                                 // .requestMatchers("/users/change-role/**").hasAnyRole(ADMIN.name())
 
                                 // .requestMatchers(DELETE,"/users/**").hasAnyAuthority(ADMIN_DELETE.name(),MANAGER_DELETE.name())
@@ -98,5 +103,17 @@ public class SecurityConfiguration {
         ;
 
         return http.build();
+    }
+
+    @Bean
+    CorsConfigurationSource corsConfigurationSource() {
+        CorsConfiguration configuration = new CorsConfiguration();
+        configuration.setAllowedOrigins(List.of("*"));  // Allow all origins, or specify specific ones
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedHeaders(List.of("*"));
+
+        UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();
+        source.registerCorsConfiguration("/**", configuration);
+        return source;
     }
 }

@@ -32,7 +32,7 @@ import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
 @RestController
-@RequestMapping("/users")
+@RequestMapping("/user")
 @RequiredArgsConstructor
 // @PreAuthorize("hasRole('ADMIN')")
 public class UserController {

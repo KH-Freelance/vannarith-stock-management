@@ -1,10 +1,10 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
-import java.time.LocalDateTime;
-
+import java.math.BigDecimal;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.hfsolution.app.util.BigDecimalSerializer;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
@@ -20,8 +20,8 @@ public class Customer {
 
    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    @Column(name = "customer_id")
-    private Long customerId;
+    @Column(name = "id")
+    private Long id;
 
     @Column(name = "customer_name")
     private String customerName;
@@ -35,6 +35,10 @@ public class Customer {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "credit")
+    @JsonSerialize(using = BigDecimalSerializer.class) 
+    private BigDecimal credit;
+
     @Column(name = "created_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp createdDate;
@@ -42,9 +46,5 @@ public class Customer {
     @Column(name = "updated_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updatedDate;
-
-
-
-
 
 }

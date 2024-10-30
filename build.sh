@@ -8,7 +8,7 @@ mvn clean install
 file="build.sh"
 
 # Extract the current version number
-current_version=5
+current_version=10
 
 # Increment the version number by 1
 new_version=$((current_version + 1))
