@@ -17,9 +17,11 @@ import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
+import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
+import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -31,6 +33,7 @@ public class StockServicelmp implements StockService {
 
     
     private final StockDao stockDao;
+    private final ProductDao productDao;
     private final HttpServletRequest httpServletRequest;
     private final SearchFilter<Stock> searchFilter;
 
@@ -76,12 +79,12 @@ public class StockServicelmp implements StockService {
             BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(stockRequest.getProductId());
             if(stockResult.getEntity()!=null){
                 stock = stockResult.getEntity();
-                stock.setProductId(stockRequest.getProductId());
                 stock.setQty(stock.getQty()+stockRequest.getQty());
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             }else{
                 stock = new Stock();
-                stock.setProductId(stockRequest.getProductId());
+                BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
+                stock.setProduct(product.getEntity());
                 stock.setQty(stockRequest.getQty());
                 stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
@@ -160,7 +163,7 @@ public class StockServicelmp implements StockService {
             //when target productid not yet exist in table (update to new) 
             }else{ 
                 stock = existingProductResult.getEntity();
-                Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setProductId);
+                // Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setProductId);
                 Optional.ofNullable(stockUpdateRequest.getQty()).ifPresent(stock::setQty);
             }
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));

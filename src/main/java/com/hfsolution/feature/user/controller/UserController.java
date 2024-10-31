@@ -1,6 +1,5 @@
 package com.hfsolution.feature.user.controller;
 
-
 import lombok.RequiredArgsConstructor;
 import java.security.Principal;
 import java.util.HashMap;
@@ -43,12 +42,12 @@ public class UserController {
 
     //ADMIN
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('admin:update')")
-    @PutMapping("/change-role/{userId}")
+    @PutMapping("/change-role/{id}")
     public ResponseEntity<?> changeRole(
           @RequestBody ChangeRoleRequest request,
-          @PathVariable(value = "userId") Integer userId
+          @PathVariable(value = "id") Integer id
     ) {
-        userService.changeRole(request, userId);
+        userService.changeRole(request, id);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();
         successResponse.setCode(SUCCESS_CODE);
         successResponse.setMsg(SUCCESS);
@@ -57,7 +56,7 @@ public class UserController {
 
 
     //MANAGER
-    @PostMapping("/register")
+    @PostMapping("/add")
     public ResponseEntity<?> register(
         @RequestBody RegisterRequest request
     ) {
@@ -68,22 +67,22 @@ public class UserController {
         return ResponseEntity.ok(successResponse);
     }
 
-    @DeleteMapping("/delete-user/{userId}")
+    @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(
-          @PathVariable Integer userId
+          @PathVariable Integer id
     ) {
-        userService.deleteUser(userId);
+        userService.deleteUser(id);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();
         successResponse.setCode(SUCCESS_CODE);
         successResponse.setMsg(SUCCESS);
         return ResponseEntity.ok(successResponse);
     }
 
-    @PutMapping("/reset-password/{userId}")
+    @PutMapping("/reset-password/{id}")
     public ResponseEntity<?> resetPassword(
-        @PathVariable(value = "userId") Integer userId, @RequestBody ResetPasswordRequest request
+        @PathVariable(value = "id") Integer id, @RequestBody ResetPasswordRequest request
     ) {
-        userService.resetPassword(request,userId);
+        userService.resetPassword(request,id);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();
         successResponse.setCode(SUCCESS_CODE);
         successResponse.setMsg(SUCCESS);

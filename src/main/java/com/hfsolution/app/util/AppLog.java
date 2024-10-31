@@ -37,7 +37,8 @@ public class AppLog<T> {
 
     @Override
     public String toString() {
-        return new Gson().toJson(this);
+        return "";
+        // return new Gson().toJson(this);
     }
 
     public void writeToLog() {

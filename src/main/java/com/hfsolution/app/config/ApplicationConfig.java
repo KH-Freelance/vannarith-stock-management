@@ -14,6 +14,8 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 
 import com.hfsolution.feature.user.repository.UserRepository;
 
+import jakarta.transaction.Transactional;
+
 @Configuration
 @RequiredArgsConstructor
 public class ApplicationConfig {
@@ -21,6 +23,7 @@ public class ApplicationConfig {
   private final UserRepository repository;
 
   @Bean
+  @Transactional
   public UserDetailsService userDetailsService() {
     return username -> repository.findByEmail(username)
         .orElseThrow(() -> new UsernameNotFoundException("User not found"));

@@ -32,11 +32,9 @@ public class Product {
     private String productDesc;
 
     @Column(name = "price")
-    // @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal price;
 
     @Column(name = "discount")
-    // @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount = BigDecimal.valueOf(0.00);
     
     @Column(name = "created_date")

@@ -5,6 +5,7 @@ spring:
     jdbc:
       time_zone: UTC
       batch_size: 1000
+    open-in-view: true
     show-sql: true
     
 postgress-connection:

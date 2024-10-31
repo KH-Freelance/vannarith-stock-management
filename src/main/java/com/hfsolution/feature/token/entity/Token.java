@@ -4,6 +4,8 @@ import static com.hfsolution.app.enums.TokenType.BEARER;
 
 import com.hfsolution.app.enums.TokenType;
 import com.hfsolution.feature.user.entity.User;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -38,7 +40,7 @@ public class Token {
 
   public boolean expired;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JoinColumn(name = "user_id")
   public User user;
 }
