@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.request;
+package com.hfsolution.feature.stockmanagement.dto.request.product;
 
 
 import java.math.BigDecimal;

@@ -21,7 +21,8 @@ import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
-import com.hfsolution.feature.stockmanagement.dto.request.ProductRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
@@ -70,8 +71,13 @@ public class ProductServicelmp implements ProductService {
 
         httpServletRequest.setAttribute(ACTION,"ADD PRODUCT");
         SuccessResponse<Product> response = new SuccessResponse<>();
-        // StockManagementResponse response = new StockManagementResponse();
         try {
+
+            BaseEntityResponseDto<Product> productResult = productDao.findByProductName(productRequest.getProductName());
+            if(productResult.getEntity()!=null){
+                String msg = AppTools.appGetMessage("010");
+                throw new AppException("010",msg);
+            }
 
             Product product = new Product();
             product.setProductName(productRequest.getProductName());
@@ -80,11 +86,7 @@ public class ProductServicelmp implements ProductService {
             product.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             product.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             product.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
-            // BaseEntityResponseDto<Product> productResult = productDao.saveEntity(product);
-            // if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
-            //     String msg = AppTools.appGetMessage("006");
-            //     throw new AppException("006",msg);
-            // }
+
             productDao.saveEntity(product);
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
@@ -125,7 +127,7 @@ public class ProductServicelmp implements ProductService {
     }
 
     @Override
-    public Object updateProductById(Long id, ProductRequest productRequest) {
+    public Object updateProductById(Long id, ProductUpdateRequest productUpdateRequest) {
 
         httpServletRequest.setAttribute(ACTION,"UPDATE PRODUCT BY ID");
         SuccessResponse<Product> response = new SuccessResponse<>();
@@ -138,12 +140,22 @@ public class ProductServicelmp implements ProductService {
                 throw new AppException("006",msg);
             }
 
+            //check target product name
+            if(productUpdateRequest.getProductName()!=null && !productUpdateRequest.getProductName().isEmpty() && !productUpdateRequest.getProductName().isBlank()){
+                BaseEntityResponseDto<Product> targetProductResult = productDao.findByProductName(productUpdateRequest.getProductName());
+                if(targetProductResult.getEntity()!=null){
+                    String msg = AppTools.appGetMessage("010");
+                    throw new AppException("010",msg);
+                }
+            }
+
             //updated
             Product existingProduct = productResult.getEntity();
-            Optional.ofNullable(productRequest.getProductName()).ifPresent(existingProduct::setProductName);
-            Optional.ofNullable(productRequest.getProductDesc()).ifPresent(existingProduct::setProductDesc);
-            Optional.ofNullable(productRequest.getPrice()).ifPresent(existingProduct::setPrice);
-            Optional.ofNullable(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)))
+            Optional.ofNullable(productUpdateRequest.getProductName()).ifPresent(existingProduct::setProductName);
+            Optional.ofNullable(productUpdateRequest.getProductDesc()).ifPresent(existingProduct::setProductDesc);
+            Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
+            Optional.ofNullable(productUpdateRequest.getExpiryDate())
+            .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
             .ifPresent(existingProduct::setExpiryDate);
             existingProduct.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             productDao.saveEntity(existingProduct);

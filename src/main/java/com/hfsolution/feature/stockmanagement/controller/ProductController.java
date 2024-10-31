@@ -15,7 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hfsolution.app.dto.SearchRequestDTO;
-import com.hfsolution.feature.stockmanagement.dto.request.ProductRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.product.ProductService;
 import jakarta.validation.Valid;
 
@@ -43,8 +44,8 @@ public class ProductController {
     }
 
     @PutMapping("/update/{id}")
-    private Object updateProductById(@PathVariable long id,@Valid @RequestBody ProductRequest productRequest){
-        return productService.updateProductById(id,productRequest);
+    private Object updateProductById(@PathVariable long id,@Valid @RequestBody ProductUpdateRequest productUpdateRequest){
+        return productService.updateProductById(id,productUpdateRequest);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

@@ -38,7 +38,7 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
     try {
 
-      Stock entity = stockRepository.findById(id).get();
+      Stock entity = stockRepository.findByProductId(id);
       var appModel = new BaseEntityResponseDto<Stock>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);

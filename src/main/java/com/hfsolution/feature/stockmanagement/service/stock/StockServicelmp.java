@@ -4,11 +4,8 @@ import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import java.sql.Timestamp;
-import java.util.List;
 import java.util.Optional;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
@@ -21,7 +18,8 @@ import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
-import com.hfsolution.feature.stockmanagement.dto.request.StockRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -68,7 +66,7 @@ public class StockServicelmp implements StockService {
     @Override
     public Object addStock(StockRequest stockRequest) {
 
-        httpServletRequest.setAttribute(ACTION,"ADD STOCK");
+        httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");
         SuccessResponse<Stock> response = new SuccessResponse<>();
         try {
 
@@ -129,7 +127,7 @@ public class StockServicelmp implements StockService {
 
 
     @Override
-    public Object updateStockByProductId(Long id, StockRequest stockRequest) {
+    public Object updateStockByProductId(Long id, StockUpdateRequest stockUpdateRequest) {
 
         httpServletRequest.setAttribute(ACTION,"UPDATE STOCK BY PRODUCT ID");
         SuccessResponse<Stock> response = new SuccessResponse<>();
@@ -144,18 +142,26 @@ public class StockServicelmp implements StockService {
             Stock stock ;
 
             //when target productid already exist in table (accumulate)
-            BaseEntityResponseDto<Stock> targetProductResult = stockDao.findStockByProductID(stockRequest.getProductId());
+            BaseEntityResponseDto<Stock> targetProductResult = stockDao.findStockByProductID(stockUpdateRequest.getProductId());
             if(targetProductResult.getEntity()!=null){ 
-                stock = targetProductResult.getEntity();
-                stock.setQty(existingProductResult.getEntity().getQty()+targetProductResult.getEntity().getQty());
 
-                //delete 
+                Long qty = existingProductResult.getEntity().getQty()+targetProductResult.getEntity().getQty();
+
+                //incase searchProduct and updateProduct same
+                if(stockUpdateRequest.getProductId()==id){
+                    qty = stockUpdateRequest.getQty();
+                }
+                stock = targetProductResult.getEntity();
+                stock.setQty(qty);
+
+                //delete search product
+                //stockDao.deleteEntityAsync(stockUpdateRequest.getProductId());
 
             //when target productid not yet exist in table (update to new) 
             }else{ 
                 stock = existingProductResult.getEntity();
-                Optional.ofNullable(stockRequest.getProductId()).ifPresent(stock::setProductId);
-                Optional.ofNullable(stockRequest.getQty()).ifPresent(stock::setQty);
+                Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setProductId);
+                Optional.ofNullable(stockUpdateRequest.getQty()).ifPresent(stock::setQty);
             }
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stockDao.saveEntity(stock);
