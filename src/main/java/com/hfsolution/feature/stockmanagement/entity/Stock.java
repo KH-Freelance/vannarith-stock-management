@@ -41,8 +41,6 @@ public class Stock {
     @Column(name = "updated_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp updatedDate;
-
-    
     
     @PrePersist
     public void preInsert() {

@@ -7,10 +7,12 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
@@ -18,6 +20,7 @@ import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
+import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
@@ -25,9 +28,9 @@ import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
 import static com.hfsolution.app.constant.AppConstant.*;
-
 
 @Service
 @RequiredArgsConstructor
@@ -36,7 +39,8 @@ public class ProductServicelmp implements ProductService {
     private final ProductDao productDao;
     private final HttpServletRequest httpServletRequest;
     private final SearchFilter<Product> searchFilter;
-
+    private final CSVService<Product> csvService;
+    private final String CSV_FILENAME = "product";
     @Override
     public Object search(SearchRequestDTO request) {
 
@@ -173,6 +177,22 @@ public class ProductServicelmp implements ProductService {
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
 
+    }
+
+    @Override
+    public void export() {
+        httpServletRequest.setAttribute(ACTION, "EXPORT PRODUCT");
+        try {
+
+            csvService.export(productDao.findAll().getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
     }
     
 }

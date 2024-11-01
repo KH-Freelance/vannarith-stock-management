@@ -9,7 +9,8 @@ import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateR
 @Service
 public interface ProductService {
 
-    public Object search(SearchRequestDTO request); 
+    public Object search(SearchRequestDTO request);
+    public void export();
     public Object addProduct(ProductRequest productRequest);
     public Object deleteProductById(Long id);
     public Object updateProductById(Long id , ProductUpdateRequest productUpdateRequest);

@@ -2,9 +2,13 @@ package com.hfsolution.app.adviser;
 
 
 import static com.hfsolution.app.constant.AppResponseCode.*;
+
+import java.net.http.HttpHeaders;
+
 import static com.hfsolution.app.constant.AppConstant.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.AccessDeniedException;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -15,6 +19,7 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExcep
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.hfsolution.app.dto.ExceptionResponse;
 import com.hfsolution.app.exception.AppException;
+import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.exception.JwtException;
 import com.hfsolution.app.util.AppTools;
@@ -72,6 +77,17 @@ public class ExceptionHandlerAdviser extends ResponseEntityExceptionHandler {
             exceptionResponse.setDevMsg(devMsg);
             status = HttpStatus.OK;
 
+        }else if (ex instanceof CsvException) {
+
+            CsvException csvException = (CsvException) ex;
+            String code = csvException.getCode();
+            String msg = AppTools.appGetMessage(FAIL_CODE);
+            String devMsg = csvException.getMsg();
+            exceptionResponse.setCode(code);
+            exceptionResponse.setMsg(msg);
+            exceptionResponse.setDevMsg(devMsg);
+            status = HttpStatus.OK;
+
         } else if (ex instanceof BadCredentialsException) {
             exceptionResponse.setCode(UNAUTH);
             exceptionResponse.setMsg(AppTools.appGetMessage(UNAUTH));
@@ -98,7 +114,7 @@ public class ExceptionHandlerAdviser extends ResponseEntityExceptionHandler {
         }
 
 
-        return ResponseEntity.status(status).body(exceptionResponse);
+        return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(exceptionResponse);
     }
    
     //  @ExceptionHandler(MethodArgumentNotValidException.class)

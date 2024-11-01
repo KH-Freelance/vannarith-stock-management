@@ -79,7 +79,6 @@ public class CustomerDao extends BaseDBDao<Customer, Long>{
     long startTime = System.currentTimeMillis();
 
     try {
-
       Customer entity = customerRepository.findByCustomerName(name);
       var appModel = new BaseEntityResponseDto<Customer>();
       appModel.setStatus(SUCCESS);

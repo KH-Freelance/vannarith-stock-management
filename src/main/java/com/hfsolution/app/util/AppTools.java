@@ -43,6 +43,10 @@ public class AppTools {
         return new SimpleDateFormat("YYYY/MM/dd HH:mm:ss.SSS").format(new Date());
     }
 
+    public static String getCurrentDateWithFormatString(String pattern){
+        return new SimpleDateFormat(pattern).format(new Date());
+    }
+
     public static String formatTimestamp(Timestamp timestamp,String pattern) {
         try {
             if (timestamp == null) return null;

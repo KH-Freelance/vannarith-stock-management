@@ -17,6 +17,7 @@ public class DataResponseAdviser implements ResponseBodyAdvice<Object>{
 
     @Autowired
     private HttpServletRequest httpServletRequest;
+
     //write response 
     @Override
     public Object beforeBodyWrite(Object body, MethodParameter arg1, MediaType arg2,
@@ -33,7 +34,6 @@ public class DataResponseAdviser implements ResponseBodyAdvice<Object>{
         ? httpServletRequest.getAttribute(REQ_INFO).toString()
         : "";
         
-            
         var appLog = new AppLog<>();
         appLog.setReqId(reqId);
         appLog.setUri(uri);
