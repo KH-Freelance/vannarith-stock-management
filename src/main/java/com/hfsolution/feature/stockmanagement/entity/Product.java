@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -35,7 +36,7 @@ public class Product {
     private BigDecimal price;
 
     @Column(name = "discount")
-    private BigDecimal discount = BigDecimal.valueOf(0.00);
+    private BigDecimal discount;
     
     @Column(name = "created_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
@@ -50,5 +51,19 @@ public class Product {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Timestamp expiryDate;
 
+
+    @PrePersist
+    public void preInsert() {
+        // Set default values or modify fields before inserting
+        if(this.discount==null){
+            this.discount = BigDecimal.valueOf(0.00);
+        }
+        if(this.createdDate==null){
+            this.createdDate = new Timestamp(System.currentTimeMillis());
+        }
+        if(this.updatedDate==null){
+            this.updatedDate = new Timestamp(System.currentTimeMillis());
+        }
+    }
   
 }

@@ -20,13 +20,18 @@ import org.springframework.web.bind.annotation.RestController;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.feature.auth.dto.AuthenticationResponse;
-import com.hfsolution.feature.auth.dto.RegisterRequest;
 import com.hfsolution.feature.auth.services.AuthenticationService;
+import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.user.dto.ChangePasswordRequest;
 import com.hfsolution.feature.user.dto.ChangeRoleRequest;
+import com.hfsolution.feature.user.dto.RegisterRequest;
 import com.hfsolution.feature.user.dto.ResetPasswordRequest;
+import com.hfsolution.feature.user.dto.UserUpdateRequest;
 import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.service.UserService;
+
+import jakarta.validation.Valid;
+
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
@@ -111,6 +116,18 @@ public class UserController {
         return ResponseEntity.ok(successResponse);
     }
 
+    
+    @PutMapping("/update/{id}")
+    public ResponseEntity<?> update(
+          @PathVariable int id,@Valid @RequestBody UserUpdateRequest userUpdateRequest
+    ) {
+        service.update(id, userUpdateRequest);
+        SuccessResponse<?> successResponse =  new SuccessResponse<>();
+        successResponse.setCode(SUCCESS_CODE);
+        successResponse.setMsg(SUCCESS);
+        return ResponseEntity.ok(successResponse);
+    }
+
     @GetMapping("/current-info")
     public ResponseEntity<?> getInfo(
           Principal connectedUser
@@ -131,28 +148,4 @@ public class UserController {
         return ResponseEntity.badRequest().body(errors);
     }
 
-    // @GetMapping
-    // // @PreAuthorize("hasAuthority('admin:read')")
-    // public String get() {
-    //     return "GET:: admin controller";
-    // }
-
-    // @PostMapping
-    // // @PreAuthorize("hasAuthority('admin:create')")
-    // @Hidden
-    // public String post() {
-    //     return "POST:: admin controller";
-    // }
-    // @PutMapping
-    // // @PreAuthorize("hasAuthority('admin:update')")
-    // @Hidden
-    // public String put() {
-    //     return "PUT:: admin controller";
-    // }
-    // @DeleteMapping
-    // // @PreAuthorize("hasAuthority('admin:delete')")
-    // @Hidden
-    // public String delete() {
-    //     return "DELETE:: admin controller";
-    // }
 }

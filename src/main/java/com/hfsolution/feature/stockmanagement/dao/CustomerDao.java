@@ -15,32 +15,33 @@ import com.hfsolution.app.dao.BaseDBDao;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
-import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
+import com.hfsolution.feature.stockmanagement.repository.CustomerRepository;
 import com.hfsolution.feature.stockmanagement.repository.ProductRepository;
 
 
 
 @Service
-public class ProductDao extends BaseDBDao<Product, Long>{
+public class CustomerDao extends BaseDBDao<Customer, Long>{
 
 
-  private ProductRepository productRepository;
+  private CustomerRepository customerRepository;
 
-  public ProductDao(ProductRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {
+  public CustomerDao(CustomerRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {
     super(repository, dataSourceDCContextHolder);
-    this.productRepository = repository;
+    this.customerRepository = repository;
   }
 
 
-  public BaseEntityResponseDto<Product> findByProductID(Long id){
+  public BaseEntityResponseDto<Customer> findByCustomerID(Long id){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
-      Product entity = productRepository.findById(id).get();
-      var appModel = new BaseEntityResponseDto<Product>();
+      Customer entity = customerRepository.findById(id).get();
+      var appModel = new BaseEntityResponseDto<Customer>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
@@ -52,35 +53,15 @@ public class ProductDao extends BaseDBDao<Product, Long>{
 
   }
 
-  public BaseEntityResponseDto<Product> findByProductName(String name){
+  public BaseEntityResponseDto<Customer> search(Specification<Customer> customers, Pageable pageable){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      Product entity = productRepository.findByProductName(name);
-      var appModel = new BaseEntityResponseDto<Product>();
-      appModel.setStatus(SUCCESS);
-      appModel.setEntity(entity);
-      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
-      return appModel;
-
-    } catch (Exception e) {
-      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
-    }
-
-  }
-
-  public BaseEntityResponseDto<Product> search(Specification<Product> stocks, Pageable pageable){
-
-    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
-    long startTime = System.currentTimeMillis();
-
-    try {
-
-      Page<Product> entity = productRepository.findAll(stocks,pageable);
-      var appModel = new BaseEntityResponseDto<Product>();
+      Page<Customer> entity = customerRepository.findAll(customers,pageable);
+      var appModel = new BaseEntityResponseDto<Customer>();
       appModel.setStatus(SUCCESS);
       appModel.setPage(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
@@ -92,18 +73,18 @@ public class ProductDao extends BaseDBDao<Product, Long>{
 
   }
 
-  @Modifying
-  @Transactional
-  public BaseEntityResponseDto<Product> deleteByProductID(Long id){
+  public BaseEntityResponseDto<Customer> findByCustomerName(String name){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      productRepository.deleteById(id);
-      var appModel = new BaseEntityResponseDto<Product>();
+      Customer entity = customerRepository.findByCustomerName(name);
+      var appModel = new BaseEntityResponseDto<Customer>();
       appModel.setStatus(SUCCESS);
+      appModel.setEntity(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
       return appModel;
 
     } catch (Exception e) {
@@ -111,6 +92,25 @@ public class ProductDao extends BaseDBDao<Product, Long>{
     }
 
   }
-  
+
+  @Modifying
+  @Transactional
+  public BaseEntityResponseDto<Customer> deleteByCustomerID(Long id){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      customerRepository.deleteById(id);
+      var appModel = new BaseEntityResponseDto<Customer>();
+      appModel.setStatus(SUCCESS);
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }  
   
 }

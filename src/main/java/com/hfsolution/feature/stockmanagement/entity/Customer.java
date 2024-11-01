@@ -10,6 +10,7 @@ import jakarta.persistence.Entity;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -18,7 +19,7 @@ import lombok.Data;
 @Table(name = "Customer")
 public class Customer {
 
-   @Id
+    @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
     private Long id;
@@ -35,8 +36,10 @@ public class Customer {
     @Column(name = "address")
     private String address;
 
+    @Column(name = "discount")
+    private BigDecimal discount;
+
     @Column(name = "credit")
-    @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal credit;
 
     @Column(name = "created_date")
@@ -46,5 +49,22 @@ public class Customer {
     @Column(name = "updated_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updatedDate;
+
+    @PrePersist
+    public void preInsert() {
+        // Set default values or modify fields before inserting
+        if(this.discount==null){
+            this.discount = BigDecimal.valueOf(0.00);
+        }
+        if(this.credit==null){
+            this.credit = BigDecimal.valueOf(0.00);
+        }
+        if(this.createdDate==null){
+            this.createdDate = new Timestamp(System.currentTimeMillis());
+        }
+        if(this.updatedDate==null){
+            this.updatedDate = new Timestamp(System.currentTimeMillis());
+        }
+    }
 
 }

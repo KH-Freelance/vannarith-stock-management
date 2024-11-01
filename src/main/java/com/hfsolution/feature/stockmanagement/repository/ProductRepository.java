@@ -9,6 +9,5 @@ public interface ProductRepository extends IBaseRepository<Product,Long>, JpaSpe
 
 
     Product findByProductName(String name);
-    void deleteByProductName(String name);
     
 } 

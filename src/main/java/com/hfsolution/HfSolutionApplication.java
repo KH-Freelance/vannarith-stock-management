@@ -8,8 +8,9 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-import com.hfsolution.feature.auth.dto.RegisterRequest;
+
 import com.hfsolution.feature.auth.services.AuthenticationService;
+import com.hfsolution.feature.user.dto.RegisterRequest;
 
 
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})

@@ -11,6 +11,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
 import lombok.Setter;
@@ -42,7 +43,17 @@ public class Stock {
     private Timestamp updatedDate;
 
     
-
-
+    
+    @PrePersist
+    public void preInsert() {
+        // Set default values or modify fields before inserting
+        if(this.createdDate==null){
+            this.createdDate = new Timestamp(System.currentTimeMillis());
+        }
+        if(this.updatedDate==null){
+            this.updatedDate = new Timestamp(System.currentTimeMillis());
+        }
+    }
+    
 
 }

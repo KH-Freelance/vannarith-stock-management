@@ -21,6 +21,7 @@ import com.hfsolution.feature.user.dto.ChangePasswordRequest;
 import com.hfsolution.feature.user.dto.ChangeRoleRequest;
 import com.hfsolution.feature.user.dto.DeleteUserRequest;
 import com.hfsolution.feature.user.dto.ResetPasswordRequest;
+import com.hfsolution.feature.user.dto.UserUpdateRequest;
 import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.enums.Role;
 import com.hfsolution.feature.user.repository.UserRepository;
@@ -58,6 +59,24 @@ public class UserService {
         user.setPassword(passwordEncoder.encode(request.getNewPassword()));
 
         // save the new password
+        repository.save(user);
+    }
+
+
+    public void update(int id, UserUpdateRequest userUpdateRequest) {
+
+
+        //check exist
+        Optional<User> opUser = repository.findById(id);
+        if(!opUser.isPresent()){
+            throw new AppException("002");
+        }
+
+        User user = opUser.get();
+        user.setFirstname(userUpdateRequest.getFirstname());
+        user.setLastname(userUpdateRequest.getLastname());
+
+        // save update user
         repository.save(user);
     }
 

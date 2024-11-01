@@ -8,7 +8,6 @@ import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateReque
 @Service
 public interface StockService {
 
-    
     public Object searchStock(SearchRequestDTO request);  
     public Object addStock(StockRequest productRequest);
     public Object updateStock(Long id , StockUpdateRequest productRequest);   
