@@ -105,13 +105,13 @@ public class StockServicelmp implements StockService {
     }
 
     @Override
-    public Object deleteStockByProductId(Long id) {
+    public Object deleteStockById(Long id) {
 
-        httpServletRequest.setAttribute(ACTION,"DELETE STOCK BY PRODUCT ID");
+        httpServletRequest.setAttribute(ACTION,"DELETE STOCK BY ID");
         SuccessResponse<Stock> response = new SuccessResponse<>();
         try {
     
-            stockDao.deleteStockByProductID(id);
+            stockDao.deleteStockByID(id);
             String msg = AppTools.appGetMessage("007");
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
@@ -130,42 +130,16 @@ public class StockServicelmp implements StockService {
 
 
     @Override
-    public Object updateStockByProductId(Long id, StockUpdateRequest stockUpdateRequest) {
+    public Object updateStock(Long id, StockUpdateRequest stockUpdateRequest) {
 
-        httpServletRequest.setAttribute(ACTION,"UPDATE STOCK BY PRODUCT ID");
+        httpServletRequest.setAttribute(ACTION,"UPDATE STOCK BY ID");
         SuccessResponse<Stock> response = new SuccessResponse<>();
         try {
 
-            //check source productid
-            BaseEntityResponseDto<Stock> existingProductResult = stockDao.findStockByProductID(id);
-            if(!existingProductResult.getStatus().equals(SUCCESS) || existingProductResult.getEntity()==null){
-                String msg = AppTools.appGetMessage("006");
-                throw new AppException("006",msg);
-            }
-            Stock stock ;
-
-            //when target productid already exist in table (accumulate)
-            BaseEntityResponseDto<Stock> targetProductResult = stockDao.findStockByProductID(stockUpdateRequest.getProductId());
-            if(targetProductResult.getEntity()!=null){ 
-
-                Long qty = existingProductResult.getEntity().getQty()+targetProductResult.getEntity().getQty();
-
-                //incase searchProduct and updateProduct same
-                if(stockUpdateRequest.getProductId()==id){
-                    qty = stockUpdateRequest.getQty();
-                }
-                stock = targetProductResult.getEntity();
-                stock.setQty(qty);
-
-                //delete search product
-                //stockDao.deleteEntityAsync(stockUpdateRequest.getProductId());
-
-            //when target productid not yet exist in table (update to new) 
-            }else{ 
-                stock = existingProductResult.getEntity();
-                // Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setProductId);
-                Optional.ofNullable(stockUpdateRequest.getQty()).ifPresent(stock::setQty);
-            }
+            BaseEntityResponseDto<Stock> stockResult = stockDao.findById(id);
+            Stock stock = stockResult.getEntity();
+            // Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setPro);
+            Optional.ofNullable(stockUpdateRequest.getQty()).ifPresent(stock::setQty);
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stockDao.saveEntity(stock);
             response.setStatus(SUCCESS);

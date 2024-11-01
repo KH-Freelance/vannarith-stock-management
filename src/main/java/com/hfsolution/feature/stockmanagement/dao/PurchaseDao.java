@@ -15,31 +15,32 @@ import com.hfsolution.app.dao.BaseDBDao;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
+import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
-import com.hfsolution.feature.stockmanagement.repository.StockRepository;
+import com.hfsolution.feature.stockmanagement.repository.PurchaseRepository;
 
 
 
 @Service
-public class StockDao extends BaseDBDao<Stock,Long>{
+public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
 
-  private StockRepository stockRepository;
+  private PurchaseRepository purchaseRepository;
 
-  public StockDao(StockRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {
+  public PurchaseDao(PurchaseRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {
     super(repository, dataSourceDCContextHolder);
-    this.stockRepository = repository;
+    this.purchaseRepository = repository;
   }
 
-  public BaseEntityResponseDto<Stock> findStockByProductID(Long id){
+  public BaseEntityResponseDto<Purchase> findStockByProductID(Long id){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      Stock entity = stockRepository.findByProductId(id);
-      var appModel = new BaseEntityResponseDto<Stock>();
+      Purchase entity = purchaseRepository.findByProductId(id);
+      var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
@@ -51,15 +52,15 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   }
 
-  public BaseEntityResponseDto<Stock> searchStock(Specification<Stock> stocks, Pageable pageable){
+  public BaseEntityResponseDto<Purchase> searchPurchase(Specification<Purchase> purchase, Pageable pageable){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      Page<Stock> entity = stockRepository.findAll(stocks,pageable);
-      var appModel = new BaseEntityResponseDto<Stock>();
+      Page<Purchase> entity = purchaseRepository.findAll(purchase,pageable);
+      var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       appModel.setPage(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
@@ -71,15 +72,35 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   }
 
-  public BaseEntityResponseDto<Stock> findStockByProductName(String name){
+  public BaseEntityResponseDto<Purchase> findPurchaseByProductName(String name){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      Stock entity = stockRepository.findByProductName(name);
-      var appModel = new BaseEntityResponseDto<Stock>();
+      Purchase entity = purchaseRepository.findByProductName(name);
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntity(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<Purchase> findPurchaseByCustomerName(String name){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      Purchase entity = purchaseRepository.findByCustomerName(name);
+      var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
@@ -93,15 +114,15 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   @Modifying
   @Transactional
-  public BaseEntityResponseDto<Stock> deleteStockByID(Long id){
+  public BaseEntityResponseDto<Purchase> deletePurchaseByID(Long id){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      stockRepository.deleteById(id);
-      var appModel = new BaseEntityResponseDto<Stock>();
+      purchaseRepository.deleteById(id);
+      var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       return appModel;
 
@@ -110,6 +131,7 @@ public class StockDao extends BaseDBDao<Stock,Long>{
     }
 
   }
+
 
 
 
