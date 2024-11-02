@@ -3,10 +3,15 @@ package com.hfsolution.feature.stockmanagement.service.product;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
+
+import java.math.BigDecimal;
+import java.nio.file.Files;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -14,6 +19,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
@@ -24,9 +31,12 @@ import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
+import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
+import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -37,6 +47,8 @@ import static com.hfsolution.app.constant.AppConstant.*;
 public class ProductServicelmp implements ProductService {
 
     private final ProductDao productDao;
+    private final PurchaseDao purchaseDao;
+    private final StockDao stockDao;
     private final HttpServletRequest httpServletRequest;
     private final SearchFilter<Product> searchFilter;
     private final CSVService<Product> csvService;
@@ -113,6 +125,8 @@ public class ProductServicelmp implements ProductService {
         SuccessResponse<Product> response = new SuccessResponse<>();
         try {
     
+            stockDao.deleteStockByProudctID(id);
+            purchaseDao.deleteByProductID(id);
             productDao.deleteByProductID(id);
             String msg = AppTools.appGetMessage("007");
             response.setStatus(SUCCESS);
@@ -184,7 +198,7 @@ public class ProductServicelmp implements ProductService {
         httpServletRequest.setAttribute(ACTION, "EXPORT PRODUCT");
         try {
 
-            csvService.export(productDao.findAll().getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            csvService.export(productDao.findAll().getEntityList(),Product.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -194,5 +208,23 @@ public class ProductServicelmp implements ProductService {
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
     }
+
+    @Override
+    public void importData(MultipartFile file) {
+        httpServletRequest.setAttribute(ACTION, "IMPORT PRODUCT");
+        try {
+
+            List<Product> productList = csvService.parseCsv(file, Product.class);
+            productDao.saveEntities(productList);
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        
+    }
     
+    }
 }

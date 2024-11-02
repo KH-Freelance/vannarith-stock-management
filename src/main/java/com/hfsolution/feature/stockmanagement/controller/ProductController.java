@@ -13,7 +13,10 @@ import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
+import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
@@ -39,9 +42,9 @@ public class ProductController {
         productService.export();
     }
 
-    @PostMapping("/import")
-    private Object importData(@RequestBody SearchRequestDTO request){
-        return productService.search(request);
+    @PostMapping(value = "/import", consumes = {"multipart/form-data"})
+    private void importData(@RequestPart("file")MultipartFile file){
+        productService.importData(file);
     }
 
     @PostMapping("/add")

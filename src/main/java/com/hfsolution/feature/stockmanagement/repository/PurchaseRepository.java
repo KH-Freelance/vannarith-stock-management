@@ -30,5 +30,10 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
     @Transactional
     @Query("DELETE FROM Purchase pu WHERE pu.customer.customerName = :name")
     void deleteByCustomerName(String name);
+
+
+    @Modifying
+    @Transactional
+    void deleteByProductId(long id);
     
 } 

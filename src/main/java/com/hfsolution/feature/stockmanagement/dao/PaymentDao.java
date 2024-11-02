@@ -15,31 +15,31 @@ import com.hfsolution.app.dao.BaseDBDao;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
-import com.hfsolution.feature.stockmanagement.entity.Stock;
-import com.hfsolution.feature.stockmanagement.repository.StockRepository;
+import com.hfsolution.feature.stockmanagement.entity.Payment;
+import com.hfsolution.feature.stockmanagement.repository.PaymentRepository;
 
 
 
 @Service
-public class StockDao extends BaseDBDao<Stock,Long>{
+public class PaymentDao extends BaseDBDao<Payment, Long>{
 
 
-  private StockRepository stockRepository;
+  private PaymentRepository PaymentRepository;
 
-  public StockDao(StockRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {
+  public PaymentDao(PaymentRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {
     super(repository, dataSourceDCContextHolder);
-    this.stockRepository = repository;
+    this.PaymentRepository = repository;
   }
 
-  public BaseEntityResponseDto<Stock> findStockByProductID(Long id){
+
+  public BaseEntityResponseDto<Payment> findByPaymentID(Long id){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
-
-      Stock entity = stockRepository.findByProductId(id);
-      var appModel = new BaseEntityResponseDto<Stock>();
+      Payment entity = PaymentRepository.findById(id).get();
+      var appModel = new BaseEntityResponseDto<Payment>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
@@ -51,15 +51,15 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   }
 
-  public BaseEntityResponseDto<Stock> searchStock(Specification<Stock> stocks, Pageable pageable){
+  public BaseEntityResponseDto<Payment> search(Specification<Payment> Payments, Pageable pageable){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      Page<Stock> entity = stockRepository.findAll(stocks,pageable);
-      var appModel = new BaseEntityResponseDto<Stock>();
+      Page<Payment> entity = PaymentRepository.findAll(Payments,pageable);
+      var appModel = new BaseEntityResponseDto<Payment>();
       appModel.setStatus(SUCCESS);
       appModel.setPage(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
@@ -71,57 +71,36 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   }
 
-  public BaseEntityResponseDto<Stock> findStockByProductName(String name){
+  // public BaseEntityResponseDto<Payment> findByPaymentName(String name){
 
-    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
-    long startTime = System.currentTimeMillis();
+  //   String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+  //   long startTime = System.currentTimeMillis();
 
-    try {
+  //   try {
+  //     Payment entity = PaymentRepository.findByPaymentName(name);
+  //     var appModel = new BaseEntityResponseDto<Payment>();
+  //     appModel.setStatus(SUCCESS);
+  //     appModel.setEntity(entity);
+  //     appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+  //     return appModel;
 
-      Stock entity = stockRepository.findByProductName(name);
-      var appModel = new BaseEntityResponseDto<Stock>();
-      appModel.setStatus(SUCCESS);
-      appModel.setEntity(entity);
-      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
-      return appModel;
+  //   } catch (Exception e) {
+  //     throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+  //   }
 
-    } catch (Exception e) {
-      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
-    }
-
-  }
-
-  @Modifying
-  @Transactional
-  public BaseEntityResponseDto<Stock> deleteStockByID(Long id){
-
-    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
-    long startTime = System.currentTimeMillis();
-
-    try {
-
-      stockRepository.deleteById(id);
-      var appModel = new BaseEntityResponseDto<Stock>();
-      appModel.setStatus(SUCCESS);
-      return appModel;
-
-    } catch (Exception e) {
-      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
-    }
-
-  }
+  // }
 
   @Modifying
   @Transactional
-  public BaseEntityResponseDto<Stock> deleteStockByProudctID(Long id){
+  public BaseEntityResponseDto<Payment> deleteByPaymentID(Long id){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      stockRepository.deleteByProductId(id);
-      var appModel = new BaseEntityResponseDto<Stock>();
+      PaymentRepository.deleteById(id);
+      var appModel = new BaseEntityResponseDto<Payment>();
       appModel.setStatus(SUCCESS);
       return appModel;
 
@@ -129,10 +108,6 @@ public class StockDao extends BaseDBDao<Stock,Long>{
       throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
     }
 
-  }
-
-
-
-  
+  }  
   
 }

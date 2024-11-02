@@ -132,6 +132,26 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
   }
 
+  @Modifying
+  @Transactional
+  public BaseEntityResponseDto<Purchase> deleteByProductID(Long id){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      purchaseRepository.deleteByProductId(id);
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
 
 
 
