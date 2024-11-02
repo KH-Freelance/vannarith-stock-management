@@ -1,46 +1,46 @@
-package com.hfsolution.feature.stockmanagement.entity;
+// package com.hfsolution.feature.stockmanagement.entity;
 
-import java.sql.Timestamp;
+// import java.sql.Timestamp;
 
-import com.hfsolution.feature.stockmanagement.dto.ProductCSVRepresentation;
+// import com.hfsolution.feature.stockmanagement.dto.ProductCSVRepresentation;
 
-import jakarta.persistence.Column;
-import jakarta.persistence.Entity;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
-import jakarta.persistence.Id;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
-import jakarta.persistence.Table;
-import lombok.Data;
+// import jakarta.persistence.Column;
+// import jakarta.persistence.Entity;
+// import jakarta.persistence.GeneratedValue;
+// import jakarta.persistence.GenerationType;
+// import jakarta.persistence.Id;
+// import jakarta.persistence.JoinColumn;
+// import jakarta.persistence.ManyToOne;
+// import jakarta.persistence.Table;
+// import lombok.Data;
 
-@Data
-@Entity
-@Table(name = "Transaction")
-public class Transaction {
+// @Data
+// @Entity
+// @Table(name = "Transaction")
+// public class Transaction {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long txnid;
+//     @Id
+//     @GeneratedValue(strategy = GenerationType.IDENTITY)
+//     private Long txnid;
 
-    @ManyToOne
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+//     @ManyToOne
+//     @JoinColumn(name = "product_id", nullable = false)
+//     private Product product;
 
-    @ManyToOne
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
+//     @ManyToOne
+//     @JoinColumn(name = "customer_id", nullable = false)
+//     private Customer customer;
 
-    @Column(name = "user_id")
-    private Long userId; 
+//     @Column(name = "user_id")
+//     private Long userId; 
 
-    @Column(name = "txn_type")
-    private String txnType;
+//     @Column(name = "txn_type")
+//     private String txnType;
 
-    @Column(name = "txn_date")
-    private Timestamp txnDate;
-
-
+//     @Column(name = "txn_date")
+//     private Timestamp txnDate;
 
 
-}
+
+
+// }

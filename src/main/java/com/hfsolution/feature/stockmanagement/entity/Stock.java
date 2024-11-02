@@ -3,7 +3,6 @@ package com.hfsolution.feature.stockmanagement.entity;
 import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
