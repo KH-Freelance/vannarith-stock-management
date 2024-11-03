@@ -8,7 +8,6 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
-
 import com.hfsolution.feature.auth.services.AuthenticationService;
 import com.hfsolution.feature.user.dto.RegisterRequest;
 
@@ -28,10 +27,10 @@ public class HfSolutionApplication {
 		return args -> {
 
 			// var hak = RegisterRequest.builder()
-			// 		.firstname("b")
-			// 		.lastname("b")
-			// 		.email("b@mail.com")
-			// 		.password("b")
+			// 		.firstname("bibi")
+			// 		.lastname("bibi")
+			// 		.email("bibi@mail.com")
+			// 		.password("bibi")
 			// 		.role(ADMIN)
 			// 		.build();
 			// System.out.println("Hakzin token: " + service.register(hak).getAccessToken());

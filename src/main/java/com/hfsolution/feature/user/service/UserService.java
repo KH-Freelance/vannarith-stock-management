@@ -63,7 +63,7 @@ public class UserService {
     }
 
 
-    public void update(int id, UserUpdateRequest userUpdateRequest) {
+    public void update(long id, UserUpdateRequest userUpdateRequest) {
 
 
         //check exist
@@ -80,7 +80,7 @@ public class UserService {
         repository.save(user);
     }
 
-    public void resetPassword(ResetPasswordRequest request, Integer userId) {
+    public void resetPassword(ResetPasswordRequest request, Long userId) {
 
         Optional<User> opUser = repository.findById(userId);
         if(!opUser.isPresent()){
@@ -95,7 +95,7 @@ public class UserService {
         repository.save(opUser.get());
     }
 
-    public void changeRole(ChangeRoleRequest request, Integer userId) {
+    public void changeRole(ChangeRoleRequest request, Long userId) {
         Optional<User> opUser = repository.findById(userId);
         if(!opUser.isPresent()){
             throw new AppException("002");
@@ -128,7 +128,7 @@ public class UserService {
         return repository.findAll(pageable);
     }
 
-    public void deleteUser(Integer userId) {
+    public void deleteUser(Long userId) {
 
         Optional<User> opUser = repository.findById(userId);
         if(!opUser.isPresent()){

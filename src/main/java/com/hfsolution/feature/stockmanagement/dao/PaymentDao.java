@@ -109,5 +109,25 @@ public class PaymentDao extends BaseDBDao<Payment, Long>{
     }
 
   }  
+
+  @Modifying
+  @Transactional
+  public BaseEntityResponseDto<Payment> deleteByPurchaseId(Long id){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      PaymentRepository.deleteByPurchaseId(id);
+      var appModel = new BaseEntityResponseDto<Payment>();
+      appModel.setStatus(SUCCESS);
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }  
   
 }

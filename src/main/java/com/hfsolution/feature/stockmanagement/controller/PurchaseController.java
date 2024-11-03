@@ -9,15 +9,13 @@ import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.PutMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
-
 import com.hfsolution.app.dto.SearchRequestDTO;
-import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
-import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
-import com.hfsolution.feature.stockmanagement.service.product.ProductService;
+import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
+import com.hfsolution.feature.stockmanagement.service.purchase.PurchaseService;
+
 import jakarta.validation.Valid;
 
 @RestController
@@ -25,28 +23,28 @@ import jakarta.validation.Valid;
 public class PurchaseController {
 
     @Autowired
-    private ProductService productService;
+    private PurchaseService purchaseService;
 
 
     @PostMapping("/search")
     private Object search(@RequestBody SearchRequestDTO request){
-        return productService.search(request);
+        return purchaseService.searchPurchase(request);
     }
 
-    @PostMapping("/purchase")
-    private Object purchase(@Valid @RequestBody ProductRequest productRequest){
-        return productService.addProduct(productRequest);
+    @PostMapping
+    private Object purchase(@Valid @RequestBody PurchaseRequest productRequest){
+        return purchaseService.addPurchase(productRequest);
     }
 
     @DeleteMapping("/delete/{id}")
     private Object deletePurchaseyId( @PathVariable long id){
-        return productService.deleteProductById(id);
+        return purchaseService.deletePurchaseById(id);
     }
 
-    @PutMapping("/update/{id}")
-    private Object updatePurchaseById(@PathVariable long id,@Valid @RequestBody ProductUpdateRequest productUpdateRequest){
-        return productService.updateProductById(id,productUpdateRequest);
-    }
+    // @PutMapping("/update/{id}")
+    // private Object updatePurchaseById(@PathVariable long id,@Valid @RequestBody ProductUpdateRequest productUpdateRequest){
+    //     return productService.updateProductById(id,productUpdateRequest);
+    // }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {

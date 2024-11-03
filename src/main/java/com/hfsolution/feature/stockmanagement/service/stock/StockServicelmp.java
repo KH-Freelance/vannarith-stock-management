@@ -48,8 +48,8 @@ public class StockServicelmp implements StockService {
             Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
             BaseEntityResponseDto<Stock> productResult = stockDao.searchStock(stocks,pageable);
             if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
-                String msg = AppTools.appGetMessage("006");
-                throw new AppException("006",msg);
+                String msg = AppTools.appGetMessage("019");
+                throw new AppException("019",msg);
             }
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
@@ -92,7 +92,7 @@ public class StockServicelmp implements StockService {
             stockDao.saveEntity(stock);
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setMsg(AppTools.appGetMessage("008"));
+            response.setMsg(AppTools.appGetMessage("021"));
             return response;
 
         }catch (DatabaseException e) {
@@ -112,7 +112,7 @@ public class StockServicelmp implements StockService {
         try {
     
             stockDao.deleteStockByID(id);
-            String msg = AppTools.appGetMessage("007");
+            String msg = AppTools.appGetMessage("020");
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
             response.setMsg(msg);
@@ -144,7 +144,7 @@ public class StockServicelmp implements StockService {
             stockDao.saveEntity(stock);
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setMsg(AppTools.appGetMessage("009"));
+            response.setMsg(AppTools.appGetMessage("020"));
             return response;
 
         }catch (DatabaseException e) {

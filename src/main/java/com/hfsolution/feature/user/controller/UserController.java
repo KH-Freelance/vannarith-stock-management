@@ -1,6 +1,8 @@
 package com.hfsolution.feature.user.controller;
 
 import lombok.RequiredArgsConstructor;
+import lombok.extern.java.Log;
+
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.Map;
@@ -50,7 +52,7 @@ public class UserController {
     @PutMapping("/change-role/{id}")
     public ResponseEntity<?> changeRole(
           @RequestBody ChangeRoleRequest request,
-          @PathVariable(value = "id") Integer id
+          @PathVariable(value = "id") Long id
     ) {
         userService.changeRole(request, id);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();
@@ -74,7 +76,7 @@ public class UserController {
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(
-          @PathVariable Integer id
+          @PathVariable Long id
     ) {
         userService.deleteUser(id);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();
@@ -85,7 +87,7 @@ public class UserController {
 
     @PutMapping("/reset-password/{id}")
     public ResponseEntity<?> resetPassword(
-        @PathVariable(value = "id") Integer id, @RequestBody ResetPasswordRequest request
+        @PathVariable(value = "id") Long id, @RequestBody ResetPasswordRequest request
     ) {
         userService.resetPassword(request,id);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();

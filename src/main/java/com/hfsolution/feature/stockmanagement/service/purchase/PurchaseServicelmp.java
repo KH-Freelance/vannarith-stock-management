@@ -1,187 +1,208 @@
-// package com.hfsolution.feature.stockmanagement.service.purchase;
+package com.hfsolution.feature.stockmanagement.service.purchase;
 
-// import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
-// import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
-// import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
-// import java.sql.Timestamp;
-// import java.util.Optional;
-// import org.springframework.data.domain.Page;
-// import org.springframework.data.domain.Pageable;
-// import org.springframework.data.jpa.domain.Specification;
-// import org.springframework.stereotype.Service;
-// import com.hfsolution.app.dto.BaseEntityResponseDto;
-// import com.hfsolution.app.dto.PageRequestDto;
-// import com.hfsolution.app.dto.SearchRequestDTO;
-// import com.hfsolution.app.dto.SuccessResponse;
-// import com.hfsolution.app.exception.AppException;
-// import com.hfsolution.app.exception.DatabaseException;
-// import com.hfsolution.app.services.SearchFilter;
-// import com.hfsolution.app.util.AppTools;
-// import com.hfsolution.feature.stockmanagement.dao.ProductDao;
-// import com.hfsolution.feature.stockmanagement.dao.StockDao;
-// import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
-// import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
-// import com.hfsolution.feature.stockmanagement.entity.Product;
-// import com.hfsolution.feature.stockmanagement.entity.Stock;
-// import lombok.RequiredArgsConstructor;
-// import jakarta.servlet.http.HttpServletRequest;
-// import static com.hfsolution.app.constant.AppConstant.*;
+import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
+import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
+import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
-// @Service
-// @RequiredArgsConstructor
-// public class PurchaseServicelmp implements PurchaseService {
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import java.util.Optional;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.stereotype.Service;
+import com.hfsolution.app.dto.BaseEntityResponseDto;
+import com.hfsolution.app.dto.PageRequestDto;
+import com.hfsolution.app.dto.SearchRequestDTO;
+import com.hfsolution.app.dto.SuccessResponse;
+import com.hfsolution.app.exception.AppException;
+import com.hfsolution.app.exception.DatabaseException;
+import com.hfsolution.app.services.SearchFilter;
+import com.hfsolution.app.util.AppTools;
+import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
+import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
+import com.hfsolution.feature.stockmanagement.dao.ProductDao;
+import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
+import com.hfsolution.feature.stockmanagement.dao.StockDao;
+import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseUpdateRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
+import com.hfsolution.feature.stockmanagement.entity.Customer;
+import com.hfsolution.feature.stockmanagement.entity.Payment;
+import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.entity.Purchase;
+import com.hfsolution.feature.stockmanagement.entity.Stock;
+import com.hfsolution.feature.user.entity.User;
+import com.hfsolution.feature.user.repository.UserRepository;
 
-    
-//     private final StockDao stockDao;
-//     private final ProductDao productDao;
-//     private final HttpServletRequest httpServletRequest;
-//     private final SearchFilter<Stock> searchFilter;
+import lombok.RequiredArgsConstructor;
+import jakarta.servlet.http.HttpServletRequest;
+import static com.hfsolution.app.constant.AppConstant.*;
 
-//     @Override
-//     public Object searchStock(SearchRequestDTO request) {
+@Service
+@RequiredArgsConstructor
+public class PurchaseServicelmp implements PurchaseService {
 
-//         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
-//         SuccessResponse<Page<Stock>> response = new SuccessResponse<>();
-//         try {
+    private final PurchaseDao purchaseDao;
+    private final HttpServletRequest httpServletRequest;
+    private final SearchFilter<Purchase> searchFilter;
+    private final UserRepository userRepository;
+    private final ProductDao productDao;
+    private final CustomerDao customerDao;
+    private final PaymentDao paymentDao;
 
-//             Specification<Stock> stocks = searchFilter.getSearchSpecification(request.getSearchRequest(), request.getGlobalOperator());
-//             Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
-//             BaseEntityResponseDto<Stock> productResult = stockDao.searchStock(stocks,pageable);
-//             if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
-//                 String msg = AppTools.appGetMessage("006");
-//                 throw new AppException("006",msg);
-//             }
-//             response.setStatus(SUCCESS);
-//             response.setCode(SUCCESS_CODE);
-//             response.setData(productResult.getPage());
-//             return response;
+    @Override
+    public Object searchPurchase(SearchRequestDTO request) {
 
-//         }catch (DatabaseException e) {
-//             throw e;   
-//         }catch (AppException e) {
-//             throw e;   
-//         }catch(Exception e){
-//             throw new AppException(FAIL_CODE,e.getMessage(),true);
-//         }
+        httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
+        SuccessResponse<Page<Purchase>> response = new SuccessResponse<>();
+        try {
+
+            Specification<Purchase> purchase = searchFilter.getSearchSpecification(request.getSearchRequest(), request.getGlobalOperator());
+            Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
+            BaseEntityResponseDto<Purchase> productResult = purchaseDao.searchPurchase(purchase,pageable);
+            if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
+                String msg = AppTools.appGetMessage("023");
+                throw new AppException("023",msg);
+            }
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(productResult.getPage());
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
         
-//     }
+    }
 
-//     @Override
-//     public Object addStock(StockRequest stockRequest) {
+    @Override
+    public Object addPurchase(PurchaseRequest purchaseRequest) {
 
-//         httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");
-//         SuccessResponse<Stock> response = new SuccessResponse<>();
-//         try {
+        httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");
+        SuccessResponse<Stock> response = new SuccessResponse<>();
+        try {
 
-//             Stock stock ;
+            //GET USER 
+            Optional<User> userResult = userRepository.findById(purchaseRequest.getUserId());
+            if(!userResult.isPresent()){
+                String msg = AppTools.appGetMessage("002");
+                throw new AppException("002",msg);
+            }
+            User user = userResult.get();
 
-//             //check product id
-//             BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(stockRequest.getProductId());
-//             if(stockResult.getEntity()!=null){
-//                 stock = stockResult.getEntity();
-//                 stock.setQty(stock.getQty()+stockRequest.getQty());
-//                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-//             }else{
-//                 stock = new Stock();
-//                 BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
-//                 stock.setProduct(product.getEntity());
-//                 stock.setQty(stockRequest.getQty());
-//                 stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-//                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-//             }
-//             stockDao.saveEntity(stock);
-//             response.setStatus(SUCCESS);
-//             response.setCode(SUCCESS_CODE);
-//             response.setMsg(AppTools.appGetMessage("008"));
-//             return response;
+            //GET PRODUCT
+            BaseEntityResponseDto<Product> productResult = productDao.findById(purchaseRequest.getProductId());
+            if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("006");
+                throw new AppException("006",msg);
+            }
+            Product product = productResult.getEntity();
 
-//         }catch (DatabaseException e) {
-//             throw e;   
-//         }catch (AppException e) {
-//             throw e;   
-//         }catch(Exception e){
-//             throw new AppException(FAIL_CODE,e.getMessage(),true);
-//         }
-//     }
+            //GET CUSTOMER 
+            BaseEntityResponseDto<Customer> customerResult = customerDao.findById(purchaseRequest.getCustomerId());
+            if(!customerResult.getStatus().equals(SUCCESS) || customerResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("027");
+                throw new AppException("027",msg);
+            }
+            Customer customer = customerResult.getEntity();
 
-//     @Override
-//     public Object deleteStockByProductId(Long id) {
+            //CALCULATE
+            BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(purchaseRequest.getQty()));
+            BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
+                                 .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO));
+            BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
+            BigDecimal totalPrice = basePrice.subtract(discountPrice);
 
-//         httpServletRequest.setAttribute(ACTION,"DELETE STOCK BY PRODUCT ID");
-//         SuccessResponse<Stock> response = new SuccessResponse<>();
-//         try {
-    
-//             stockDao.deleteStockByProductID(id);
-//             String msg = AppTools.appGetMessage("007");
-//             response.setStatus(SUCCESS);
-//             response.setCode(SUCCESS_CODE);
-//             response.setMsg(msg);
-//             return response;
+            Purchase purchase = new Purchase();
+            purchase.setProduct(product);
+            purchase.setCustomer(customer);
+            purchase.setUser(user);
+            purchase.setQty(purchaseRequest.getQty());
+            purchase.setDiscount(totalDiscount);
+            purchase.setTotal(basePrice);
+            purchase.setPaymentType(purchaseRequest.getPaymentType()); 
+            purchaseDao.saveEntity(purchase);
 
-//         }catch (DatabaseException e) {
-//             throw e;   
-//         }catch (AppException e) {
-//             throw e;   
-//         }catch(Exception e){
-//             throw new AppException(FAIL_CODE,e.getMessage(),true);
-//         }
+            Payment payment = new Payment();
+            payment.setPurchase(purchase);
+            payment.setProduct(product);
+            payment.setCustomer(customer);
+            payment.setUser(user);
+            payment.setAmount(totalPrice);
+            paymentDao.saveEntity(payment);
 
-//     }
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setMsg(AppTools.appGetMessage("025"));
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+    @Override
+    public Object deletePurchaseById(Long id) {
+
+        httpServletRequest.setAttribute(ACTION,"DELETE PURCHASE BY ID");
+        SuccessResponse<Purchase> response = new SuccessResponse<>();
+        try {
+            paymentDao.deleteByPurchaseId(id);
+            purchaseDao.deletePurchaseByID(id);
+            String msg = AppTools.appGetMessage("024");
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setMsg(msg);
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+
+    }
 
 
-//     @Override
-//     public Object updateStockByProductId(Long id, StockUpdateRequest stockUpdateRequest) {
+    // @Override
+    // public Object updatePurchase(Long id, PurchaseUpdateRequest purchaseUpdateRequest) {
 
-//         httpServletRequest.setAttribute(ACTION,"UPDATE STOCK BY PRODUCT ID");
-//         SuccessResponse<Stock> response = new SuccessResponse<>();
-//         try {
+    //     httpServletRequest.setAttribute(ACTION,"UPDATE STOCK BY ID");
+    //     SuccessResponse<Stock> response = new SuccessResponse<>();
+    //     try {
 
-//             //check source productid
-//             BaseEntityResponseDto<Stock> existingProductResult = stockDao.findStockByProductID(id);
-//             if(!existingProductResult.getStatus().equals(SUCCESS) || existingProductResult.getEntity()==null){
-//                 String msg = AppTools.appGetMessage("006");
-//                 throw new AppException("006",msg);
-//             }
-//             Stock stock ;
+    //         BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findById(id);
+    //         Purchase purchase = purchaseResult.getEntity();
+    //         // Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setPro);
+    //         Optional.ofNullable(stockUpdateRequest.getQty()).ifPresent(purchase::setQty);
+    //         purchase.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+    //         purchaseDao.saveEntity(purchase);
+    //         response.setStatus(SUCCESS);
+    //         response.setCode(SUCCESS_CODE);
+    //         response.setMsg(AppTools.appGetMessage("026"));
+    //         return response;
 
-//             //when target productid already exist in table (accumulate)
-//             BaseEntityResponseDto<Stock> targetProductResult = stockDao.findStockByProductID(stockUpdateRequest.getProductId());
-//             if(targetProductResult.getEntity()!=null){ 
+    //     }catch (DatabaseException e) {
+    //         throw e;   
+    //     }catch (AppException e) {
+    //         throw e;   
+    //     }catch(Exception e){
+    //         throw new AppException(FAIL_CODE,e.getMessage(),true);
+    //     }
 
-//                 Long qty = existingProductResult.getEntity().getQty()+targetProductResult.getEntity().getQty();
-
-//                 //incase searchProduct and updateProduct same
-//                 if(stockUpdateRequest.getProductId()==id){
-//                     qty = stockUpdateRequest.getQty();
-//                 }
-//                 stock = targetProductResult.getEntity();
-//                 stock.setQty(qty);
-
-//                 //delete search product
-//                 //stockDao.deleteEntityAsync(stockUpdateRequest.getProductId());
-
-//             //when target productid not yet exist in table (update to new) 
-//             }else{ 
-//                 stock = existingProductResult.getEntity();
-//                 // Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setProductId);
-//                 Optional.ofNullable(stockUpdateRequest.getQty()).ifPresent(stock::setQty);
-//             }
-//             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-//             stockDao.saveEntity(stock);
-//             response.setStatus(SUCCESS);
-//             response.setCode(SUCCESS_CODE);
-//             response.setMsg(AppTools.appGetMessage("009"));
-//             return response;
-
-//         }catch (DatabaseException e) {
-//             throw e;   
-//         }catch (AppException e) {
-//             throw e;   
-//         }catch(Exception e){
-//             throw new AppException(FAIL_CODE,e.getMessage(),true);
-//         }
-
-//     }
+    // }
    
     
-// }
+}
