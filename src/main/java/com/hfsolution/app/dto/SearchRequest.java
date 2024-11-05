@@ -17,7 +17,7 @@ import lombok.experimental.FieldDefaults;
 public class SearchRequest {
 
     String column;
-    String value;
+    Object value;
     String joinTable;
     Operator operator = Operator.EQUAL;
     FieldType fieldType = FieldType.STRING;

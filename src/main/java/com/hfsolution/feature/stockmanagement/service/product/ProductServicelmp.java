@@ -12,10 +12,14 @@ import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
@@ -28,6 +32,7 @@ import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CSVService;
+import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
@@ -36,6 +41,8 @@ import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.user.entity.User;
+import com.hfsolution.feature.user.enums.Role;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -227,4 +234,41 @@ public class ProductServicelmp implements ProductService {
     }
     
     }
+
+    @Override
+    public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
+
+        httpServletRequest.setAttribute(ACTION,"SEARCH PRODUCT");
+        SuccessResponse<Page<Product>> response = new SuccessResponse<>();
+        try {
+
+            Specification<Product> products = new CustomSpecification<>(q);
+            PageRequestDto pageRequestDto = new PageRequestDto();
+            pageRequestDto.setPageNo(pageNo);
+            pageRequestDto.setPageSize(pageSize);
+            pageRequestDto.setSort(sort);
+            pageRequestDto.setSortByColumn(sortByColum);
+            Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+            BaseEntityResponseDto<Product> productResult = productDao.search(products,pageable);
+            if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
+                String msg = AppTools.appGetMessage("006");
+            
+                throw new AppException("006",msg);
+            }
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(productResult.getPage());
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+       
+    } 
+
+    
 }

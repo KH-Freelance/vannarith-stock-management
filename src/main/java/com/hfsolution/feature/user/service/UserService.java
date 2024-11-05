@@ -13,8 +13,11 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 import com.hfsolution.app.dto.PageRequestDto;
+import com.hfsolution.app.dto.SearchRequest;
 import com.hfsolution.app.dto.SearchRequestDTO;
+import com.hfsolution.app.enums.FieldType;
 import com.hfsolution.app.exception.AppException;
+import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.feature.token.repository.TokenRepository;
 import com.hfsolution.feature.user.dto.ChangePasswordRequest;
@@ -27,7 +30,9 @@ import com.hfsolution.feature.user.enums.Role;
 import com.hfsolution.feature.user.repository.UserRepository;
 
 import java.security.Principal;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 @Service
@@ -38,6 +43,7 @@ public class UserService {
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
     private final SearchFilter<User> searchFilter;
+    // private final CustomSpecification<User> customSpecification;
 
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
@@ -113,9 +119,42 @@ public class UserService {
     }
 
     public Page<User> searchUser(SearchRequestDTO request) {
+        // for (SearchRequest searchRequest : request.getSearchRequest()) {
+        //     if(searchRequest.getFieldType().compareTo(FieldType.ENUM)==1 ){
+        //         searchRequest.setValue(Role.valueOf(searchRequest.getValue().toString().toUpperCase()));
+        //     }
+        // }
+
         Specification<User> users = searchFilter.getSearchSpecification(request.getSearchRequest(), request.getGlobalOperator());
         Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
         return repository.findAll(users,pageable);
+    }
+
+    @SuppressWarnings("rawtypes")
+    public Page<User> searchUser(String q, int page,int size, Sort.Direction sort,String sortByColumn) {
+
+        // Define ENUM fields in the entity and their types
+        Map<String, Class<? extends Enum>> enumFields = new HashMap<>();
+        enumFields.put("role", Role.class);  // Assuming "status" is an ENUM field in the entity
+        Specification<User> users = new CustomSpecification<>(q,enumFields);
+        PageRequestDto pageRequestDto = new PageRequestDto();
+        pageRequestDto.setPageNo(page);
+        pageRequestDto.setPageSize(size);
+        pageRequestDto.setSort(sort);
+        pageRequestDto.setSortByColumn(sortByColumn);
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+        return repository.findAll(users,pageable);
+    }
+
+
+    public Page<User> getByEmail(int page,int size, Sort.Direction sort,String sortByColumn,String email) {
+        PageRequestDto pageRequestDto = new PageRequestDto();
+        pageRequestDto.setPageNo(page);
+        pageRequestDto.setPageSize(size);
+        pageRequestDto.setSort(sort);
+        pageRequestDto.setSortByColumn(sortByColumn);
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+        return repository.findByEmailLike("%"+email+"%",pageable);
     }
 
     public Page<User> getAllUsers(int page,int size, Sort.Direction sort,String sortByColumn) {

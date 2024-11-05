@@ -6,17 +6,23 @@ import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
+import com.hfsolution.app.services.CSVService;
+import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
@@ -51,9 +57,86 @@ public class PurchaseServicelmp implements PurchaseService {
     private final ProductDao productDao;
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
+    private final CSVService<Purchase> csvService;
+    private final String CSV_FILENAME="purchase";
+
+    @Override
+    public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
+
+        httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
+        SuccessResponse<Page<Purchase>> response = new SuccessResponse<>();
+        try {
+
+            Specification<Purchase> purchases = new CustomSpecification<>(q);
+            PageRequestDto pageRequestDto = new PageRequestDto();
+            pageRequestDto.setPageNo(pageNo);
+            pageRequestDto.setPageSize(pageSize);
+            pageRequestDto.setSort(sort);
+            pageRequestDto.setSortByColumn(sortByColum);
+            Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+            BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases,pageable);
+            if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getPage()==null){
+                String msg = AppTools.appGetMessage("023");
+            
+                throw new AppException("023",msg);
+            }
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(purchaseResult.getPage());
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+       
+    } 
+
+
+     @Override
+    public void export() {
+        httpServletRequest.setAttribute(ACTION, "EXPORT PURCHASE");
+        try {
+
+            csvService.export(purchaseDao.findAll().getEntityList(),Purchase.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+    @Override
+    public void importData(MultipartFile file) {
+        httpServletRequest.setAttribute(ACTION, "IMPORT PURCHASE");
+        try {
+
+            List<Purchase> purchaseList = csvService.parseCsv(file, Purchase.class);
+            purchaseDao.saveEntities(purchaseList);
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        
+    }
+    
+    }
+    
 
     @Override
     public Object searchPurchase(SearchRequestDTO request) {
+
+
+        
 
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
         SuccessResponse<Page<Purchase>> response = new SuccessResponse<>();

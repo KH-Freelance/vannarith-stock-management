@@ -36,7 +36,7 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 ),
                 @Server(
                         description = "PROD ENV HTTPS",
-                        url = "https://f730-3-17-133-210.ngrok-free.app"
+                        url = "https://compound-expert-improving-donna.trycloudflare.com"
                 )
         },
         security = {

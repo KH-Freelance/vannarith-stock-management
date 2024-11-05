@@ -5,5 +5,6 @@ public enum FieldType {
     INTEGER,
     DOUBLE,
     LONG,
+    ENUM,
     BOOLEAN;
 }

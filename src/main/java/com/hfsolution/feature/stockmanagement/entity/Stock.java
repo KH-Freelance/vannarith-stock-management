@@ -2,6 +2,7 @@ package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.opencsv.bean.CsvBindByPosition;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -25,20 +26,27 @@ public class Stock {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @CsvBindByPosition(position = 0)
     private Long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @CsvBindByPosition(position = 1)
+    private Long productId;
+
+    @CsvBindByPosition(position = 2)
     @Column(name = "qty")
     private Long qty;
 
     @Column(name = "created_date")
+    @CsvBindByPosition(position = 3)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
+    @CsvBindByPosition(position = 4)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp updatedDate;
     

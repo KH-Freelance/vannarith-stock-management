@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.hfsolution.feature.user.entity.User;
+import com.opencsv.bean.CsvBindByPosition;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -29,6 +31,7 @@ public class Purchase {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @CsvBindByPosition(position = 0)
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -43,26 +46,41 @@ public class Purchase {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; 
 
+    @CsvBindByPosition(position = 1)
+    private Long productId;
+
+    @CsvBindByPosition(position = 2)
+    private Long customerId;
+
+    @CsvBindByPosition(position = 3)
+    private Long userId;
+
     @Column(name = "qty")
+    @CsvBindByPosition(position = 4)
     private Long qty;
 
     @Column(name = "total")
+    @CsvBindByPosition(position = 5)
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal total;
 
     @Column(name = "payment_type")
     @Enumerated(EnumType.STRING)
+    @CsvBindByPosition(position = 6)
     private PaymentType paymentType = PaymentType.CASH;
 
     @Column(name = "discount")
+    @CsvBindByPosition(position = 7)
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount;
 
     @Column(name = "created_date")
+    @CsvBindByPosition(position = 8)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
+    @CsvBindByPosition(position = 9)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updateDate;
 

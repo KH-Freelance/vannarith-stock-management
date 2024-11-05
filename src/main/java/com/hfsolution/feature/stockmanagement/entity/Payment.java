@@ -6,6 +6,8 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
 import com.hfsolution.feature.user.entity.User;
+import com.opencsv.bean.CsvBindByPosition;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -31,33 +33,41 @@ public class Payment {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     @Column(name = "id")
+    @CsvBindByPosition(position = 0)
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "purchase_id", nullable = false)
+    @CsvBindByPosition(position = 1)
     private Purchase purchase;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @CsvBindByPosition(position = 2)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @CsvBindByPosition(position = 3)
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
  
     @ManyToOne(fetch = FetchType.EAGER)
+    @CsvBindByPosition(position = 4)
     @JoinColumn(name = "user_id", nullable = false)
     private User user; 
 
     @Column(name = "amount")
+    @CsvBindByPosition(position = 5)
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal amount;
 
     @Column(name = "created_date")
+    @CsvBindByPosition(position = 6)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
+    @CsvBindByPosition(position = 7)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updateDate;
 
