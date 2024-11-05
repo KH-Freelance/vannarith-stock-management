@@ -19,7 +19,9 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
+import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.customer.CustomerService;
@@ -62,8 +64,8 @@ public class CustomerController {
     }
 
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
-    private void importData(@RequestPart("file")MultipartFile file){
-        customerService.importData(file);
+    private Object  importData(@RequestPart("file")MultipartFile file){
+        return customerService.importData(file);
     }
 
     @PostMapping("/add")

@@ -2,7 +2,10 @@ package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
+import com.opencsv.bean.CsvIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -12,8 +15,10 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -31,10 +36,13 @@ public class Stock {
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
+    @CsvIgnore
     private Product product;
 
+    @Transient // This field will not be persisted in the database
+    @JsonIgnore
     @CsvBindByPosition(position = 1)
-    private Long productId;
+    private Long prodId;
 
     @CsvBindByPosition(position = 2)
     @Column(name = "qty")
@@ -50,6 +58,14 @@ public class Stock {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp updatedDate;
     
+    @PostLoad
+    public void postLoad() {
+        // Populate the productId field when the entity is loaded from the database
+        if (this.product != null) {
+            this.prodId = this.product.getId(); // Assuming Product has a getId() method
+        }
+    }
+
     @PrePersist
     public void preInsert() {
         // Set default values or modify fields before inserting

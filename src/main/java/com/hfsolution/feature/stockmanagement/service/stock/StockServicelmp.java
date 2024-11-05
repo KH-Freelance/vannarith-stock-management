@@ -18,6 +18,7 @@ import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
+import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.CustomSpecification;
@@ -174,6 +175,8 @@ public class StockServicelmp implements StockService {
 
         }catch (DatabaseException e) {
             throw e;   
+        }catch (CsvException e) {
+            throw new AppException("031",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
@@ -182,15 +185,21 @@ public class StockServicelmp implements StockService {
     }
 
     @Override
-    public void importData(MultipartFile file) {
+    public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT STOCK");
         try {
 
             List<Stock> stockList = csvService.parseCsv(file, Stock.class);
             stockDao.saveEntities(stockList);
-
+            SuccessResponse<?> response = new SuccessResponse<>();
+            response.setStatus(SUCCESS);
+            response.setMsg(AppTools.appGetMessage("034"));
+            response.setCode(SUCCESS_CODE);
+            return response;
         }catch (DatabaseException e) {
             throw e;   
+        }catch (CsvException e) {
+            throw new AppException("033",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){

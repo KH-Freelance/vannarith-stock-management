@@ -18,6 +18,7 @@ import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
+import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.CustomSpecification;
@@ -87,6 +88,8 @@ public class CustomerServicelmp implements CustomerService {
 
         }catch (DatabaseException e) {
             throw e;   
+        }catch (CsvException e) {
+            throw new AppException("027",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
@@ -95,15 +98,21 @@ public class CustomerServicelmp implements CustomerService {
     }
 
     @Override
-    public void importData(MultipartFile file) {
+    public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT CUSTOMER");
         try {
 
             List<Customer> customerList = csvService.parseCsv(file, Customer.class);
             customerDao.saveEntities(customerList);
-
+            SuccessResponse<?> response = new SuccessResponse<>();
+            response.setStatus(SUCCESS);
+            response.setMsg(AppTools.appGetMessage("030"));
+            response.setCode(SUCCESS_CODE);
+            return response;
         }catch (DatabaseException e) {
             throw e;   
+        }catch (CsvException e) {
+            throw new AppException("029",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){

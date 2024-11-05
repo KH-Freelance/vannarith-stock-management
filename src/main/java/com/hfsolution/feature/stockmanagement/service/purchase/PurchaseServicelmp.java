@@ -20,6 +20,7 @@ import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
+import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.CustomSpecification;
@@ -113,15 +114,21 @@ public class PurchaseServicelmp implements PurchaseService {
     }
 
     @Override
-    public void importData(MultipartFile file) {
+    public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PURCHASE");
         try {
 
             List<Purchase> purchaseList = csvService.parseCsv(file, Purchase.class);
             purchaseDao.saveEntities(purchaseList);
-
+            SuccessResponse<?> response = new SuccessResponse<>();
+            response.setStatus(SUCCESS);
+            response.setMsg(AppTools.appGetMessage("038"));
+            response.setCode(SUCCESS_CODE);
+            return response;
         }catch (DatabaseException e) {
             throw e;   
+        }catch (CsvException e) {
+            throw new AppException("037",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){

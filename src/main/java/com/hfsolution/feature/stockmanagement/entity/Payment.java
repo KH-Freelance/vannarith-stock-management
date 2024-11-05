@@ -3,10 +3,12 @@ package com.hfsolution.feature.stockmanagement.entity;
 import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
 import com.hfsolution.feature.user.entity.User;
 import com.opencsv.bean.CsvBindByPosition;
+import com.opencsv.bean.CsvIgnore;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -17,8 +19,10 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToOne;
+import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
+import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 
@@ -37,24 +41,44 @@ public class Payment {
     private Long id;
 
     @ManyToOne(fetch = FetchType.EAGER)
+    @CsvIgnore
     @JoinColumn(name = "purchase_id", nullable = false)
-    @CsvBindByPosition(position = 1)
     private Purchase purchase;
 
+    @Transient // This field will not be persisted in the database
+    @JsonIgnore
+    @CsvBindByPosition(position = 1)
+    private Long purchId;
+
     @ManyToOne(fetch = FetchType.EAGER)
-    @CsvBindByPosition(position = 2)
+    @CsvIgnore
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    @Transient // This field will not be persisted in the database
+    @JsonIgnore
+    @CsvBindByPosition(position = 2)
+    private Long prodId;
+
     @ManyToOne(fetch = FetchType.EAGER)
-    @CsvBindByPosition(position = 3)
+    @CsvIgnore
     @JoinColumn(name = "customer_id", nullable = false)
     private Customer customer;
+
+    @Transient // This field will not be persisted in the database
+    @JsonIgnore
+    @CsvBindByPosition(position = 3)
+    private Long custId;
  
     @ManyToOne(fetch = FetchType.EAGER)
-    @CsvBindByPosition(position = 4)
+    @CsvIgnore
     @JoinColumn(name = "user_id", nullable = false)
     private User user; 
+
+    @Transient // This field will not be persisted in the database
+    @JsonIgnore
+    @CsvBindByPosition(position = 4)
+    private Long usrId;
 
     @Column(name = "amount")
     @CsvBindByPosition(position = 5)
@@ -70,6 +94,23 @@ public class Payment {
     @CsvBindByPosition(position = 7)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updateDate;
+
+    @PostLoad
+    public void postLoad() {
+        // Populate the productId field when the entity is loaded from the database
+        if (this.product != null) {
+            this.prodId = this.product.getId(); // Assuming Product has a getId() method
+        }
+        if (this.user != null) {
+            this.usrId = this.user.getId(); // Assuming Product has a getId() method
+        }
+        if (this.customer != null) {
+            this.custId = this.customer.getId(); // Assuming Product has a getId() method
+        }
+        if (this.purchase != null) {
+            this.purchId = this.purchase.getId(); // Assuming Product has a getId() method
+        }
+    }
 
     @PrePersist
     public void preInsert() {

@@ -19,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
@@ -62,8 +63,8 @@ public class PurchaseController {
     }
 
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
-    private void importData(@RequestPart("file")MultipartFile file){
-        purchaseService.importData(file);
+    private Object importData(@RequestPart("file")MultipartFile file){
+        return purchaseService.importData(file);
     }
 
     

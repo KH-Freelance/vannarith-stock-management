@@ -10,17 +10,20 @@ import java.io.Reader;
 import java.nio.file.Files;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Map;
+import java.util.TreeMap;
 import java.util.stream.Collectors;
 
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
+import java.lang.reflect.Field;
 import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.util.InfoGenerator;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
+import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.HeaderColumnNameMappingStrategy;
@@ -58,6 +61,7 @@ public class CSVService<T> {
             CsvToBean<T> csvToBean =
                     new CsvToBeanBuilder<T>(reader)
                             .withMappingStrategy(strategy)
+                            .withSkipLines(1)
                             .withIgnoreEmptyLine(true)
                             .withIgnoreLeadingWhiteSpace(true)
                             .build();
@@ -75,10 +79,26 @@ public class CSVService<T> {
         try{
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "");
+
+            // Initialize writer
+            CSVWriter csvWriter = new CSVWriter(response.getWriter());
+
+            // Generate headers based on @CsvBindByPosition annotations
+            Map<Integer, String> headers = new TreeMap<>();
+            for (Field field : clazz.getDeclaredFields()) {
+                if (field.isAnnotationPresent(CsvBindByPosition.class)) {
+                    int position = field.getAnnotation(CsvBindByPosition.class).position();
+                    headers.put(position, field.getName());
+                }
+            }
+
+            // Convert headers map to array and write to CSV
+            String[] headerArray = headers.values().toArray(new String[0]);
+            csvWriter.writeNext(headerArray);
             ColumnPositionMappingStrategy<T> strategy = new ColumnPositionMappingStrategy<>();
             strategy.setType(clazz);
             // strategy.setColumnMapping(orderColumn);      
-            StatefulBeanToCsv<T> writer = new StatefulBeanToCsvBuilder<T>(response.getWriter())
+            StatefulBeanToCsv<T> writer = new StatefulBeanToCsvBuilder<T>(csvWriter)
             .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
             .withOrderedResults(true)
             .withMappingStrategy(strategy)
