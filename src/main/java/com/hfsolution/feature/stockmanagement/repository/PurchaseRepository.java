@@ -36,4 +36,7 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
     @Transactional
     void deleteByProductId(long id);
     
+    @Query(value = "SELECT nextval('purchase_id_seq')", nativeQuery = true)
+    Long getNextPurchaseId();
+    
 } 

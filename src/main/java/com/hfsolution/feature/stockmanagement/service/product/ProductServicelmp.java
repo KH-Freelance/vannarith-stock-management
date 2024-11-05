@@ -104,6 +104,7 @@ public class ProductServicelmp implements ProductService {
             }
 
             Product product = new Product();
+            product.setId(productDao.getProductId());
             product.setProductName(productRequest.getProductName());
             product.setProductDesc(productRequest.getProductDesc());
             product.setPrice(productRequest.getPrice());

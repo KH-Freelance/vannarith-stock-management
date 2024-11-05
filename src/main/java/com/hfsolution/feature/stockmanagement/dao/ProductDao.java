@@ -17,6 +17,7 @@ import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
+import com.hfsolution.feature.stockmanagement.repository.PaymentRepository;
 import com.hfsolution.feature.stockmanagement.repository.ProductRepository;
 
 
@@ -32,6 +33,20 @@ public class ProductDao extends BaseDBDao<Product, Long>{
     this.productRepository = repository;
   }
 
+  public Long getProductId(){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+      
+      return productRepository.getNextProductId();
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
 
   public BaseEntityResponseDto<Product> findByProductID(Long id){
 

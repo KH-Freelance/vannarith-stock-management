@@ -30,8 +30,6 @@ import lombok.Setter;
 public class Stock {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "stock_seq")
-    @SequenceGenerator(name = "stock_seq", sequenceName = "stock_id_seq", allocationSize = 1)
     @Column(name = "id")
     @CsvBindByPosition(position = 0)
     private Long id;

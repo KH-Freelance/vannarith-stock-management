@@ -210,6 +210,7 @@ public class PurchaseServicelmp implements PurchaseService {
             BigDecimal totalPrice = basePrice.subtract(discountPrice);
 
             Purchase purchase = new Purchase();
+            purchase.setId(purchaseDao.getPurchaseId());
             purchase.setProduct(product);
             purchase.setCustomer(customer);
             purchase.setUser(user);
@@ -220,6 +221,7 @@ public class PurchaseServicelmp implements PurchaseService {
             purchaseDao.saveEntity(purchase);
 
             Payment payment = new Payment();
+            payment.setId(paymentDao.getPaymentId());
             payment.setPurchase(purchase);
             payment.setProduct(product);
             payment.setCustomer(customer);

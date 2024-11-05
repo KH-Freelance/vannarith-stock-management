@@ -165,6 +165,7 @@ public class CustomerServicelmp implements CustomerService {
             }
 
             Customer Customer = new Customer();
+            Customer.setId(customerDao.getCustomerId());
             Customer.setCustomerName(CustomerRequest.getCustomerName());
             Customer.setEmail(CustomerRequest.getEmail());
             Customer.setPhone(CustomerRequest.getPhone());

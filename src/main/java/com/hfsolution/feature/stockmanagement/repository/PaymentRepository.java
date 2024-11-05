@@ -16,4 +16,8 @@ public interface PaymentRepository extends IBaseRepository<Payment,Long>, JpaSpe
     @Query("DELETE FROM Payment s WHERE s.purchase.id = :id")
     void deleteByPurchaseId(Long id);
 
+    
+    @Query(value = "SELECT nextval('payment_id_seq')", nativeQuery = true)
+    Long getNextPaymentId();
+
 } 

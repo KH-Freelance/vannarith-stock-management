@@ -32,6 +32,21 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
     this.purchaseRepository = repository;
   }
 
+  public Long getPurchaseId(){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+      
+      return purchaseRepository.getNextPurchaseId();
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
   public BaseEntityResponseDto<Purchase> findStockByProductID(Long id){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

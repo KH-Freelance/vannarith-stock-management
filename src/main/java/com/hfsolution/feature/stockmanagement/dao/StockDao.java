@@ -31,6 +31,21 @@ public class StockDao extends BaseDBDao<Stock,Long>{
     this.stockRepository = repository;
   }
 
+  public Long getStockId(){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+      
+      return stockRepository.getNextStockId();
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
   public BaseEntityResponseDto<Stock> findStockByProductID(Long id){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

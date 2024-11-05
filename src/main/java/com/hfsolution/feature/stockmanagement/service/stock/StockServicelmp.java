@@ -93,6 +93,7 @@ public class StockServicelmp implements StockService {
             }else{
                 stock = new Stock();
                 BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
+                stock.setId(stockDao.getStockId());
                 stock.setProduct(product.getEntity());
                 stock.setQty(stockRequest.getQty());
                 stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
