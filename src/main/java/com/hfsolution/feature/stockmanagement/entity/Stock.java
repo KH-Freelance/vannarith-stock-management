@@ -17,6 +17,7 @@ import jakarta.persistence.JoinColumn;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
+import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Getter;
@@ -29,7 +30,8 @@ import lombok.Setter;
 public class Stock {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    @GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "stock_seq")
+    @SequenceGenerator(name = "stock_seq", sequenceName = "stock_id_seq", allocationSize = 1)
     @Column(name = "id")
     @CsvBindByPosition(position = 0)
     private Long id;
