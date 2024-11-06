@@ -77,9 +77,9 @@ public class PurchaseServicelmp implements PurchaseService {
             Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases,pageable);
             if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getPage()==null){
-                String msg = AppTools.appGetMessage("023");
+                String msg = AppTools.appGetMessage("032");
             
-                throw new AppException("023",msg);
+                throw new AppException("032",msg);
             }
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
@@ -98,11 +98,12 @@ public class PurchaseServicelmp implements PurchaseService {
 
 
      @Override
-    public void export() {
+    public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PURCHASE");
         try {
-
-            csvService.export(purchaseDao.findAll().getEntityList(),Purchase.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            Specification<Purchase> purchases = new CustomSpecification<>(q);
+            BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases);
+            csvService.export(purchaseResult.getEntityList(),Purchase.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -122,13 +123,13 @@ public class PurchaseServicelmp implements PurchaseService {
             purchaseDao.saveEntities(purchaseList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
-            response.setMsg(AppTools.appGetMessage("038"));
-            response.setCode(SUCCESS_CODE);
+            response.setMsg(AppTools.appGetMessage("039"));
+            response.setCode("039");
             return response;
         }catch (DatabaseException e) {
             throw e;   
         }catch (CsvException e) {
-            throw new AppException("037",e.getMessage(),true); 
+            throw new AppException("038",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
@@ -153,8 +154,8 @@ public class PurchaseServicelmp implements PurchaseService {
             Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
             BaseEntityResponseDto<Purchase> productResult = purchaseDao.searchPurchase(purchase,pageable);
             if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
-                String msg = AppTools.appGetMessage("023");
-                throw new AppException("023",msg);
+                String msg = AppTools.appGetMessage("032");
+                throw new AppException("032",msg);
             }
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
@@ -230,8 +231,8 @@ public class PurchaseServicelmp implements PurchaseService {
             paymentDao.saveEntity(payment);
 
             response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
-            response.setMsg(AppTools.appGetMessage("025"));
+            response.setCode("034");
+            response.setMsg(AppTools.appGetMessage("034"));
             return response;
 
         }catch (DatabaseException e) {
@@ -251,9 +252,9 @@ public class PurchaseServicelmp implements PurchaseService {
         try {
             paymentDao.deleteByPurchaseId(id);
             purchaseDao.deletePurchaseByID(id);
-            String msg = AppTools.appGetMessage("024");
+            String msg = AppTools.appGetMessage("033");
             response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
+            response.setCode("033");
             response.setMsg(msg);
             return response;
 
@@ -283,7 +284,7 @@ public class PurchaseServicelmp implements PurchaseService {
     //         purchaseDao.saveEntity(purchase);
     //         response.setStatus(SUCCESS);
     //         response.setCode(SUCCESS_CODE);
-    //         response.setMsg(AppTools.appGetMessage("026"));
+    //         response.setMsg(AppTools.appGetMessage("035"));
     //         return response;
 
     //     }catch (DatabaseException e) {

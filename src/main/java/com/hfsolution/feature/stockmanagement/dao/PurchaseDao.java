@@ -2,6 +2,9 @@ package com.hfsolution.feature.stockmanagement.dao;
 
 
 import static com.hfsolution.app.constant.AppResponseStatus.*;
+
+import java.util.List;
+
 import static com.hfsolution.app.constant.AppResponseCode.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -78,6 +81,26 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
       var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       appModel.setPage(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<Purchase> searchPurchase(Specification<Purchase> purchase){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Purchase> entity = purchaseRepository.findAll(purchase);
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
       return appModel;
 

@@ -41,6 +41,7 @@ import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
+import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.enums.Role;
@@ -114,7 +115,7 @@ public class ProductServicelmp implements ProductService {
 
             productDao.saveEntity(product);
             response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
+            response.setCode("008");
             response.setMsg(AppTools.appGetMessage("008"));
             return response;
 
@@ -139,7 +140,7 @@ public class ProductServicelmp implements ProductService {
             productDao.deleteByProductID(id);
             String msg = AppTools.appGetMessage("007");
             response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
+            response.setCode("007");
             response.setMsg(msg);
             return response;
 
@@ -188,7 +189,7 @@ public class ProductServicelmp implements ProductService {
             productDao.saveEntity(existingProduct);
 
             response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
+            response.setCode("009");
             response.setMsg(AppTools.appGetMessage("009"));
             return response;
 
@@ -203,16 +204,18 @@ public class ProductServicelmp implements ProductService {
     }
 
     @Override
-    public void export() {
+    public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PRODUCT");
         try {
-
-            csvService.export(productDao.findAll().getEntityList(),Product.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            
+            Specification<Product> products = new CustomSpecification<>(q);
+            BaseEntityResponseDto<Product> productResult = productDao.search(products);
+            csvService.export(productResult.getEntityList(),Product.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
         }catch (CsvException e) {
-            throw new AppException("015",e.getMessage(),true); 
+            throw new AppException("011",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
@@ -229,13 +232,13 @@ public class ProductServicelmp implements ProductService {
             productDao.saveEntities(productList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
-            response.setMsg(AppTools.appGetMessage("018"));
-            response.setCode(SUCCESS_CODE);
+            response.setMsg(AppTools.appGetMessage("014"));
+            response.setCode("014");
             return response;
         }catch (DatabaseException e) {
             throw e;   
         }catch (CsvException e) {
-            throw new AppException("017",e.getMessage(),true); 
+            throw new AppException("013",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){

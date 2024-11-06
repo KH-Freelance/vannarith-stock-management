@@ -15,7 +15,7 @@ public interface ProductService {
 
     public Object search(SearchRequestDTO request);
     public Object search(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
-    public void export();
+    public void export(String q);
     public Object importData(MultipartFile file);
     public Object addProduct(ProductRequest productRequest);
     public Object deleteProductById(Long id);

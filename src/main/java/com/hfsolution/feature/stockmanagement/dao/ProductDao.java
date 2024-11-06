@@ -2,6 +2,10 @@ package com.hfsolution.feature.stockmanagement.dao;
 
 
 import static com.hfsolution.app.constant.AppResponseStatus.*;
+
+import java.sql.Timestamp;
+import java.util.List;
+
 import static com.hfsolution.app.constant.AppResponseCode.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -15,6 +19,7 @@ import com.hfsolution.app.dao.BaseDBDao;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
+import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.repository.PaymentRepository;
@@ -87,17 +92,39 @@ public class ProductDao extends BaseDBDao<Product, Long>{
 
   }
 
-  public BaseEntityResponseDto<Product> search(Specification<Product> stocks, Pageable pageable){
+ 
+
+  public BaseEntityResponseDto<Product> search(Specification<Product> products, Pageable pageable){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      Page<Product> entity = productRepository.findAll(stocks,pageable);
+      Page<Product> entity = productRepository.findAll(products,pageable);
       var appModel = new BaseEntityResponseDto<Product>();
       appModel.setStatus(SUCCESS);
       appModel.setPage(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<Product> search(Specification<Product> products){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Product> entity = productRepository.findAll(products);
+      var appModel = new BaseEntityResponseDto<Product>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
       return appModel;
 

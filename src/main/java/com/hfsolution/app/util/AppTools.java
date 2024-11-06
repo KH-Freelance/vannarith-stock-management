@@ -92,4 +92,20 @@ public class AppTools {
         return null;
     }
 
+    public static Timestamp formatDateStringToTimestamp(String dateString) throws ParseException {
+        // try {
+        SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
+        // Parse the date string into a java.util.Date
+        java.util.Date parsedDate = dateFormat.parse(dateString);
+        // Da
+        // Convert to java.sql.Timestamp
+        Timestamp timestamp = new Timestamp(parsedDate.getTime());
+        // Print the result
+        return timestamp;
+        // } catch (ParseException e) {
+        //     e.printStackTrace();
+        // }
+        // return null;
+    }
+
 }

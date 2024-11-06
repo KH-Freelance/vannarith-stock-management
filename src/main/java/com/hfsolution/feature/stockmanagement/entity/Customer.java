@@ -25,7 +25,7 @@ public class Customer {
     @CsvBindByPosition(position = 0)
     private Long id;
 
-    @Column(name = "customer_name")
+    @Column(name = "customer_name",unique = true)
     @CsvBindByPosition(position = 1)
     private String customerName;
 
@@ -63,10 +63,10 @@ public class Customer {
     public void preInsert() {
         // Set default values or modify fields before inserting
         if(this.discount==null){
-            this.discount = BigDecimal.valueOf(0.00);
+            this.discount = BigDecimal.ZERO;
         }
         if(this.credit==null){
-            this.credit = BigDecimal.valueOf(0.00);
+            this.credit = BigDecimal.ZERO;
         }
         if(this.createdDate==null){
             this.createdDate = new Timestamp(System.currentTimeMillis());

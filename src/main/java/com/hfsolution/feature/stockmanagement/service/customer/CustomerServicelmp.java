@@ -4,6 +4,8 @@ import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import java.sql.Timestamp;
+import java.text.ParseException;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -80,18 +82,17 @@ public class CustomerServicelmp implements CustomerService {
     } 
 
      @Override
-    public void export() {
+    public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT CUSTOMER");
         try {
-
-            csvService.export(customerDao.findAll().getEntityList(),Customer.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            Specification<Customer> customers = new CustomSpecification<>(q);
+            BaseEntityResponseDto<Customer> customerResult = customerDao.search(customers);
+            csvService.export(customerResult.getEntityList(),Customer.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
         }catch (CsvException e) {
-            throw new AppException("027",e.getMessage(),true); 
-        }catch (AppException e) {
-            throw e;   
+            throw new AppException("015",e.getMessage(),true); 
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
@@ -106,13 +107,13 @@ public class CustomerServicelmp implements CustomerService {
             customerDao.saveEntities(customerList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
-            response.setMsg(AppTools.appGetMessage("030"));
-            response.setCode(SUCCESS_CODE);
+            response.setMsg(AppTools.appGetMessage("023"));
+            response.setCode("023");
             return response;
         }catch (DatabaseException e) {
             throw e;   
         }catch (CsvException e) {
-            throw new AppException("029",e.getMessage(),true); 
+            throw new AppException("022",e.getMessage(),true); 
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
@@ -160,8 +161,8 @@ public class CustomerServicelmp implements CustomerService {
 
             BaseEntityResponseDto<Customer> CustomerResult = customerDao.findByCustomerName(CustomerRequest.getCustomerName());
             if(CustomerResult.getEntity()!=null){
-                String msg = AppTools.appGetMessage("014");
-                throw new AppException("014",msg);
+                String msg = AppTools.appGetMessage("019");
+                throw new AppException("019",msg);
             }
 
             Customer Customer = new Customer();
@@ -176,8 +177,8 @@ public class CustomerServicelmp implements CustomerService {
 
             customerDao.saveEntity(Customer);
             response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
-            response.setMsg(AppTools.appGetMessage("012"));
+            response.setCode("017");
+            response.setMsg(AppTools.appGetMessage("017"));
             return response;
 
         }catch (DatabaseException e) {
@@ -197,9 +198,9 @@ public class CustomerServicelmp implements CustomerService {
         try {
     
             customerDao.deleteByCustomerID(id);
-            String msg = AppTools.appGetMessage("011");
+            String msg = AppTools.appGetMessage("016");
             response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
+            response.setCode("016");
             response.setMsg(msg);
             return response;
 
@@ -232,8 +233,8 @@ public class CustomerServicelmp implements CustomerService {
             Customer.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             customerDao.saveEntity(Customer);
             response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
-            response.setMsg(AppTools.appGetMessage("013"));
+            response.setCode("018");
+            response.setMsg(AppTools.appGetMessage("018"));
             return response;
 
         }catch (DatabaseException e) {

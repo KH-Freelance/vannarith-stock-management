@@ -2,6 +2,10 @@ package com.hfsolution.feature.stockmanagement.dao;
 
 
 import static com.hfsolution.app.constant.AppResponseStatus.*;
+
+import java.sql.Timestamp;
+import java.util.List;
+
 import static com.hfsolution.app.constant.AppResponseCode.*;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -85,6 +89,29 @@ public class CustomerDao extends BaseDBDao<Customer, Long>{
     }
 
   }
+
+
+  public BaseEntityResponseDto<Customer> search(Specification<Customer> customers){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Customer> entity = customerRepository.findAll(customers);
+      var appModel = new BaseEntityResponseDto<Customer>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+
 
   public BaseEntityResponseDto<Customer> findByCustomerName(String name){
 
