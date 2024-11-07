@@ -22,10 +22,10 @@ import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
-import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
+import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
@@ -45,6 +45,8 @@ import com.hfsolution.feature.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import static com.hfsolution.app.constant.AppConstant.*;
 
 @Service
@@ -53,12 +55,12 @@ public class PurchaseServicelmp implements PurchaseService {
 
     private final PurchaseDao purchaseDao;
     private final HttpServletRequest httpServletRequest;
+    private final HttpServletResponse httpServletResponse;
     private final SearchFilter<Purchase> searchFilter;
     private final UserRepository userRepository;
     private final ProductDao productDao;
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
-    private final CSVService<Purchase> csvService;
     private final String CSV_FILENAME="purchase";
 
     @Override
@@ -101,9 +103,10 @@ public class PurchaseServicelmp implements PurchaseService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PURCHASE");
         try {
+            CSVHelper<Purchase> csvService = new CSVHelper<>(Purchase.class,httpServletResponse);
             Specification<Purchase> purchases = new CustomSpecification<>(q);
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases);
-            csvService.export(purchaseResult.getEntityList(),Purchase.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            csvService.export(purchaseResult.getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -118,8 +121,8 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PURCHASE");
         try {
-
-            List<Purchase> purchaseList = csvService.parseCsv(file, Purchase.class);
+            CSVHelper<Purchase> csvService = new CSVHelper<>(Purchase.class);
+            List<Purchase> purchaseList = csvService.parseCsv(file);
             purchaseDao.saveEntities(purchaseList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);

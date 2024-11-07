@@ -20,19 +20,20 @@ import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
-import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
+import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import static com.hfsolution.app.constant.AppConstant.*;
 
 @Service
@@ -43,8 +44,8 @@ public class StockServicelmp implements StockService {
     private final StockDao stockDao;
     private final ProductDao productDao;
     private final HttpServletRequest httpServletRequest;
+    private final HttpServletResponse httpServletResponse;
     private final SearchFilter<Stock> searchFilter;
-    private final CSVService<Stock> csvService;
     private final String CSV_FILENAME="stock";
 
     @Override
@@ -172,9 +173,10 @@ public class StockServicelmp implements StockService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT STOCK");
         try {
+            CSVHelper<Stock> csvService = new CSVHelper<>(Stock.class,httpServletResponse);
             Specification<Stock> stocks = new CustomSpecification<>(q);
             BaseEntityResponseDto<Stock> stockResult = stockDao.searchStock(stocks);
-            csvService.export(stockResult.getEntityList(),Stock.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            csvService.export(stockResult.getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -191,8 +193,8 @@ public class StockServicelmp implements StockService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT STOCK");
         try {
-
-            List<Stock> stockList = csvService.parseCsv(file, Stock.class);
+            CSVHelper<Stock> csvService = new CSVHelper<>(Stock.class);
+            List<Stock> stockList = csvService.parseCsv(file);
             stockDao.saveEntities(stockList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);

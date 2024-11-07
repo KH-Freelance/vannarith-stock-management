@@ -32,10 +32,10 @@ import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
-import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
+import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
@@ -59,8 +59,8 @@ public class ProductServicelmp implements ProductService {
     private final PurchaseDao purchaseDao;
     private final StockDao stockDao;
     private final HttpServletRequest httpServletRequest;
+    private final HttpServletResponse httpServletResponse;
     private final SearchFilter<Product> searchFilter;
-    private final CSVService<Product> csvService;
     private final String CSV_FILENAME = "product";
     @Override
     public Object search(SearchRequestDTO request) {
@@ -207,10 +207,10 @@ public class ProductServicelmp implements ProductService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PRODUCT");
         try {
-            
+            CSVHelper<Product> csvService = new CSVHelper<>(Product.class,httpServletResponse);
             Specification<Product> products = new CustomSpecification<>(q);
             BaseEntityResponseDto<Product> productResult = productDao.search(products);
-            csvService.export(productResult.getEntityList(),Product.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            csvService.export(productResult.getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -227,8 +227,8 @@ public class ProductServicelmp implements ProductService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PRODUCT");
         try {
-
-            List<Product> productList = csvService.parseCsv(file, Product.class);
+            CSVHelper<Product> csvService = new CSVHelper<>(Product.class);
+            List<Product> productList = csvService.parseCsv(file);
             productDao.saveEntities(productList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);

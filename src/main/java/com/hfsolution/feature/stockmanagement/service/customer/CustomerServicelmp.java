@@ -3,6 +3,8 @@ package com.hfsolution.feature.stockmanagement.service.customer;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
+import static org.springframework.http.HttpMethod.resolve;
+
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -22,18 +24,21 @@ import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
-import com.hfsolution.app.services.CSVService;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
+import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
+import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
+
 import static com.hfsolution.app.constant.AppConstant.*;
 
 @Service
@@ -43,9 +48,10 @@ public class CustomerServicelmp implements CustomerService {
     
     private final CustomerDao customerDao;
     private final HttpServletRequest httpServletRequest;
+    private final HttpServletResponse httpServletResponse;
     private final SearchFilter<Customer> searchFilter;
     private final String CSV_FILENAME= "customer";
-    private final CSVService<Customer> csvService;
+    private CSVHelper<Customer> csvService;
     @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
@@ -85,9 +91,10 @@ public class CustomerServicelmp implements CustomerService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT CUSTOMER");
         try {
+            CSVHelper<Customer> csvService = new CSVHelper<>(Customer.class,httpServletResponse);
             Specification<Customer> customers = new CustomSpecification<>(q);
             BaseEntityResponseDto<Customer> customerResult = customerDao.search(customers);
-            csvService.export(customerResult.getEntityList(),Customer.class, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            csvService.export(customerResult.getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -102,8 +109,8 @@ public class CustomerServicelmp implements CustomerService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT CUSTOMER");
         try {
-
-            List<Customer> customerList = csvService.parseCsv(file, Customer.class);
+            CSVHelper<Customer> csvService = new CSVHelper<>(Customer.class);
+            List<Customer> customerList = csvService.parseCsv(file);
             customerDao.saveEntities(customerList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
