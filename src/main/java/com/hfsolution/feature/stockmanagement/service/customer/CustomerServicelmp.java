@@ -51,7 +51,6 @@ public class CustomerServicelmp implements CustomerService {
     private final HttpServletResponse httpServletResponse;
     private final SearchFilter<Customer> searchFilter;
     private final String CSV_FILENAME= "customer";
-    private CSVHelper<Customer> csvService;
     @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
@@ -87,7 +86,7 @@ public class CustomerServicelmp implements CustomerService {
        
     } 
 
-     @Override
+    @Override
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT CUSTOMER");
         try {
@@ -98,7 +97,7 @@ public class CustomerServicelmp implements CustomerService {
 
         }catch (DatabaseException e) {
             throw e;   
-        }catch (CsvException e) {
+        }catch (AppException e) {
             throw new AppException("015",e.getMessage(),true); 
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
@@ -119,10 +118,8 @@ public class CustomerServicelmp implements CustomerService {
             return response;
         }catch (DatabaseException e) {
             throw e;   
-        }catch (CsvException e) {
-            throw new AppException("022",e.getMessage(),true); 
         }catch (AppException e) {
-            throw e;   
+            throw new AppException("022",e.getMessage(),true);
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         

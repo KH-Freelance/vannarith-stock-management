@@ -214,10 +214,8 @@ public class ProductServicelmp implements ProductService {
 
         }catch (DatabaseException e) {
             throw e;   
-        }catch (CsvException e) {
-            throw new AppException("011",e.getMessage(),true); 
         }catch (AppException e) {
-            throw e;   
+            throw new AppException("011",e.getMessage(),true); 
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
@@ -237,10 +235,8 @@ public class ProductServicelmp implements ProductService {
             return response;
         }catch (DatabaseException e) {
             throw e;   
-        }catch (CsvException e) {
-            throw new AppException("013",e.getMessage(),true); 
         }catch (AppException e) {
-            throw e;   
+            throw new AppException("013",e.getMessage(),true);
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         

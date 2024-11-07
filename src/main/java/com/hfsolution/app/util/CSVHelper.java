@@ -11,6 +11,8 @@ import java.util.TreeMap;
 import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.CsvException;
 import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
@@ -51,8 +53,6 @@ public class CSVHelper<T> {
     }
 
     public List<T> parseCsv(MultipartFile file) {
-        String methodName = "parseCsv";
-        long startTime = System.currentTimeMillis();
         try (Reader reader = new BufferedReader(new InputStreamReader(file.getInputStream()))) {
             ColumnPositionMappingStrategy<T> strategy = new ColumnPositionMappingStrategy<>();
             strategy.setType(clazz);
@@ -64,13 +64,11 @@ public class CSVHelper<T> {
                     .build();
             return csvToBean.parse();
         } catch (Exception e) {
-            throw new CsvException(FAIL_CODE, e.getMessage(), InfoGenerator.generateInfo(methodName, startTime));
+            throw new AppException(FAIL_CODE, e.getMessage());
         }
     }
 
     public void export(List<T> data, String filename) {
-        String methodName = "export";
-        long startTime = System.currentTimeMillis();
         try {
             response.setContentType("text/csv");
             response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + filename + "\"");
@@ -85,12 +83,12 @@ public class CSVHelper<T> {
                         .withSeparator(CSVWriter.DEFAULT_SEPARATOR)
                         .withOrderedResults(true)
                         .withMappingStrategy(strategy)
-                        .build();
+                        .build(); 
 
                 writer.write(data);
             }
         } catch (Exception e) {
-            throw new CsvException(FAIL_CODE, e.getMessage(), InfoGenerator.generateInfo(methodName, startTime));
+            throw new AppException(FAIL_CODE, e.getMessage());
         }
     }
 }

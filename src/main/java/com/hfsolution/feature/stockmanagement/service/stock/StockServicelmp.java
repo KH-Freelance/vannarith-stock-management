@@ -180,10 +180,8 @@ public class StockServicelmp implements StockService {
 
         }catch (DatabaseException e) {
             throw e;   
-        }catch (CsvException e) {
-            throw new AppException("028",e.getMessage(),true); 
         }catch (AppException e) {
-            throw e;   
+            throw new AppException("028",e.getMessage(),true); 
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
@@ -203,10 +201,8 @@ public class StockServicelmp implements StockService {
             return response;
         }catch (DatabaseException e) {
             throw e;   
-        }catch (CsvException e) {
-            throw new AppException("030",e.getMessage(),true); 
         }catch (AppException e) {
-            throw e;   
+            throw new AppException("030",e.getMessage(),true); 
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         
@@ -231,7 +227,6 @@ public class StockServicelmp implements StockService {
             BaseEntityResponseDto<Stock> stockResult = stockDao.searchStock(stocks,pageable);
             if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getPage()==null){
                 String msg = AppTools.appGetMessage("024");
-            
                 throw new AppException("024",msg);
             }
             response.setStatus(SUCCESS);

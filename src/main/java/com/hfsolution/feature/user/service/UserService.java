@@ -11,14 +11,23 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
-
+import org.springframework.web.multipart.MultipartFile;
+import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
+import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
+import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
+import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequest;
 import com.hfsolution.app.dto.SearchRequestDTO;
+import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.enums.FieldType;
 import com.hfsolution.app.exception.AppException;
+import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
+import com.hfsolution.app.util.AppTools;
+import com.hfsolution.app.util.CSVHelper;
+import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.token.repository.TokenRepository;
 import com.hfsolution.feature.user.dto.ChangePasswordRequest;
 import com.hfsolution.feature.user.dto.ChangeRoleRequest;
@@ -28,6 +37,8 @@ import com.hfsolution.feature.user.dto.UserUpdateRequest;
 import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.enums.Role;
 import com.hfsolution.feature.user.repository.UserRepository;
+
+import jakarta.servlet.http.HttpServletResponse;
 
 import java.security.Principal;
 import java.util.HashMap;
@@ -43,6 +54,8 @@ public class UserService {
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
     private final SearchFilter<User> searchFilter;
+    private final HttpServletResponse response;
+    private final String CSV_FILENAME="CSV_FILENAME";
     // private final CustomSpecification<User> customSpecification;
 
 
@@ -147,14 +160,40 @@ public class UserService {
     }
 
 
-    public Page<User> getByEmail(int page,int size, Sort.Direction sort,String sortByColumn,String email) {
-        PageRequestDto pageRequestDto = new PageRequestDto();
-        pageRequestDto.setPageNo(page);
-        pageRequestDto.setPageSize(size);
-        pageRequestDto.setSort(sort);
-        pageRequestDto.setSortByColumn(sortByColumn);
-        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
-        return repository.findByEmailLike("%"+email+"%",pageable);
+    public void export(String q) {
+        try {
+            CSVHelper<User> csvService = new CSVHelper<>(User.class,response);
+            Specification<User> users = new CustomSpecification<>(q);
+            List<User> userResult = repository.findAll(users);
+            csvService.export(userResult, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw new AppException("015",e.getMessage(),true); 
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+    public Object importData(MultipartFile file) {
+        try {
+            CSVHelper<User> csvService = new CSVHelper<>(User.class);
+            List<User> usererList = csvService.parseCsv(file);
+            repository.saveAll(usererList);
+            SuccessResponse<?> response = new SuccessResponse<>();
+            response.setStatus(SUCCESS);
+            response.setMsg(AppTools.appGetMessage("023"));
+            response.setCode("023");
+            return response;
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw new AppException("022",e.getMessage(),true);
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        
+        }
     }
 
     public Page<User> getAllUsers(int page,int size, Sort.Direction sort,String sortByColumn) {

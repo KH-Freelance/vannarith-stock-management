@@ -111,7 +111,7 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
-            throw e;   
+            throw new AppException("036",e.getMessage(),true);  
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
@@ -131,10 +131,8 @@ public class PurchaseServicelmp implements PurchaseService {
             return response;
         }catch (DatabaseException e) {
             throw e;   
-        }catch (CsvException e) {
-            throw new AppException("038",e.getMessage(),true); 
         }catch (AppException e) {
-            throw e;   
+            throw new AppException("038",e.getMessage(),true);  
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         
