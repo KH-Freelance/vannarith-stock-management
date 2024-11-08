@@ -13,7 +13,6 @@ import java.util.Map;
 import java.util.function.Function;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.stereotype.Service;
-
 import com.hfsolution.app.properties.JwtProperties;
 
 @Service
@@ -26,12 +25,19 @@ public class JwtService {
     return extractClaim(token, Claims::getSubject);
   }
 
+  public Object extractClaim(String token, String claim) {
+    return extractClaim(token, claims -> claims.get(claim, Object.class));
+  }
+
+
+
   public <T> T extractClaim(String token, Function<Claims, T> claimsResolver) {
     final Claims claims = extractAllClaims(token);
     return claimsResolver.apply(claims);
   }
 
   public String generateToken(UserDetails userDetails) {
+
     return generateToken(new HashMap<>(), userDetails);
   }
 

@@ -12,9 +12,14 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
+
+import static com.hfsolution.app.constant.AppConstant.STOCK_USER;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
+
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequest;
@@ -23,6 +28,7 @@ import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.enums.FieldType;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
+import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
@@ -40,6 +46,7 @@ import com.hfsolution.feature.user.repository.UserRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -49,13 +56,14 @@ import java.util.Optional;
 @Service
 @RequiredArgsConstructor
 public class UserService {
-
+    
+    private final CloudinaryProperties cloudinaryProperties;
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
     private final SearchFilter<User> searchFilter;
     private final HttpServletResponse response;
-    private final String CSV_FILENAME="CSV_FILENAME";
+    private final String CSV_FILENAME="user";
     // private final CustomSpecification<User> customSpecification;
 
 
@@ -95,6 +103,32 @@ public class UserService {
         user.setFirstname(userUpdateRequest.getFirstname());
         user.setLastname(userUpdateRequest.getLastname());
 
+        // save update user
+        repository.save(user);
+    }
+    public void update(long id, UserUpdateRequest userUpdateRequest, MultipartFile file) {
+
+
+        //check exist
+        Optional<User> opUser = repository.findById(id);
+        if(!opUser.isPresent()){
+            throw new AppException("002");
+        }
+        
+        User user = opUser.get();
+        user.setFirstname(userUpdateRequest.getFirstname());
+        user.setLastname(userUpdateRequest.getLastname());
+        try {
+            if(file == null){
+                user.setImageUrl(cloudinaryProperties.getDefaultImage());
+            }else{
+                user.setImageUrl(uploadImage(file, STOCK_USER+"/"+String.valueOf(id)).get("secure_url").toString());
+            }
+        } catch (IOException e) {
+            // TODO Auto-generated catch block
+            e.printStackTrace();
+        }
+        
         // save update user
         repository.save(user);
     }
@@ -215,5 +249,20 @@ public class UserService {
         tokenRepository.deleteByUserId(opUser.get().getId());
         repository.deleteById(opUser.get().getId());
 
+    }
+
+    private Map uploadImage(MultipartFile file, String imageName) throws IOException{
+        Cloudinary cloudinary = new Cloudinary(cloudinaryProperties.getUrl());
+        System.out.println(cloudinary.config.cloudName);
+        // Upload the image
+        Map params1 = ObjectUtils.asMap(
+            "use_filename", true,
+            "unique_filename", false,
+            "overwrite", true,
+            "quality", "auto",
+            "public_id", imageName
+        );
+
+        return cloudinary.uploader().upload(file.getBytes(), params1);
     }
 }

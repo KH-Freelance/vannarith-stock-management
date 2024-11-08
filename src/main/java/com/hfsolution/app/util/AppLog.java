@@ -28,6 +28,8 @@ public class AppLog<T> {
  
     String reqId;
 	String uri;
+	String username;
+	String userId;
 	String action;
 	String info;
     T request;

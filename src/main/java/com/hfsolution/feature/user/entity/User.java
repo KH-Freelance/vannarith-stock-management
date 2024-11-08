@@ -1,6 +1,7 @@
 package com.hfsolution.feature.user.entity;
 
 import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
 import jakarta.persistence.Enumerated;
@@ -21,6 +22,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hfsolution.feature.token.entity.Token;
 import com.hfsolution.feature.user.enums.Role;
+import com.opencsv.bean.CsvBindByPosition;
 
 @Data
 @Builder
@@ -32,16 +34,26 @@ public class User implements UserDetails {
 
   @Id
   @GeneratedValue
+  @CsvBindByPosition(position = 0)
   private Long id;
+  @CsvBindByPosition(position = 1)
   private String firstname;
+  @CsvBindByPosition(position = 2)
   private String lastname;
+  @CsvBindByPosition(position = 3)
   private String email;
+  @CsvBindByPosition(position = 4)
   private String password;
 
   @Enumerated(EnumType.STRING)
+  @CsvBindByPosition(position = 5)
   private Role role;
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL, orphanRemoval = true)
+  @CsvBindByPosition(position = 6)
+  @Column(name = "image_url")
+  private String imageUrl;
+
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
   @JsonIgnore
   private List<Token> tokens;
 

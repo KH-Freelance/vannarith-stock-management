@@ -1,9 +1,12 @@
 package com.hfsolution.feature.auth.services;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.enums.TokenType;
 import com.hfsolution.app.exception.AppException;
+import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.app.services.JwtService;
 import com.hfsolution.feature.auth.dto.AuthenticationRequest;
 import com.hfsolution.feature.auth.dto.AuthenticationResponse;
@@ -20,15 +23,21 @@ import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.web.multipart.MultipartFile;
+
 import java.io.IOException;
+import java.util.HashMap;
+import java.util.Map;
 import java.util.Optional;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
-
+import static com.hfsolution.app.constant.AppConstant.USERID;
+import static com.hfsolution.app.constant.AppConstant.USERNAME;
+import static com.hfsolution.app.constant.AppConstant.STOCK_USER;
 @Service
 @RequiredArgsConstructor
 public class AuthenticationService {
-
+  private final CloudinaryProperties cloudinaryProperties;
   private final UserRepository repository;
   private final TokenRepository tokenRepository;
   private final UserRepository userRepository;
@@ -43,11 +52,49 @@ public class AuthenticationService {
       .firstname(request.getFirstname())
       .lastname(request.getLastname())
       .email(request.getEmail())
+      .imageUrl(cloudinaryProperties.getDefaultImage())
       .password(passwordEncoder.encode(request.getPassword()))
       .role(request.getRole())
       .build();
       var savedUser = repository.save(user);
-      var jwtToken = jwtService.generateToken(user);
+      Map<String, Object> extraClaims = new HashMap<>();
+      extraClaims.put(USERID, user.getId());
+      extraClaims.put(USERNAME, user.getFirstname()+" "+user.getLastname());
+      var jwtToken = jwtService.generateToken(extraClaims,user);
+      var refreshToken = jwtService.generateRefreshToken(user);
+      saveUserToken(savedUser, jwtToken);
+      return AuthenticationResponse.builder()
+          .accessToken(jwtToken)
+              .refreshToken(refreshToken)
+          .build();
+    }else{
+       throw new AppException("005");
+    }
+     
+  }
+
+  public AuthenticationResponse register(RegisterRequest request, MultipartFile file) throws IOException {
+    Optional<User> existUser = userRepository.findByEmail(request.getEmail());
+    if(!existUser.isPresent()){
+      String imageUrl = null;
+      if(file == null){
+        imageUrl = cloudinaryProperties.getDefaultImage();
+      }else{
+        imageUrl = (String)uploadImage(file, STOCK_USER+"/"+request.getFirstname()+request.getLastname()).get("secure_url");
+      }
+      var user = User.builder()
+      .firstname(request.getFirstname())
+      .lastname(request.getLastname())
+      .email(request.getEmail())
+      .imageUrl(imageUrl)
+      .password(passwordEncoder.encode(request.getPassword()))
+      .role(request.getRole())
+      .build();
+      var savedUser = repository.save(user);
+      Map<String, Object> extraClaims = new HashMap<>();
+      extraClaims.put(USERID, user.getId());
+      extraClaims.put(USERNAME, user.getFirstname()+" "+user.getLastname());
+      var jwtToken = jwtService.generateToken(extraClaims,user);
       var refreshToken = jwtService.generateRefreshToken(user);
       saveUserToken(savedUser, jwtToken);
       return AuthenticationResponse.builder()
@@ -69,7 +116,10 @@ public class AuthenticationService {
     );
     var user = repository.findByEmail(request.getEmail())
         .orElseThrow();
-    var jwtToken = jwtService.generateToken(user);
+    Map<String, Object> extraClaims = new HashMap<>();
+    extraClaims.put(USERID, user.getId());
+    extraClaims.put(USERNAME, user.getFirstname()+" "+user.getLastname());
+    var jwtToken = jwtService.generateToken(extraClaims,user);
     var refreshToken = jwtService.generateRefreshToken(user);
     revokeAllUserTokens(user);
     saveUserToken(user, jwtToken);
@@ -133,4 +183,19 @@ public class AuthenticationService {
       }
     }
   }
+   private Map uploadImage(MultipartFile file, String imageName) throws IOException{
+  
+        Cloudinary cloudinary = new Cloudinary(cloudinaryProperties.getUrl());
+        System.out.println(cloudinary.config.cloudName);
+        // Upload the image
+        Map params1 = ObjectUtils.asMap(
+            "use_filename", true,
+            "unique_filename", false,
+            "overwrite", true,
+            "quality", "auto",
+            "public_id", imageName
+
+        );
+        return cloudinary.uploader().upload(file.getBytes(), params1);
+    }
 }

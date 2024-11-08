@@ -4,8 +4,12 @@ public class AppConstant {
     public static String REQ_INFO = "request-info";
     public static String REQ_ID = "reqid";
     public static String ACTION = "action";
+    public static String USERNAME = "username";
+    public static String USERID = "userId";
     public static String CONTROLLER = "controller";
     public static String STEP = "step";
     public static String INFO = "info";
     public static String URI = "uri";
+    public static String STOCK_PRODUCT = "stock-product";
+    public static String STOCK_USER = "stock-user";
 }

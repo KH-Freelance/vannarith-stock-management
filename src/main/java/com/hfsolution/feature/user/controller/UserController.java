@@ -3,6 +3,7 @@ package com.hfsolution.feature.user.controller;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.java.Log;
 
+import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
 import java.util.List;
@@ -10,6 +11,7 @@ import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.data.repository.query.Param;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.MethodArgumentNotValidException;
@@ -37,6 +39,7 @@ import com.hfsolution.feature.user.dto.RegisterRequest;
 import com.hfsolution.feature.user.dto.ResetPasswordRequest;
 import com.hfsolution.feature.user.dto.UserUpdateRequest;
 import com.hfsolution.feature.user.entity.User;
+import com.hfsolution.feature.user.enums.Role;
 import com.hfsolution.feature.user.service.UserService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -54,7 +57,6 @@ public class UserController {
 
     private final AuthenticationService authService;
     private final UserService userService;
-    private final UserService service;
 
     //ADMIN
     @PreAuthorize("hasRole('ADMIN') or hasAuthority('admin:update')")
@@ -83,6 +85,29 @@ public class UserController {
         return ResponseEntity.ok(successResponse);
     }
 
+    @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<?> register(
+        @RequestPart(value = "file", required = false)MultipartFile file,
+        // @RequestPart(value = "request", required = false) RegisterRequest request
+        @RequestParam String firstname,
+        @RequestParam String lastname,
+        @RequestParam String email,
+        @RequestParam String password,
+        @RequestParam Role role
+    ) throws IOException {
+        RegisterRequest request = new RegisterRequest();
+        request.setEmail(email);
+        request.setFirstname(firstname);
+        request.setLastname(lastname);
+        request.setPassword(password);
+        request.setRole(role);
+        SuccessResponse<AuthenticationResponse> successResponse =  new SuccessResponse<>();
+        successResponse.setCode(SUCCESS_CODE);
+        successResponse.setData(authService.register(request,file));
+        successResponse.setMsg(SUCCESS);
+        return ResponseEntity.ok(successResponse);
+    }
+
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(
           @PathVariable Long id
@@ -106,14 +131,14 @@ public class UserController {
     }
 
     @GetMapping("/export")
-    private void exportData(
+    public void exportData(
         @Parameter(description = "Query string to query resources. Supported query patterns are \"exact match(k=v)\", \"fuzzy match(k=~v)\", \"range(k=[min~max])\", \"list with union releationship(k={v1 v2 v3})\" and \"list with intersetion relationship(k=(v1 v2 v3))\". The value of range and list can be string(enclosed by \" or '), integer or time(in format \"2020-04-09 02:36:00\"). All of these query patterns should be put in the query string \"q=xxx\" and splitted by \",\". e.g. q=k1=v1,k2=~v2,k3=[min~max], Note: q is empty mean query all result.")
         @RequestParam(required = false) String q){
             userService.export(q);
     }
 
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
-    private Object  importData(@RequestPart("file")MultipartFile file){
+    public Object  importData(@RequestPart("file")MultipartFile file){
         return userService.importData(file);
     }
 
@@ -151,7 +176,7 @@ public class UserController {
           @RequestBody ChangePasswordRequest request,
           Principal connectedUser
     ) {
-        service.changePassword(request, connectedUser);
+        userService.changePassword(request, connectedUser);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();
         successResponse.setCode(SUCCESS_CODE);
         successResponse.setMsg(SUCCESS);
@@ -163,7 +188,25 @@ public class UserController {
     public ResponseEntity<?> update(
           @PathVariable int id,@Valid @RequestBody UserUpdateRequest userUpdateRequest
     ) {
-        service.update(id, userUpdateRequest);
+        userService.update(id, userUpdateRequest);
+        SuccessResponse<?> successResponse =  new SuccessResponse<>();
+        successResponse.setCode(SUCCESS_CODE);
+        successResponse.setMsg(SUCCESS);
+        return ResponseEntity.ok(successResponse);
+    }
+
+    @PutMapping(value = "/v2/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    public ResponseEntity<?> update(
+          @PathVariable int id,
+            @RequestPart(value = "file", required = false) MultipartFile file,
+            // @RequestPart(value = "userUpdateRequest", required = false) UserUpdateRequest userUpdateRequest
+            @RequestParam String firstname,
+            @RequestParam String lastname
+    ) {
+        UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+        userUpdateRequest.setFirstname(firstname);
+        userUpdateRequest.setLastname(lastname);
+        userService.update(id, userUpdateRequest, file);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();
         successResponse.setCode(SUCCESS_CODE);
         successResponse.setMsg(SUCCESS);
@@ -175,7 +218,7 @@ public class UserController {
           Principal connectedUser
     ) {
         SuccessResponse<User> successResponse =  new SuccessResponse<>();
-        successResponse.setData(service.getInfo(connectedUser));
+        successResponse.setData(userService.getInfo(connectedUser));
         successResponse.setCode(SUCCESS_CODE);
         successResponse.setMsg(SUCCESS);
         return ResponseEntity.ok(successResponse);

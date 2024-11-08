@@ -5,6 +5,9 @@ import jakarta.servlet.ServletException;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
+import static com.hfsolution.app.constant.AppConstant.USERID;
+import static com.hfsolution.app.constant.AppConstant.USERNAME;
+import static com.hfsolution.feature.user.enums.Role.USER;
 
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
@@ -42,6 +45,7 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     }
     final String authHeader = request.getHeader("Authorization");
     final String jwt;
+
     final String userEmail;
     if (authHeader == null ||!authHeader.startsWith("Bearer ")) {
       filterChain.doFilter(request, response);
@@ -51,6 +55,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
     try {
       jwt = authHeader.substring(7);
       userEmail = jwtService.extractUsername(jwt);
+      
+
       if (userEmail != null && SecurityContextHolder.getContext().getAuthentication() == null) {
         UserDetails userDetails = this.userDetailsService.loadUserByUsername(userEmail);
         var isTokenValid = tokenRepository.findByToken(jwt)
@@ -65,6 +71,16 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           authToken.setDetails(
               new WebAuthenticationDetailsSource().buildDetails(request)
           );
+          // set this value indentifer who was process the request
+          try {
+            String username = (String)jwtService.extractClaim(jwt, USERNAME.toString());
+            Integer userId = (Integer)jwtService.extractClaim(jwt, USERID.toString());
+            request.setAttribute(USERNAME, username);
+            request.setAttribute(USERID, userId);
+          } catch (Exception e) {
+            e.printStackTrace();
+          }
+          
           SecurityContextHolder.getContext().setAuthentication(authToken);
         }
       }

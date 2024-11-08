@@ -3,7 +3,6 @@ package com.hfsolution.feature.stockmanagement.service.customer;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
-import static org.springframework.http.HttpMethod.resolve;
 
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -16,13 +15,11 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
-import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
@@ -32,9 +29,6 @@ import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
-import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.entity.Stock;
-
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;

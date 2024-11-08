@@ -1,10 +1,13 @@
 package com.hfsolution.feature.stockmanagement.controller;
 
+import java.io.IOException;
+import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
@@ -23,6 +26,7 @@ import org.springframework.web.multipart.MultipartFile;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
+import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.product.ProductService;
@@ -32,6 +36,13 @@ import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
+
+import com.cloudinary.*;
+import com.cloudinary.utils.ObjectUtils;
+import io.github.cdimascio.dotenv.Dotenv;
+
+import java.util.Map;
+
 @RestController
 @RequestMapping("/product")
 public class ProductController {
@@ -39,6 +50,8 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
+    @Autowired
+    private CloudinaryProperties cloudinaryProperties;
 
     @PostMapping("/search")
     @Operation(summary = "remove soon")
@@ -70,7 +83,24 @@ public class ProductController {
         productService.export(q);
     }
 
-    @PostMapping(value = "/import", consumes = {"multipart/form-data"})
+    // @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
+    // private Object uploadImage(@RequestPart("file")MultipartFile file) throws IOException{
+    //     // Dotenv dotenv = Dotenv.load()
+    //     Cloudinary cloudinary = new Cloudinary(cloudinaryProperties.getUrl());
+    //     System.out.println(cloudinary.config.cloudName);
+    //     // Upload the image
+    //     Map params1 = ObjectUtils.asMap(
+    //         "use_filename", true,
+    //         "unique_filename", false,
+    //         "overwrite", true,
+    //         "public_id", "stock-producdt/"+file.getOriginalFilename()
+    //     );
+
+    //     System.out.println(cloudinary.uploader().upload(file.getBytes(), params1));
+    //     return "Successufully";
+    // }
+
+    @PostMapping(value = "/import", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE})
     private Object importData(@RequestPart("file")MultipartFile file){
         return productService.importData(file);
     }
@@ -78,6 +108,24 @@ public class ProductController {
     @PostMapping("/add")
     private Object addProduct(@Valid @RequestBody ProductRequest productRequest){
         return productService.addProduct(productRequest);
+    }
+
+
+    @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    private Object addProduct(
+        @RequestPart(value = "file", required = false)MultipartFile file,
+        // @RequestPart(value = "productRequest", required = false) ProductRequest productRequest
+        @RequestParam String productName,
+        @RequestParam String productDesc,
+        @RequestParam BigDecimal price,
+        @RequestParam String expiryDate
+        ){
+        ProductRequest productRequest = new ProductRequest();
+        productRequest.setProductName(productName);
+        productRequest.setProductDesc(productDesc);
+        productRequest.setPrice(price);
+        productRequest.setExpiryDate(expiryDate);
+        return productService.addProduct(productRequest,file);
     }
 
     @DeleteMapping("/delete/{id}")
@@ -88,6 +136,23 @@ public class ProductController {
     @PutMapping("/update/{id}")
     private Object updateProductById(@PathVariable long id,@Valid @RequestBody ProductUpdateRequest productUpdateRequest){
         return productService.updateProductById(id,productUpdateRequest);
+    }
+
+    @PutMapping(value = "/v2/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    private Object updateProductById(@PathVariable long id,
+        @RequestPart(value = "file", required = false)MultipartFile file,
+        // @RequestPart(value = "productUpdateRequest", required = false)ProductUpdateRequest productUpdateRequest
+        @RequestParam String productName,
+        @RequestParam String productDesc,
+        @RequestParam BigDecimal price,
+        @RequestParam String expiryDate
+    ){
+        ProductUpdateRequest productUpdateRequest = new ProductUpdateRequest();
+        productUpdateRequest.setProductName(productName);
+        productUpdateRequest.setProductDesc(productDesc);
+        productUpdateRequest.setPrice(price);
+        productUpdateRequest.setExpiryDate(expiryDate);
+        return productService.updateProductById(id,productUpdateRequest,file);
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

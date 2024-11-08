@@ -9,12 +9,8 @@ import java.util.List;
 import java.util.Map;
 import java.util.TreeMap;
 import org.springframework.http.HttpHeaders;
-import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.hfsolution.app.exception.AppException;
-import com.hfsolution.app.exception.CsvException;
-import com.opencsv.CSVReader;
 import com.opencsv.CSVWriter;
 import com.opencsv.bean.ColumnPositionMappingStrategy;
 import com.opencsv.bean.CsvBindByPosition;
@@ -22,7 +18,6 @@ import com.opencsv.bean.CsvToBean;
 import com.opencsv.bean.CsvToBeanBuilder;
 import com.opencsv.bean.StatefulBeanToCsv;
 import com.opencsv.bean.StatefulBeanToCsvBuilder;
-
 import jakarta.servlet.http.HttpServletResponse;
 import java.lang.reflect.Field;
 
@@ -84,7 +79,6 @@ public class CSVHelper<T> {
                         .withOrderedResults(true)
                         .withMappingStrategy(strategy)
                         .build(); 
-
                 writer.write(data);
             }
         } catch (Exception e) {

@@ -3,9 +3,7 @@ package com.hfsolution.feature.stockmanagement.service.purchase;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
-
 import java.math.BigDecimal;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -14,13 +12,11 @@ import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
-import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
@@ -30,11 +26,7 @@ import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
-import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
-import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseUpdateRequest;
-import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
-import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
@@ -42,11 +34,9 @@ import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
-
 import static com.hfsolution.app.constant.AppConstant.*;
 
 @Service
@@ -123,6 +113,11 @@ public class PurchaseServicelmp implements PurchaseService {
         try {
             CSVHelper<Purchase> csvService = new CSVHelper<>(Purchase.class);
             List<Purchase> purchaseList = csvService.parseCsv(file);
+            purchaseList.forEach(purchase->{
+                purchase.setProduct(productDao.findById(purchase.getProdId()).getEntity());
+                purchase.setCustomer(customerDao.findById(purchase.getCustId()).getEntity());
+                purchase.setUser(userRepository.findById(purchase.getCustId()).get());
+            });
             purchaseDao.saveEntities(purchaseList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);

@@ -18,8 +18,10 @@ public interface ProductService {
     public void export(String q);
     public Object importData(MultipartFile file);
     public Object addProduct(ProductRequest productRequest);
+    public Object addProduct(ProductRequest productRequest,MultipartFile file);
     public Object deleteProductById(Long id);
     public Object updateProductById(Long id , ProductUpdateRequest productUpdateRequest);
+    public Object updateProductById(Long id , ProductUpdateRequest productUpdateRequest,MultipartFile file);
 
     
 }  

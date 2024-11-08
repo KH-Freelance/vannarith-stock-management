@@ -4,6 +4,7 @@ import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.sql.Timestamp;
@@ -16,6 +17,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -25,13 +28,15 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.cloudinary.Cloudinary;
+import com.cloudinary.utils.ObjectUtils;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
-import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
+import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
@@ -41,11 +46,7 @@ import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
-import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.user.entity.User;
-import com.hfsolution.feature.user.enums.Role;
-
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -54,7 +55,8 @@ import static com.hfsolution.app.constant.AppConstant.*;
 @Service
 @RequiredArgsConstructor
 public class ProductServicelmp implements ProductService {
-
+    
+    private final CloudinaryProperties cloudinaryProperties;
     private final ProductDao productDao;
     private final PurchaseDao purchaseDao;
     private final StockDao stockDao;
@@ -109,10 +111,53 @@ public class ProductServicelmp implements ProductService {
             product.setProductName(productRequest.getProductName());
             product.setProductDesc(productRequest.getProductDesc());
             product.setPrice(productRequest.getPrice());
+            product.setImageUrl(cloudinaryProperties.getDefaultImage());
             product.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             product.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             product.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
 
+            productDao.saveEntity(product);
+            response.setStatus(SUCCESS);
+            response.setCode("008");
+            response.setMsg(AppTools.appGetMessage("008"));
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+    @Override
+    public Object addProduct(ProductRequest productRequest,MultipartFile file) {
+
+        httpServletRequest.setAttribute(ACTION,"ADD PRODUCT");
+        SuccessResponse<Product> response = new SuccessResponse<>();
+        try {
+
+            
+            BaseEntityResponseDto<Product> productResult = productDao.findByProductName(productRequest.getProductName());
+            Product product = new Product();
+            if(productResult.getEntity()!=null){
+                String msg = AppTools.appGetMessage("010");
+                throw new AppException("010",msg);
+            }
+            if (file == null){
+                product.setImageUrl(cloudinaryProperties.getDefaultImage());
+            }else{
+                product.setImageUrl((String)uploadImage(file, STOCK_PRODUCT+"/"+productRequest.getProductName()).get("secure_url"));
+            }
+            product.setId(productDao.getProductId());
+            product.setProductName(productRequest.getProductName());
+            product.setProductDesc(productRequest.getProductDesc());
+            product.setPrice(productRequest.getPrice());
+            product.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+            product.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+            product.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
+            
             productDao.saveEntity(product);
             response.setStatus(SUCCESS);
             response.setCode("008");
@@ -179,6 +224,62 @@ public class ProductServicelmp implements ProductService {
 
             //updated
             Product existingProduct = productResult.getEntity();
+            Optional.ofNullable(productUpdateRequest.getProductName()).ifPresent(existingProduct::setProductName);
+            Optional.ofNullable(productUpdateRequest.getProductDesc()).ifPresent(existingProduct::setProductDesc);
+            Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
+            Optional.ofNullable(productUpdateRequest.getExpiryDate())
+            .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
+            .ifPresent(existingProduct::setExpiryDate);
+            existingProduct.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+            productDao.saveEntity(existingProduct);
+
+            response.setStatus(SUCCESS);
+            response.setCode("009");
+            response.setMsg(AppTools.appGetMessage("009"));
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+
+    }
+
+    @Override
+    public Object updateProductById(Long id, ProductUpdateRequest productUpdateRequest, MultipartFile file) {
+
+        httpServletRequest.setAttribute(ACTION,"UPDATE PRODUCT BY ID");
+        SuccessResponse<Product> response = new SuccessResponse<>();
+        try {
+
+            //check product id
+            BaseEntityResponseDto<Product> productResult = productDao.findByProductID(id);
+            if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("006");
+                throw new AppException("006",msg);
+            }
+
+            //check target product name
+            if(productUpdateRequest.getProductName()!=null && !productUpdateRequest.getProductName().isEmpty() && !productUpdateRequest.getProductName().isBlank()){
+                BaseEntityResponseDto<Product> targetProductResult = productDao.findByProductName(productUpdateRequest.getProductName());
+                if(targetProductResult.getEntity()!=null){
+                    String msg = AppTools.appGetMessage("010");
+                    throw new AppException("010",msg);
+                }
+            }
+
+            //updated
+            // String imageUrl = (String)uploadImage(file,STOCK_PRODUCT+"/"+String.valueOf(id)).get("secure_url");
+            Product existingProduct = productResult.getEntity();
+            if(file == null){
+                existingProduct.setImageUrl(cloudinaryProperties.getDefaultImage());
+            }else{
+
+                existingProduct.setImageUrl((String)uploadImage(file,STOCK_PRODUCT+"/"+String.valueOf(id)).get("secure_url"));
+            }
             Optional.ofNullable(productUpdateRequest.getProductName()).ifPresent(existingProduct::setProductName);
             Optional.ofNullable(productUpdateRequest.getProductDesc()).ifPresent(existingProduct::setProductDesc);
             Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
@@ -277,7 +378,23 @@ public class ProductServicelmp implements ProductService {
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
        
-    } 
+    }
+
+    private Map uploadImage(MultipartFile file, String imageName) throws IOException{
+       
+        Cloudinary cloudinary = new Cloudinary(cloudinaryProperties.getUrl());
+        System.out.println(cloudinary.config.cloudName);
+        // Upload the image
+        Map params1 = ObjectUtils.asMap(
+            "use_filename", true,
+            "unique_filename", false,
+            "overwrite", true,
+            "quality", "auto",
+            "public_id", imageName
+        );
+        
+        return cloudinary.uploader().upload(file.getBytes(), params1);
+    }
 
     
 }

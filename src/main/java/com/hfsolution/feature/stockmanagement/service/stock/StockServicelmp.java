@@ -18,7 +18,6 @@ import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
-import com.hfsolution.app.exception.CsvException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.services.SearchFilter;
@@ -193,6 +192,9 @@ public class StockServicelmp implements StockService {
         try {
             CSVHelper<Stock> csvService = new CSVHelper<>(Stock.class);
             List<Stock> stockList = csvService.parseCsv(file);
+            stockList.forEach(stock->{
+                stock.setProduct(productDao.findById(stock.getProdId()).getEntity());
+            });
             stockDao.saveEntities(stockList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);

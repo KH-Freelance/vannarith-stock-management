@@ -68,12 +68,9 @@ public class Product {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     private Timestamp expiryDate;
 
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Stock stock;
-
-    @OneToOne(fetch = FetchType.LAZY, cascade = CascadeType.ALL)
-    private Purchase purchase;
-
+    @Column(name = "image_url")
+    @CsvBindByPosition(position = 8)
+    private String imageUrl;
 
     @PrePersist
     public void preInsert() {

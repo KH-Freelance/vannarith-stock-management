@@ -11,6 +11,8 @@ import org.springframework.web.servlet.mvc.method.annotation.ResponseBodyAdvice;
 import static com.hfsolution.app.constant.AppConstant.*;
 import com.hfsolution.app.util.AppLog;
 import jakarta.servlet.http.HttpServletRequest;
+import static com.hfsolution.app.constant.AppConstant.USERID;
+import static com.hfsolution.app.constant.AppConstant.USERNAME;
 
 @RestControllerAdvice
 public class DataResponseAdviser implements ResponseBodyAdvice<Object>{
@@ -33,10 +35,18 @@ public class DataResponseAdviser implements ResponseBodyAdvice<Object>{
         String requestInfo = httpServletRequest.getAttribute(REQ_INFO) != null
         ? httpServletRequest.getAttribute(REQ_INFO).toString()
         : "";
+        String userId = httpServletRequest.getAttribute(USERID) != null
+        ? httpServletRequest.getAttribute(USERID).toString()
+        : "";
+        String username = httpServletRequest.getAttribute(USERNAME) != null
+        ? httpServletRequest.getAttribute(USERNAME).toString()
+        : "";
         
         var appLog = new AppLog<>();
         appLog.setReqId(reqId);
         appLog.setUri(uri);
+        appLog.setUserId(userId);
+        appLog.setUsername(username);
         appLog.setAction(action);
         appLog.setRequest(requestInfo);
         appLog.setResponse(body);
