@@ -2,6 +2,9 @@ package com.hfsolution.feature.stockmanagement.dto.request.product;
 
 
 import java.math.BigDecimal;
+
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -13,6 +16,7 @@ public class ProductRequest {
     @NotBlank(message = "Product name is required.")
     private String productName;
     private String productDesc;
+    private MultipartFile file;
     @Positive(message = "Price must be greater than 0")
     private BigDecimal price; 
     @NotBlank(message = "Expiry date is required.")

@@ -1,5 +1,7 @@
 package com.hfsolution.feature.user.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.hfsolution.feature.user.enums.Role;
 
 import jakarta.validation.constraints.Email;
@@ -27,4 +29,5 @@ public class RegisterRequest {
   @NotBlank(message = "password is required.")
   private String password;
   private Role role;
+  private MultipartFile file;
 }

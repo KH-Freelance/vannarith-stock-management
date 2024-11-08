@@ -13,6 +13,7 @@ import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.ModelAttribute;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.PutMapping;
@@ -112,20 +113,22 @@ public class ProductController {
 
 
     @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    private Object addProduct(
-        @RequestPart(value = "file", required = false)MultipartFile file,
-        // @RequestPart(value = "productRequest", required = false) ProductRequest productRequest
-        @RequestParam String productName,
-        @RequestParam String productDesc,
-        @RequestParam BigDecimal price,
-        @RequestParam String expiryDate
+    private Object addProduct2(
+        // @RequestPart(value = "file", required = false)MultipartFile file,
+        // @RequestPart(value = "productRequest", required = false) String productRequest
+        
+        @ModelAttribute ProductRequest productRequest
+        // @RequestParam String productName,
+        // @RequestParam String productDesc,
+        // @RequestParam BigDecimal price,
+        // @RequestParam String expiryDate
         ){
-        ProductRequest productRequest = new ProductRequest();
-        productRequest.setProductName(productName);
-        productRequest.setProductDesc(productDesc);
-        productRequest.setPrice(price);
-        productRequest.setExpiryDate(expiryDate);
-        return productService.addProduct(productRequest,file);
+        // ProductRequest productRequest = new ProductRequest();
+        // productRequest.setProductName(productName);
+        // productRequest.setProductDesc(productDesc);
+        // productRequest.setPrice(price);
+        // productRequest.setExpiryDate(expiryDate);
+        return productService.addProduct(productRequest,productRequest.getFile());
     }
 
     @DeleteMapping("/delete/{id}")
@@ -139,20 +142,21 @@ public class ProductController {
     }
 
     @PutMapping(value = "/v2/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    private Object updateProductById(@PathVariable long id,
-        @RequestPart(value = "file", required = false)MultipartFile file,
+    private Object updateProductById2(@PathVariable long id,
+        @ModelAttribute ProductUpdateRequest productUpdateRequest
+        // @RequestPart(value = "file", required = false)MultipartFile file,
         // @RequestPart(value = "productUpdateRequest", required = false)ProductUpdateRequest productUpdateRequest
-        @RequestParam String productName,
-        @RequestParam String productDesc,
-        @RequestParam BigDecimal price,
-        @RequestParam String expiryDate
+        // @RequestParam String productName,
+        // @RequestParam String productDesc,
+        // @RequestParam BigDecimal price,
+        // @RequestParam String expiryDate
     ){
-        ProductUpdateRequest productUpdateRequest = new ProductUpdateRequest();
-        productUpdateRequest.setProductName(productName);
-        productUpdateRequest.setProductDesc(productDesc);
-        productUpdateRequest.setPrice(price);
-        productUpdateRequest.setExpiryDate(expiryDate);
-        return productService.updateProductById(id,productUpdateRequest,file);
+        // ProductUpdateRequest productUpdateRequest = new ProductUpdateRequest();
+        // productUpdateRequest.setProductName(productName);
+        // productUpdateRequest.setProductDesc(productDesc);
+        // productUpdateRequest.setPrice(price);
+        // productUpdateRequest.setExpiryDate(expiryDate);
+        return productService.updateProductById(id,productUpdateRequest,productUpdateRequest.getFile());
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)

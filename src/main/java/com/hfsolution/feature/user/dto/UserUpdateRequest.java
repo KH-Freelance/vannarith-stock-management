@@ -1,5 +1,7 @@
 package com.hfsolution.feature.user.dto;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import jakarta.validation.constraints.NotBlank;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,5 +14,6 @@ public class UserUpdateRequest {
     private String firstname;
     @NotBlank(message = "lastname is required.")
     private String lastname;
+    private MultipartFile file;
 
 }
