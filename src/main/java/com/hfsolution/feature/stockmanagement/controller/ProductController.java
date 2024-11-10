@@ -1,11 +1,8 @@
 package com.hfsolution.feature.stockmanagement.controller;
 
-import java.io.IOException;
-import java.math.BigDecimal;
 import java.util.HashMap;
 import java.util.Map;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -23,26 +20,14 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
-import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.product.ProductService;
-import com.hfsolution.feature.user.entity.User;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
-
-
-import com.cloudinary.*;
-import com.cloudinary.utils.ObjectUtils;
-import io.github.cdimascio.dotenv.Dotenv;
-
-import java.util.Map;
 
 @RestController
 @RequestMapping("/product")
@@ -113,21 +98,9 @@ public class ProductController {
 
 
     @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    private Object addProduct2(
-        // @RequestPart(value = "file", required = false)MultipartFile file,
-        // @RequestPart(value = "productRequest", required = false) String productRequest
-        
+    private Object addProduct2(        
         @ModelAttribute ProductRequest productRequest
-        // @RequestParam String productName,
-        // @RequestParam String productDesc,
-        // @RequestParam BigDecimal price,
-        // @RequestParam String expiryDate
         ){
-        // ProductRequest productRequest = new ProductRequest();
-        // productRequest.setProductName(productName);
-        // productRequest.setProductDesc(productDesc);
-        // productRequest.setPrice(price);
-        // productRequest.setExpiryDate(expiryDate);
         return productService.addProduct(productRequest,productRequest.getFile());
     }
 
@@ -144,18 +117,7 @@ public class ProductController {
     @PutMapping(value = "/v2/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     private Object updateProductById2(@PathVariable long id,
         @ModelAttribute ProductUpdateRequest productUpdateRequest
-        // @RequestPart(value = "file", required = false)MultipartFile file,
-        // @RequestPart(value = "productUpdateRequest", required = false)ProductUpdateRequest productUpdateRequest
-        // @RequestParam String productName,
-        // @RequestParam String productDesc,
-        // @RequestParam BigDecimal price,
-        // @RequestParam String expiryDate
     ){
-        // ProductUpdateRequest productUpdateRequest = new ProductUpdateRequest();
-        // productUpdateRequest.setProductName(productName);
-        // productUpdateRequest.setProductDesc(productDesc);
-        // productUpdateRequest.setPrice(price);
-        // productUpdateRequest.setExpiryDate(expiryDate);
         return productService.updateProductById(id,productUpdateRequest,productUpdateRequest.getFile());
     }
 

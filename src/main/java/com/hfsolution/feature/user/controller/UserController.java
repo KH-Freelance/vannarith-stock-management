@@ -1,16 +1,12 @@
 package com.hfsolution.feature.user.controller;
 
 import lombok.RequiredArgsConstructor;
-import lombok.extern.java.Log;
-
 import java.io.IOException;
 import java.security.Principal;
 import java.util.HashMap;
-import java.util.List;
 import java.util.Map;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Sort;
-import org.springframework.data.repository.query.Param;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
@@ -28,32 +24,26 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.feature.auth.dto.AuthenticationResponse;
 import com.hfsolution.feature.auth.services.AuthenticationService;
-import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.user.dto.ChangePasswordRequest;
 import com.hfsolution.feature.user.dto.ChangeRoleRequest;
 import com.hfsolution.feature.user.dto.RegisterRequest;
 import com.hfsolution.feature.user.dto.ResetPasswordRequest;
 import com.hfsolution.feature.user.dto.UserUpdateRequest;
 import com.hfsolution.feature.user.entity.User;
-import com.hfsolution.feature.user.enums.Role;
 import com.hfsolution.feature.user.service.UserService;
-
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
-
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
 @RestController
 @RequestMapping("/user")
 @RequiredArgsConstructor
-// @PreAuthorize("hasRole('ADMIN')")
 public class UserController {
 
     private final AuthenticationService authService;
@@ -88,21 +78,8 @@ public class UserController {
 
     @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
     public ResponseEntity<?> register2(
-        // @RequestPart(value = "file", required = false)MultipartFile file,
         @ModelAttribute RegisterRequest request
-        // @RequestPart(value = "request", required = false) RegisterRequest request
-        // @RequestParam String firstname,
-        // @RequestParam String lastname,
-        // @RequestParam String email,
-        // @RequestParam String password,
-        // @RequestParam Role role
     ) throws IOException {
-        // RegisterRequest request = new RegisterRequest();
-        // request.setEmail(email);
-        // request.setFirstname(firstname);
-        // request.setLastname(lastname);
-        // request.setPassword(password);
-        // request.setRole(role);
         SuccessResponse<AuthenticationResponse> successResponse =  new SuccessResponse<>();
         successResponse.setCode(SUCCESS_CODE);
         successResponse.setData(authService.register(request,request.getFile()));

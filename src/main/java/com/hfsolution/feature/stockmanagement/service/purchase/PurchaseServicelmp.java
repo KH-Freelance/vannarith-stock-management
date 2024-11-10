@@ -4,6 +4,7 @@ import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import java.math.BigDecimal;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
@@ -26,6 +27,7 @@ import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
+import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
@@ -44,6 +46,7 @@ import static com.hfsolution.app.constant.AppConstant.*;
 public class PurchaseServicelmp implements PurchaseService {
 
     private final PurchaseDao purchaseDao;
+    private final StockDao stockDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final SearchFilter<Purchase> searchFilter;
@@ -215,16 +218,22 @@ public class PurchaseServicelmp implements PurchaseService {
             purchase.setDiscount(totalDiscount);
             purchase.setTotal(basePrice);
             purchase.setPaymentType(purchaseRequest.getPaymentType()); 
-            purchaseDao.saveEntity(purchase);
+            BaseEntityResponseDto<Purchase> pur = purchaseDao.saveEntity(purchase);
 
             Payment payment = new Payment();
             payment.setId(paymentDao.getPaymentId());
-            payment.setPurchase(purchase);
+            payment.setPurchase(pur.getEntity());
             payment.setProduct(product);
             payment.setCustomer(customer);
             payment.setUser(user);
             payment.setAmount(totalPrice);
             paymentDao.saveEntity(payment);
+
+            BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(purchaseRequest.getProductId());
+            Stock stock = stockResult.getEntity();
+            stock.setQty(stock.getQty()-purchaseRequest.getQty());
+            stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+            stockDao.saveEntity(stock);
 
             response.setStatus(SUCCESS);
             response.setCode("034");
