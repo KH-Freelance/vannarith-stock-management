@@ -214,13 +214,13 @@ public class ProductServicelmp implements ProductService {
             }
 
             // //check target product name
-            // if(productUpdateRequest.getProductName()!=null && !productUpdateRequest.getProductName().isEmpty() && !productUpdateRequest.getProductName().isBlank()){
-            //     BaseEntityResponseDto<Product> targetProductResult = productDao.findByProductName(productUpdateRequest.getProductName());
-            //     if(targetProductResult.getEntity()!=null){
-            //         String msg = AppTools.appGetMessage("010");
-            //         throw new AppException("010",msg);
-            //     }
-            // }
+            if(productUpdateRequest.getProductName()!=null && !productUpdateRequest.getProductName().isEmpty() && !productUpdateRequest.getProductName().isBlank()){
+                BaseEntityResponseDto<Product> targetProductResult = productDao.findByProductName(productUpdateRequest.getProductName());
+                if(targetProductResult.getEntity()!=null && targetProductResult.getEntity().getId() != id){
+                    String msg = AppTools.appGetMessage("010");
+                    throw new AppException("010",msg);
+                }
+            }
 
             //updated
             Product existingProduct = productResult.getEntity();
