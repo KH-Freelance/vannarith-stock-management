@@ -37,5 +37,9 @@ public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecifi
     @Query(value = "SELECT nextval('stock_id_seq')", nativeQuery = true)
     Long getNextStockId();
 
+
+    @Query("SELECT SUM(s.qty) FROM Stock s")
+    Long getTotal();
+
     
 } 

@@ -1,8 +1,11 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.hfsolution.app.util.BigDecimalSerializer;
 import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.CsvIgnore;
@@ -48,13 +51,16 @@ public class Stock {
     @Column(name = "qty")
     private Long qty;
 
+    @Transient // This field will not be persisted in the database
+    private Double percentage;
+
     @Column(name = "created_date")
-    @CsvBindByPosition(position = 3)
+    @CsvBindByPosition(position = 4)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
-    @CsvBindByPosition(position = 4)
+    @CsvBindByPosition(position = 5)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp updatedDate;
     

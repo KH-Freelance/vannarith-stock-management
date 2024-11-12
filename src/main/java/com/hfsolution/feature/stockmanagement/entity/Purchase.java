@@ -84,18 +84,22 @@ public class Purchase {
     @CsvBindByPosition(position = 6)
     private PaymentType paymentType = PaymentType.CASH;
 
-    @Column(name = "discount")
+    @Column(name = "location")
     @CsvBindByPosition(position = 7)
+    private String location;
+
+    @Column(name = "discount")
+    @CsvBindByPosition(position = 8)
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount;
 
     @Column(name = "created_date")
-    @CsvBindByPosition(position = 8)
+    @CsvBindByPosition(position = 9)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
-    @CsvBindByPosition(position = 9)
+    @CsvBindByPosition(position = 10)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updateDate;
 

@@ -16,6 +16,7 @@ public class PurchaseRequest {
     private Long userId; 
     @Positive(message = "Qty must be greater than 0")
     private Long qty;
+    private String location;
     @NotNull(message = "Payment type cannot be null")
     //@NotBlank(message = "Payment type cannot be null")
     private PaymentType paymentType;

@@ -3,6 +3,9 @@ package com.hfsolution.feature.stockmanagement.service.stock;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
+
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
@@ -231,6 +234,8 @@ public class StockServicelmp implements StockService {
                 String msg = AppTools.appGetMessage("024");
                 throw new AppException("024",msg);
             }
+
+            calculatePercentageOfQty(stockResult.getPage());
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
             response.setData(stockResult.getPage());
@@ -245,5 +250,20 @@ public class StockServicelmp implements StockService {
         }
        
     } 
+
+    public void calculatePercentageOfQty(Page<Stock> stockPage) {
+        Long totalQty = stockDao.getTotal();
+        if (totalQty == null || totalQty == 0) {
+            System.out.println("Total quantity is zero. Cannot calculate percentages.");
+            return;
+        }
+
+        // Calculate and print the percentage for each stock entry
+        for (Stock stock : stockPage) {
+            double percentage = ((double) stock.getQty() / totalQty) * 100;
+            BigDecimal bd = new BigDecimal(percentage).setScale(2, RoundingMode.HALF_UP);
+            stock.setPercentage(bd.doubleValue());
+        }
+    }
     
 }

@@ -4,6 +4,7 @@ import java.sql.Connection;
 import java.util.List;
 import java.util.concurrent.CompletableFuture;
 
+import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 
@@ -28,6 +29,7 @@ public interface IBaseDBDao <T, ID> {
 
   BaseEntityResponseDto<T> findAll(PageRequest page);
   BaseEntityResponseDto<T> findAll(Pageable page);
+  // BaseEntityResponseDto<T> findPercentage(Page<T> page);
   BaseEntityResponseDto<T> findAll();
   CompletableFuture<BaseEntityResponseDto<T>> findAllAsync();
 

@@ -40,8 +40,23 @@ public class StockDao extends BaseDBDao<Stock,Long>{
     long startTime = System.currentTimeMillis();
 
     try {
-      
       return stockRepository.getNextStockId();
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+
+  public Long getTotal(){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+      
+      return stockRepository.getTotal();
 
     } catch (Exception e) {
       throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
