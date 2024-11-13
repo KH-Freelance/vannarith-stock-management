@@ -6,6 +6,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.SearchRequestDTO;
+import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseUpdateRequest;
 
@@ -18,6 +19,7 @@ public interface PurchaseService {
     public void export(String q);
     public Object importData(MultipartFile file);
     public Object addPurchase(PurchaseRequest purchaseRequest);
+    public Object pay(Long id, PayRequest payRequest);
     public Object deletePurchaseById(Long id);
     //public Object updatePurchase(Long id , PurchaseUpdateRequest purchaseUpdateRequest);   
     

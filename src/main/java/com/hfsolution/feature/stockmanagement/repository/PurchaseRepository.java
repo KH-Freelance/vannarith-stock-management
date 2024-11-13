@@ -1,5 +1,7 @@
 package com.hfsolution.feature.stockmanagement.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -13,6 +15,7 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
 
     Purchase findByProductId(Long id);
     Purchase findByCustomerId(Long id);
+
     
 
     @Query("SELECT pu FROM Purchase pu WHERE pu.product.productName = :name")

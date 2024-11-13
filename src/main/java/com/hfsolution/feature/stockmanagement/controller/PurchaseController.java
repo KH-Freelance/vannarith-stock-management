@@ -18,6 +18,7 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.hfsolution.app.dto.SearchRequestDTO;
+import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.service.purchase.PurchaseService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -49,7 +50,7 @@ public class PurchaseController {
 
         ) {
         return purchaseService.search(q,pageNo,pageSize,sort,sortByColum);
-    }
+    }   
 
     @GetMapping("/export")
     private void exportData(
@@ -69,6 +70,11 @@ public class PurchaseController {
     @PostMapping("/add")
     private Object purchase(@Valid @RequestBody PurchaseRequest productRequest){
         return purchaseService.addPurchase(productRequest);
+    }
+
+    @PostMapping("/pay/{id}")
+    private Object pay(@PathVariable long id,@Valid @RequestBody PayRequest payRequest){
+        return purchaseService.pay(id,payRequest);
     }
 
     @DeleteMapping("/delete/{id}")

@@ -40,76 +40,36 @@ public class Payment {
     @CsvBindByPosition(position = 0)
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @CsvIgnore
-    @JoinColumn(name = "purchase_id", nullable = false)
-    private Purchase purchase;
+    // @ManyToOne(fetch = FetchType.LAZY)
+    // @CsvIgnore
+    // // @JoinColumn(name = "purchase_id", nullable = false)
+    // private Purchase purchase;
 
     @Transient // This field will not be persisted in the database
     @JsonIgnore
     @CsvBindByPosition(position = 1)
     private Long purchId;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @CsvIgnore
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
-
-    @Transient // This field will not be persisted in the database
-    @JsonIgnore
-    @CsvBindByPosition(position = 2)
-    private Long prodId;
-
-    @ManyToOne(fetch = FetchType.EAGER)
-    @CsvIgnore
-    @JoinColumn(name = "customer_id", nullable = false)
-    private Customer customer;
-
-    @Transient // This field will not be persisted in the database
-    @JsonIgnore
-    @CsvBindByPosition(position = 3)
-    private Long custId;
- 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @CsvIgnore
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user; 
-
-    @Transient // This field will not be persisted in the database
-    @JsonIgnore
-    @CsvBindByPosition(position = 4)
-    private Long usrId;
-
     @Column(name = "amount")
-    @CsvBindByPosition(position = 5)
-    @JsonSerialize(using = BigDecimalSerializer.class) 
+    @CsvBindByPosition(position = 2)
     private BigDecimal amount;
 
     @Column(name = "created_date")
-    @CsvBindByPosition(position = 6)
+    @CsvBindByPosition(position = 3)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
-    @CsvBindByPosition(position = 7)
+    @CsvBindByPosition(position = 4)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updateDate;
 
     @PostLoad
     public void postLoad() {
-        // Populate the productId field when the entity is loaded from the database
-        if (this.product != null) {
-            this.prodId = this.product.getId(); // Assuming Product has a getId() method
-        }
-        if (this.user != null) {
-            this.usrId = this.user.getId(); // Assuming Product has a getId() method
-        }
-        if (this.customer != null) {
-            this.custId = this.customer.getId(); // Assuming Product has a getId() method
-        }
-        if (this.purchase != null) {
-            this.purchId = this.purchase.getId(); // Assuming Product has a getId() method
-        }
+
+        // if (this.purchase != null) {
+        //     this.purchId = this.purchase.getId(); // Assuming Product has a getId() method
+        // }
     }
 
     @PrePersist

@@ -1,10 +1,13 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
+import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.hfsolution.feature.user.entity.User;
 import com.opencsv.bean.CsvBindByPosition;
@@ -20,6 +23,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.SequenceGenerator;
@@ -55,6 +59,10 @@ public class Purchase {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; 
 
+    @OneToMany(mappedBy = "purchase", fetch = FetchType.EAGER)
+    @CsvIgnore
+    private List<Payment> payments;
+
     @Transient // This field will not be persisted in the database
     @JsonIgnore
     @CsvBindByPosition(position = 1)
@@ -84,22 +92,27 @@ public class Purchase {
     @CsvBindByPosition(position = 6)
     private PaymentType paymentType = PaymentType.CASH;
 
-    @Column(name = "location")
+    @Column(name = "payment_status")
+    @Enumerated(EnumType.STRING)
     @CsvBindByPosition(position = 7)
+    private PaymentStatus paymentStatus = PaymentStatus.PAID;
+
+    @Column(name = "location")
+    @CsvBindByPosition(position = 8)
     private String location;
 
     @Column(name = "discount")
-    @CsvBindByPosition(position = 8)
+    @CsvBindByPosition(position = 9)
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount;
 
     @Column(name = "created_date")
-    @CsvBindByPosition(position = 9)
+    @CsvBindByPosition(position = 10)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
-    @CsvBindByPosition(position = 10)
+    @CsvBindByPosition(position = 11)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updateDate;
 
