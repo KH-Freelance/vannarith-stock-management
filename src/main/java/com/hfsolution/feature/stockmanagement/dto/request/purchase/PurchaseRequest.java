@@ -1,5 +1,7 @@
 package com.hfsolution.feature.stockmanagement.dto.request.purchase;
 
+import java.math.BigDecimal;
+
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Positive;
@@ -16,6 +18,8 @@ public class PurchaseRequest {
     private Long userId; 
     @Positive(message = "Qty must be greater than 0")
     private Long qty;
+    @Positive(message = "discount must be greater than 0")
+    private BigDecimal discount;
     private String location;
     @NotNull(message = "Payment type cannot be null")
     //@NotBlank(message = "Payment type cannot be null")

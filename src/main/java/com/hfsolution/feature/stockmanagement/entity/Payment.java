@@ -40,10 +40,11 @@ public class Payment {
     @CsvBindByPosition(position = 0)
     private Long id;
 
-    // @ManyToOne(fetch = FetchType.LAZY)
-    // @CsvIgnore
-    // // @JoinColumn(name = "purchase_id", nullable = false)
-    // private Purchase purchase;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @CsvIgnore
+    @JsonIgnore
+    @JoinColumn(name = "purchase_id", nullable = false)
+    private Purchase purchase;
 
     @Transient // This field will not be persisted in the database
     @JsonIgnore
@@ -64,25 +65,14 @@ public class Payment {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updateDate;
 
-    @PostLoad
-    public void postLoad() {
-
-        // if (this.purchase != null) {
-        //     this.purchId = this.purchase.getId(); // Assuming Product has a getId() method
-        // }
-    }
-
     @PrePersist
     public void preInsert() {
         
         if(this.createdDate==null){
             this.createdDate = new Timestamp(System.currentTimeMillis());
         }
-        if(this.updateDate==null){
-            this.updateDate = new Timestamp(System.currentTimeMillis());
-        }
+        // Always update datetime if insert or update
+        this.updateDate = new Timestamp(System.currentTimeMillis());
     }
-
-
 
 }

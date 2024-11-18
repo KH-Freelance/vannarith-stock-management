@@ -110,6 +110,7 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
   }
 
+
   public BaseEntityResponseDto<Purchase> findPurchaseByProductName(String name){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

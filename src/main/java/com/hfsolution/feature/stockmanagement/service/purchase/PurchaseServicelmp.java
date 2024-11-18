@@ -5,13 +5,16 @@ import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
@@ -38,10 +41,13 @@ import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.hfsolution.feature.user.entity.User;
+import com.hfsolution.feature.user.enums.Role;
 import com.hfsolution.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+// import jakarta.transaction.Transactional;
+
 import static com.hfsolution.app.constant.AppConstant.*;
 
 @Service
@@ -60,13 +66,16 @@ public class PurchaseServicelmp implements PurchaseService {
     private final String CSV_FILENAME="purchase";
 
     @Override
+    @Transactional
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
         SuccessResponse<Page<Purchase>> response = new SuccessResponse<>();
         try {
-
-            Specification<Purchase> purchases = new CustomSpecification<>(q);
+            Map<String, Class<? extends Enum>> enumFields = new HashMap<>();
+            enumFields.put("paymentType", PaymentType.class); 
+            enumFields.put("paymentStatus", PaymentStatus.class); 
+            Specification<Purchase> purchases = new CustomSpecification<>(q,enumFields);
             PageRequestDto pageRequestDto = new PageRequestDto();
             pageRequestDto.setPageNo(pageNo);
             pageRequestDto.setPageSize(pageSize);
@@ -76,7 +85,6 @@ public class PurchaseServicelmp implements PurchaseService {
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases,pageable);
             if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getPage()==null){
                 String msg = AppTools.appGetMessage("032");
-            
                 throw new AppException("032",msg);
             }
             response.setStatus(SUCCESS);
@@ -178,7 +186,7 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object addPurchase(PurchaseRequest purchaseRequest) {
 
         httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");
-        SuccessResponse<Stock> response = new SuccessResponse<>();
+        SuccessResponse<Purchase> response = new SuccessResponse<>();
         try {
 
             //GET USER 
@@ -200,8 +208,8 @@ public class PurchaseServicelmp implements PurchaseService {
             //GET CUSTOMER 
             BaseEntityResponseDto<Customer> customerResult = customerDao.findById(purchaseRequest.getCustomerId());
             if(!customerResult.getStatus().equals(SUCCESS) || customerResult.getEntity()==null){
-                String msg = AppTools.appGetMessage("027");
-                throw new AppException("027",msg);
+                String msg = AppTools.appGetMessage("015");
+                throw new AppException("015",msg);
             }
             Customer customer = customerResult.getEntity();
 
@@ -225,7 +233,8 @@ public class PurchaseServicelmp implements PurchaseService {
             //CALCULATE
             BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(purchaseRequest.getQty()));
             BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
-                                 .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO));
+                                 .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
+                                 .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
             BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
             BigDecimal totalPrice = basePrice.subtract(discountPrice);
 
@@ -238,29 +247,39 @@ public class PurchaseServicelmp implements PurchaseService {
             purchase.setQty(purchaseRequest.getQty());
             purchase.setDiscount(totalDiscount);
             purchase.setTotal(basePrice);
+            purchase.setLocation(purchaseRequest.getLocation());
             purchase.setPaymentType(purchaseRequest.getPaymentType()); 
+           
 
-            // Check PaymentType
+            // Check PaymentType return 0 = PAID, -1 = CREDIT
             if(purchaseRequest.getPaymentType().compareTo(PaymentType.CASH)==0){
+                // Status PAID
                 purchase.setPaymentStatus(PaymentStatus.PAID);
+               
             }else{
+                // Status CREDIT
                 purchase.setPaymentStatus(PaymentStatus.CREDIT);
+                customer.setCredit(customer.getCredit().add(totalPrice));
+                customerDao.saveEntity(customer);
             }
+            
             BaseEntityResponseDto<Purchase> pur = purchaseDao.saveEntity(purchase);
-
-            // Save Payment
-            Payment payment = new Payment();
-            payment.setId(paymentDao.getPaymentId());
-            // payment.setPurchase(pur.getEntity());
-            payment.setAmount(totalPrice);
-            paymentDao.saveEntity(payment);
-
+            if(pur.getEntity().getPaymentStatus().compareTo(PaymentStatus.PAID)==0){
+                // Save Payment for PAID
+                Payment payment = new Payment();
+                payment.setId(paymentDao.getPaymentId());
+                payment.setPurchase(pur.getEntity());
+                payment.setAmount(totalPrice);
+                paymentDao.saveEntity(payment);
+            }
+            
             // Minus from Stock
             stock.setQty(stock.getQty()-purchaseRequest.getQty());
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stockDao.saveEntity(stock);
 
             response.setStatus(SUCCESS);
+            response.setData(pur.getEntity());
             response.setCode("034");
             response.setMsg(AppTools.appGetMessage("034"));
             return response;
@@ -322,17 +341,18 @@ public class PurchaseServicelmp implements PurchaseService {
             // Check if the amount over
             BigDecimal total = payRequest.getAmount();
             for (Payment payment : purchase.getPayments()) {
-                total.add(payment.getAmount());
+                total = total.add(payment.getAmount());
             }
+
             if(purchase.getTotal().compareTo(total) < 0){
-                String msg = AppTools.appGetMessage("040");
-                throw new AppException("040",msg);
+                String msg = AppTools.appGetMessage("044");
+                throw new AppException("044",msg);
             }
 
             // Create Payment
             Payment payment = new Payment();
             payment.setId(paymentDao.getPaymentId());
-            // payment.setPurchase(purchase);
+            payment.setPurchase(purchase);
             payment.setAmount(payRequest.getAmount());
             paymentDao.saveEntity(payment);
 
@@ -341,6 +361,18 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchase.setPaymentStatus(PaymentStatus.PAID);
                 purchaseDao.saveEntity(purchase);
             }
+
+            //GET CUSTOMER 
+            BaseEntityResponseDto<Customer> customerResult = customerDao.findById(purchase.getCustomer().getId());
+            if(!customerResult.getStatus().equals(SUCCESS) || customerResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("027");
+                throw new AppException("027",msg);
+            }
+            // Subtrac Credit of Customer
+            Customer customer = customerResult.getEntity();
+            customer.setCredit(customer.getCredit().subtract(payRequest.getAmount()));
+            customerDao.saveEntity(customer);
+
 
             String msg = AppTools.appGetMessage("041");
             response.setStatus(SUCCESS);

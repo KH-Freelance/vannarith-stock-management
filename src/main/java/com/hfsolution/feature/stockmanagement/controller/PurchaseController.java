@@ -17,6 +17,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.hfsolution.app.dto.ExceptionResponse;
 import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
@@ -82,19 +84,17 @@ public class PurchaseController {
         return purchaseService.deletePurchaseById(id);
     }
 
-    // @PutMapping("/update/{id}")
-    // private Object updatePurchaseById(@PathVariable long id,@Valid @RequestBody ProductUpdateRequest productUpdateRequest){
-    //     return productService.updateProductById(id,productUpdateRequest);
+    // @ExceptionHandler(MethodArgumentNotValidException.class)
+    // public ResponseEntity<ExceptionResponse> handleValidationExceptions(MethodArgumentNotValidException ex) {
+    //     ExceptionResponse exceptionResponse = new ExceptionResponse();
+        
+    //     ex.getBindingResult().getFieldErrors().forEach(error -> {
+    //         exceptionResponse.setCode("001");
+    //         exceptionResponse.setMsg(error.getDefaultMessage());
+    //         exceptionResponse.setDevMsg(error.getDefaultMessage());
+    //     });
+    //     return ResponseEntity.ok().body(exceptionResponse);
     // }
-
-    @ExceptionHandler(MethodArgumentNotValidException.class)
-    public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-        Map<String, String> errors = new HashMap<>();
-        ex.getBindingResult().getFieldErrors().forEach(error -> 
-            errors.put(error.getField(), error.getDefaultMessage())
-        );
-        return ResponseEntity.badRequest().body(errors);
-    }
 
     
 }

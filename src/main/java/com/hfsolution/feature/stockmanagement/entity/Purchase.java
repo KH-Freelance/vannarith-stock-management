@@ -61,6 +61,7 @@ public class Purchase {
 
     @OneToMany(mappedBy = "purchase", fetch = FetchType.EAGER)
     @CsvIgnore
+    // @JoinColumn(name =  "payment_id", nullable = true)
     private List<Payment> payments;
 
     @Transient // This field will not be persisted in the database

@@ -2,6 +2,10 @@ package com.hfsolution.app.adviser;
 
 
 import static com.hfsolution.app.constant.AppResponseCode.*;
+
+import java.net.http.HttpHeaders;
+import java.util.stream.Collectors;
+
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,7 +24,6 @@ import com.hfsolution.app.util.AppTools;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
 
-
 @RestControllerAdvice
 public class ExceptionHandlerAdviser extends ResponseEntityExceptionHandler {
 
@@ -33,31 +36,29 @@ public class ExceptionHandlerAdviser extends ResponseEntityExceptionHandler {
             JwtException.class,
             BadCredentialsException.class,
             ExpiredJwtException.class
-    })
+    })  // Removed MethodArgumentNotValidException from this list
     protected ResponseEntity<ExceptionResponse> handleException(RuntimeException ex, WebRequest request) throws JsonProcessingException {
 
         ExceptionResponse exceptionResponse = new ExceptionResponse();
         HttpStatus status;
-        // Determine the status code based on the exception type
+
+        
         if (ex instanceof AppException) {
             AppException appException = (AppException) ex;
             String code = appException.getCode();
             String msg = appException.getMsg();
             String devMsg = appException.getMsg();
-            if(appException.getCustom().equals("N")){
+            if (appException.getCustom().equals("N")) {
                 msg = AppTools.appGetMessage(code);
             }
-            if(appException.isNotify()){
-                //telegram alert
+            if (appException.isNotify()) {
+                // Send telegram alert
             }
             exceptionResponse.setCode(code);
             exceptionResponse.setMsg(msg);
             exceptionResponse.setDevMsg(devMsg);
             status = HttpStatus.OK;
-            
-
-        }else if (ex instanceof DatabaseException) {
-
+        } else if (ex instanceof DatabaseException) {
             DatabaseException dbException = (DatabaseException) ex;
             String code = dbException.getCode();
             String msg = AppTools.appGetMessage(FAIL_CODE);
@@ -74,35 +75,21 @@ public class ExceptionHandlerAdviser extends ResponseEntityExceptionHandler {
             exceptionResponse.setCode(FORBID);
             exceptionResponse.setMsg(AppTools.appGetMessage(FORBID));
             status = HttpStatus.FORBIDDEN;
-        } 
-        else if (ex instanceof SignatureException) {
+        } else if (ex instanceof SignatureException) {
             exceptionResponse.setCode(FORBID);
             exceptionResponse.setMsg(ex.getMessage());
             status = HttpStatus.FORBIDDEN;
-        } 
-        else if (ex instanceof ExpiredJwtException) {
+        } else if (ex instanceof ExpiredJwtException) {
             exceptionResponse.setCode(FORBID);
             exceptionResponse.setMsg(ex.getMessage());
             status = HttpStatus.FORBIDDEN;
-        }
-        else {
+        } else {
             exceptionResponse.setCode(INTERNAL_SERVER_ERROR);
             exceptionResponse.setMsg(ex.getMessage());
             status = HttpStatus.INTERNAL_SERVER_ERROR;
         }
 
-
         return ResponseEntity.status(status).contentType(MediaType.APPLICATION_JSON).body(exceptionResponse);
     }
-   
-    //  @ExceptionHandler(MethodArgumentNotValidException.class)
-    // public ResponseEntity<Map<String, String>> handleValidationExceptions(MethodArgumentNotValidException ex) {
-    //     Map<String, String> errors = new HashMap<>();
-    //     ex.getBindingResult().getFieldErrors().forEach(error -> 
-    //         errors.put(error.getField(), error.getDefaultMessage())
-    //     );
-    //     return ResponseEntity.badRequest().body(errors);
-    // }
 
-   
 }
