@@ -34,20 +34,12 @@ public class Stock {
 
     @Id
     @Column(name = "id")
-    @CsvBindByPosition(position = 0)
     private Long id;
 
     @OneToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "product_id", nullable = false)
-    @CsvIgnore
     private Product product;
 
-    @Transient // This field will not be persisted in the database
-    @JsonIgnore
-    @CsvBindByPosition(position = 1)
-    private Long prodId;
-
-    @CsvBindByPosition(position = 2)
     @Column(name = "qty")
     private Long qty;
 
@@ -55,22 +47,13 @@ public class Stock {
     private Double percentage;
 
     @Column(name = "created_date")
-    @CsvBindByPosition(position = 4)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
-    @CsvBindByPosition(position = 5)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp updatedDate;
-    
-    @PostLoad
-    public void postLoad() {
-        // Populate the productId field when the entity is loaded from the database
-        if (this.product != null) {
-            this.prodId = this.product.getId(); // Assuming Product has a getId() method
-        }
-    }
+
 
     @PrePersist
     public void preInsert() {

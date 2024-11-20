@@ -9,6 +9,8 @@ import java.text.ParseException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -26,6 +28,7 @@ import com.hfsolution.app.services.SearchFilter;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
+import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.CustomerCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
@@ -84,10 +87,16 @@ public class CustomerServicelmp implements CustomerService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT CUSTOMER");
         try {
-            CSVHelper<Customer> csvService = new CSVHelper<>(Customer.class,httpServletResponse);
+            CSVHelper<CustomerCsv> csvService = new CSVHelper<>(CustomerCsv.class,httpServletResponse);
             Specification<Customer> customers = new CustomSpecification<>(q);
             BaseEntityResponseDto<Customer> customerResult = customerDao.search(customers);
-            csvService.export(customerResult.getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            List<CustomerCsv> customerCsvs = new ArrayList<>();
+            customerResult.getEntityList().stream().forEach(customer->{
+                CustomerCsv customerCsv = new CustomerCsv();
+                BeanUtils.copyProperties(customer, customerCsv);
+                customerCsvs.add(customerCsv);
+            });
+            csvService.export(customerCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -102,9 +111,15 @@ public class CustomerServicelmp implements CustomerService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT CUSTOMER");
         try {
-            CSVHelper<Customer> csvService = new CSVHelper<>(Customer.class);
-            List<Customer> customerList = csvService.parseCsv(file);
-            customerDao.saveEntities(customerList);
+            CSVHelper<CustomerCsv> csvService = new CSVHelper<>(CustomerCsv.class);
+            List<CustomerCsv> customerCsvList = csvService.parseCsv(file);
+            List<Customer> customers = new ArrayList<>();
+            customerCsvList.stream().forEach(customerCsv->{
+                Customer customer= new Customer();
+                BeanUtils.copyProperties(customerCsv, customer);
+                customers.add(customer);
+            });
+            customerDao.saveEntities(customers);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
             response.setMsg(AppTools.appGetMessage("023"));

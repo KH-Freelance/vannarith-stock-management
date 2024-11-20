@@ -3,31 +3,24 @@ package com.hfsolution.feature.stockmanagement.service.product;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
-
 import java.io.IOException;
-import java.math.BigDecimal;
-import java.nio.file.Files;
+import java.lang.reflect.InvocationTargetException;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
-import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
-import org.springframework.data.domain.Sort;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
-import org.springframework.http.HttpHeaders;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
@@ -44,6 +37,7 @@ import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
+import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.ProductCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
@@ -64,6 +58,7 @@ public class ProductServicelmp implements ProductService {
     private final HttpServletResponse httpServletResponse;
     private final SearchFilter<Product> searchFilter;
     private final String CSV_FILENAME = "product";
+
     @Override
     public Object search(SearchRequestDTO request) {
 
@@ -308,10 +303,16 @@ public class ProductServicelmp implements ProductService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PRODUCT");
         try {
-            CSVHelper<Product> csvService = new CSVHelper<>(Product.class,httpServletResponse);
+            CSVHelper<ProductCsv> csvService = new CSVHelper<>(ProductCsv.class,httpServletResponse);
             Specification<Product> products = new CustomSpecification<>(q);
             BaseEntityResponseDto<Product> productResult = productDao.search(products);
-            csvService.export(productResult.getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            List<ProductCsv> productCsvList = new ArrayList<>();
+            productResult.getEntityList().stream().forEach(product->{
+                ProductCsv productCsv = new ProductCsv();
+                BeanUtils.copyProperties(product, productCsv);
+                productCsvList.add(productCsv);
+            });
+            csvService.export(productCsvList, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -326,9 +327,15 @@ public class ProductServicelmp implements ProductService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PRODUCT");
         try {
-            CSVHelper<Product> csvService = new CSVHelper<>(Product.class);
-            List<Product> productList = csvService.parseCsv(file);
-            productDao.saveEntities(productList);
+            CSVHelper<ProductCsv> csvService = new CSVHelper<>(ProductCsv.class);
+            List<ProductCsv> productCsvList = csvService.parseCsv(file);
+            List<Product> products = new ArrayList<>();
+            productCsvList.stream().forEach(productCsv->{
+                Product product = new Product();
+                BeanUtils.copyProperties(productCsv, product);
+                products.add(product);
+            });
+            productDao.saveEntities(products);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
             response.setMsg(AppTools.appGetMessage("014"));

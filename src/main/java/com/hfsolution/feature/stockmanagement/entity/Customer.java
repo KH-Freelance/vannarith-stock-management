@@ -22,40 +22,31 @@ public class Customer {
 
     @Id
     @Column(name = "id")
-    @CsvBindByPosition(position = 0)
     private Long id;
 
     @Column(name = "customer_name",unique = true)
-    @CsvBindByPosition(position = 1)
     private String customerName;
 
     @Column(name = "email")
-    @CsvBindByPosition(position = 2)
     private String email;
 
     @Column(name = "phone")
-    @CsvBindByPosition(position = 3)
     private String phone;
 
     @Column(name = "address")
-    @CsvBindByPosition(position = 4)
     private String address;
 
     @Column(name = "discount")
-    @CsvBindByPosition(position = 5)
     private BigDecimal discount;
 
     @Column(name = "credit")
-    @CsvBindByPosition(position = 6)
     private BigDecimal credit;
 
     @Column(name = "created_date")
-    @CsvBindByPosition(position = 7)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp createdDate;
 
     @Column(name = "updated_date")
-    @CsvBindByPosition(position = 8)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
     private Timestamp updatedDate;
 

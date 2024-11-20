@@ -21,6 +21,5 @@ public interface PurchaseService {
     public Object addPurchase(PurchaseRequest purchaseRequest);
     public Object pay(Long id, PayRequest payRequest);
     public Object deletePurchaseById(Long id);
-    //public Object updatePurchase(Long id , PurchaseUpdateRequest purchaseUpdateRequest);   
     
 } 

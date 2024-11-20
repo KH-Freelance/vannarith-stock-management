@@ -5,6 +5,7 @@ import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
@@ -31,6 +32,7 @@ import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
+import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.PurchaseCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
@@ -107,10 +109,30 @@ public class PurchaseServicelmp implements PurchaseService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PURCHASE");
         try {
-            CSVHelper<Purchase> csvService = new CSVHelper<>(Purchase.class,httpServletResponse);
+            CSVHelper<PurchaseCsv> csvService = new CSVHelper<>(PurchaseCsv.class,httpServletResponse);
             Specification<Purchase> purchases = new CustomSpecification<>(q);
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases);
-            csvService.export(purchaseResult.getEntityList(), CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            List<PurchaseCsv> purchaseCsvs = new ArrayList<>();
+            purchaseResult.getEntityList().stream().forEach(purchase -> {
+                PurchaseCsv purchaseCsv = new PurchaseCsv();
+                purchaseCsv.setId(purchase.getId());
+                purchaseCsv.setProductName(purchase.getProduct().getProductName());
+                purchaseCsv.setProductId(purchase.getProduct().getId());
+                purchaseCsv.setCustomerName(purchase.getCustomer().getCustomerName());
+                purchaseCsv.setCustomerId(purchase.getCustomer().getId());
+                purchaseCsv.setEmployeeName(purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname());
+                purchaseCsv.setEmployeeId(purchase.getUser().getId());
+                purchaseCsv.setQty(purchase.getQty());
+                purchaseCsv.setTotal(purchase.getTotal());
+                purchaseCsv.setPaymentStatus(purchase.getPaymentStatus());
+                purchaseCsv.setPaymentType(purchase.getPaymentType());
+                purchaseCsv.setLocation(purchase.getLocation());
+                purchaseCsv.setDiscount(purchase.getDiscount());
+                purchaseCsv.setCreatedDate(purchase.getCreatedDate());
+                purchaseCsv.setUpdateDate(purchase.getUpdateDate());
+                purchaseCsvs.add(purchaseCsv);
+            });
+            csvService.export(purchaseCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -125,13 +147,38 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PURCHASE");
         try {
-            CSVHelper<Purchase> csvService = new CSVHelper<>(Purchase.class);
-            List<Purchase> purchaseList = csvService.parseCsv(file);
-            purchaseList.forEach(purchase->{
-                purchase.setProduct(productDao.findById(purchase.getProdId()).getEntity());
-                purchase.setCustomer(customerDao.findById(purchase.getCustId()).getEntity());
-                purchase.setUser(userRepository.findById(purchase.getCustId()).get());
-            });
+            CSVHelper<PurchaseCsv> csvService = new CSVHelper<>(PurchaseCsv.class);
+            List<PurchaseCsv> purchaseCSVList = csvService.parseCsv(file);
+            List<Purchase> purchaseList = new ArrayList<>();
+            purchaseCSVList.stream().forEach(purchaseCsv -> {
+
+                BaseEntityResponseDto<Product> productResult = productDao.findById(purchaseCsv.getProductId());
+                if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
+                    String msg = AppTools.appGetMessage("006");
+                    throw new AppException("006",msg);
+                }
+
+                BaseEntityResponseDto<Customer> customerResult = customerDao.findById(purchaseCsv.getCustomerId());
+                if(!customerResult.getStatus().equals(SUCCESS) || customerResult.getEntity()==null){
+                    String msg = AppTools.appGetMessage("015");
+                    throw new AppException("015",msg);
+                }
+
+                Purchase purchase = new Purchase();
+                purchase.setProduct(productResult.getEntity());
+                purchase.setCustomer(customerResult.getEntity());
+                purchase.setUser(userRepository.findById(purchaseCsv.getEmployeeId()).orElseThrow(() -> new AppException("002", "User not found")));
+                purchase.setQty(purchaseCsv.getQty());
+                purchase.setDiscount(purchaseCsv.getDiscount());
+                purchase.setTotal(purchaseCsv.getTotal());
+                purchase.setLocation(purchaseCsv.getLocation());
+                purchase.setPaymentType(purchaseCsv.getPaymentType());
+                purchase.setPaymentStatus(purchaseCsv.getPaymentStatus());
+                purchase.setCreatedDate(purchaseCsv.getCreatedDate());
+                purchase.setUpdateDate(purchaseCsv.getUpdateDate());
+                purchase.setId(purchaseCsv.getId());
+                purchaseList.add(purchase);
+            });         
             purchaseDao.saveEntities(purchaseList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
@@ -144,8 +191,7 @@ public class PurchaseServicelmp implements PurchaseService {
             throw new AppException("038",e.getMessage(),true);  
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
-        
-    }
+        }
     
     }
     
@@ -190,7 +236,8 @@ public class PurchaseServicelmp implements PurchaseService {
         try {
 
             //GET USER 
-            Optional<User> userResult = userRepository.findById(purchaseRequest.getUserId());
+           long userId = (long)Optional.ofNullable(httpServletRequest.getAttribute(USERID)).orElseThrow(() -> new AppException("002", "User ID is null"));
+            Optional<User> userResult = userRepository.findById(userId);
             if(!userResult.isPresent()){
                 String msg = AppTools.appGetMessage("002");
                 throw new AppException("002",msg);

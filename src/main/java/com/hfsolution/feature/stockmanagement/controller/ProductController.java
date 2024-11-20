@@ -36,9 +36,6 @@ public class ProductController {
     @Autowired
     private ProductService productService;
 
-    @Autowired
-    private CloudinaryProperties cloudinaryProperties;
-
     @PostMapping("/search")
     @Operation(summary = "remove soon")
     private Object search(@RequestBody SearchRequestDTO request){
