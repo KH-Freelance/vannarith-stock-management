@@ -84,7 +84,7 @@ public class Purchase {
 
     @Column(name = "updated_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
-    private Timestamp updateDate;
+    private Timestamp updatedDate;
 
     @PrePersist
     public void preInsert() {
@@ -95,8 +95,8 @@ public class Purchase {
         if(this.createdDate==null){
             this.createdDate = new Timestamp(System.currentTimeMillis());
         }
-        if(this.updateDate==null){
-            this.updateDate = new Timestamp(System.currentTimeMillis());
+        if(this.updatedDate==null){
+            this.updatedDate = new Timestamp(System.currentTimeMillis());
         }
     }
 

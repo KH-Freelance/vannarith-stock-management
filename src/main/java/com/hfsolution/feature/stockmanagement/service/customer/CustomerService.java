@@ -4,7 +4,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
@@ -12,7 +12,6 @@ import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdat
 @Service
 public interface CustomerService {
     
-    public Object searchCustomer(SearchRequestDTO request);  
     public Object search(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
     public void export(String q);
     public Object  importData(MultipartFile file);

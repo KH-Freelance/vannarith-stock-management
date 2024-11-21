@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.dto.BaseEntityResponseDto;
-import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
@@ -36,13 +35,6 @@ public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
-
-
-    @PostMapping("/search")
-    @Operation(summary = "remove soon")
-    private Object search(@RequestBody SearchRequestDTO request){
-        return customerService.searchCustomer(request);
-    }
 
     @GetMapping("/search")
     @Operation(summary = "List customers")

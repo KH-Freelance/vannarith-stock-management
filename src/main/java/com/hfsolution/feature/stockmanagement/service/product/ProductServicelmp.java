@@ -25,13 +25,13 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.app.services.CustomSpecification;
-import com.hfsolution.app.services.SearchFilter;
+
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
@@ -56,37 +56,9 @@ public class ProductServicelmp implements ProductService {
     private final StockDao stockDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
-    private final SearchFilter<Product> searchFilter;
     private final String CSV_FILENAME = "product";
 
-    @Override
-    public Object search(SearchRequestDTO request) {
-
-        httpServletRequest.setAttribute(ACTION,"SEARCH PRODUCT");
-        SuccessResponse<Page<Product>> response = new SuccessResponse<>();
-        try {
-
-            Specification<Product> products = searchFilter.getSearchSpecification(request.getSearchRequest(), request.getGlobalOperator());
-            Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
-            BaseEntityResponseDto<Product> productResult = productDao.search(products,pageable);
-            if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
-                String msg = AppTools.appGetMessage("006");
-                throw new AppException("006",msg);
-            }
-            response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
-            response.setData(productResult.getPage());
-            return response;
-
-        }catch (DatabaseException e) {
-            throw e;   
-        }catch (AppException e) {
-            throw e;   
-        }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
-        }
-        
-    }
+   
 
     @Override
     public Object addProduct(ProductRequest productRequest) {

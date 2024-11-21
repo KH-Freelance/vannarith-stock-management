@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.dto.BaseEntityResponseDto;
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseUpdateRequest;
@@ -14,7 +14,6 @@ import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseUpdat
 public interface PurchaseService {
 
     
-    public Object searchPurchase(SearchRequestDTO request);  
     public Object search(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
     public void export(String q);
     public Object importData(MultipartFile file);

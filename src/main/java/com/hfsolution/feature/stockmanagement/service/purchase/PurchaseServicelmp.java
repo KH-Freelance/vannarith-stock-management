@@ -19,12 +19,12 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
-import com.hfsolution.app.services.SearchFilter;
+
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
@@ -60,7 +60,6 @@ public class PurchaseServicelmp implements PurchaseService {
     private final StockDao stockDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
-    private final SearchFilter<Purchase> searchFilter;
     private final UserRepository userRepository;
     private final ProductDao productDao;
     private final CustomerDao customerDao;
@@ -129,7 +128,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchaseCsv.setLocation(purchase.getLocation());
                 purchaseCsv.setDiscount(purchase.getDiscount());
                 purchaseCsv.setCreatedDate(purchase.getCreatedDate());
-                purchaseCsv.setUpdateDate(purchase.getUpdateDate());
+                purchaseCsv.setUpdateDate(purchase.getUpdatedDate());
                 purchaseCsvs.add(purchaseCsv);
             });
             csvService.export(purchaseCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
@@ -175,7 +174,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchase.setPaymentType(purchaseCsv.getPaymentType());
                 purchase.setPaymentStatus(purchaseCsv.getPaymentStatus());
                 purchase.setCreatedDate(purchaseCsv.getCreatedDate());
-                purchase.setUpdateDate(purchaseCsv.getUpdateDate());
+                purchase.setUpdatedDate(purchaseCsv.getUpdateDate());
                 purchase.setId(purchaseCsv.getId());
                 purchaseList.add(purchase);
             });         
@@ -196,37 +195,6 @@ public class PurchaseServicelmp implements PurchaseService {
     }
     
 
-    @Override
-    public Object searchPurchase(SearchRequestDTO request) {
-
-
-        
-
-        httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
-        SuccessResponse<Page<Purchase>> response = new SuccessResponse<>();
-        try {
-
-            Specification<Purchase> purchase = searchFilter.getSearchSpecification(request.getSearchRequest(), request.getGlobalOperator());
-            Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
-            BaseEntityResponseDto<Purchase> productResult = purchaseDao.searchPurchase(purchase,pageable);
-            if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
-                String msg = AppTools.appGetMessage("032");
-                throw new AppException("032",msg);
-            }
-            response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
-            response.setData(productResult.getPage());
-            return response;
-
-        }catch (DatabaseException e) {
-            throw e;   
-        }catch (AppException e) {
-            throw e;   
-        }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
-        }
-        
-    }
 
     @Override
     public Object addPurchase(PurchaseRequest purchaseRequest) {

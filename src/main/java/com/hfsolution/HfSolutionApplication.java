@@ -13,7 +13,6 @@ import com.hfsolution.feature.user.dto.RegisterRequest;
 
 
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
-
 public class HfSolutionApplication {
 
 	public static void main(String[] args) {

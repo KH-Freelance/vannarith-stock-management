@@ -24,7 +24,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.feature.auth.dto.AuthenticationResponse;
 import com.hfsolution.feature.auth.services.AuthenticationService;
@@ -119,16 +119,6 @@ public class UserController {
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
     public Object  importData(@RequestPart("file")MultipartFile file){
         return userService.importData(file);
-    }
-
-    @PostMapping("/search")
-    @Operation(summary = "remove soon")
-    public ResponseEntity<?> getUsersInfo(@RequestBody SearchRequestDTO request) {
-        SuccessResponse<Page<User>> successResponse =  new SuccessResponse<>();
-        successResponse.setData(userService.searchUser(request));
-        successResponse.setCode(SUCCESS_CODE);
-        successResponse.setMsg(SUCCESS);
-        return ResponseEntity.ok(successResponse);
     }
 
     @GetMapping("/search")

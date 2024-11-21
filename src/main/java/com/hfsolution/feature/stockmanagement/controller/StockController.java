@@ -20,7 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.dto.BaseEntityResponseDto;
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.stock.StockService;
@@ -38,11 +38,6 @@ public class StockController {
     @Autowired
     private StockService stockService;
 
-    @PostMapping("/search")
-    @Operation(summary = "remove soon")
-    private Object search(@RequestBody SearchRequestDTO request){
-        return stockService.searchStock(request);
-    }
 
     @GetMapping("/search")
     @Operation(summary = "List stocks")

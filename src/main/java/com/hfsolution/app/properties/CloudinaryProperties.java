@@ -7,6 +7,7 @@ import lombok.AccessLevel;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.experimental.FieldDefaults;
+
 @Configuration
 @ConfigurationProperties(prefix = "cloudinary")
 @Getter

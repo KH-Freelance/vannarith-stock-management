@@ -20,7 +20,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
@@ -35,14 +34,6 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
-
-    @PostMapping("/search")
-    @Operation(summary = "remove soon")
-    private Object search(@RequestBody SearchRequestDTO request){
-        return productService.search(request);
-    }
-
- 
     
     @GetMapping("/search")
     @Operation(summary = "List products")

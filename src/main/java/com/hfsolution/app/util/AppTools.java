@@ -8,7 +8,6 @@ import java.util.Locale;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.domain.Page;
 
-import com.hfsolution.app.enums.FieldType;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 
 public class AppTools {
@@ -26,38 +25,6 @@ public class AppTools {
         
     }
 
-    public static Object convertValue(Object value, FieldType fieldType) {
-        switch (fieldType) {
-            case INTEGER:
-                return Integer.parseInt((String) value);
-            case DOUBLE:
-                return Double.parseDouble((String) value);
-            case LONG:
-                return Long.parseLong((String) value);
-            case BOOLEAN:
-                return Boolean.parseBoolean((String) value);
-            default:  // STRING or any unsupported types are returned as-is
-                return value;
-        }
-    }
-
-    // @SuppressWarnings({ "rawtypes", "unchecked" })
-    // public static Object convertValue(String value, FieldType fieldType, Class<?> clazz) {
-    //     switch (fieldType) {
-    //         case INTEGER:
-    //             return Integer.parseInt(value);
-    //         case DOUBLE:
-    //             return Double.parseDouble(value);
-    //         case LONG:
-    //             return Long.parseLong(value);
-    //         case BOOLEAN:
-    //             return Boolean.parseBoolean(value);
-    //         case ENUM:
-    //             EnumConverter.fromString(Role.class, role);
-    //         default:  // STRING or any unsupported types are returned as-is
-    //             return value;
-    //     }
-    // }
 
 
 
@@ -106,10 +73,6 @@ public class AppTools {
         Timestamp timestamp = new Timestamp(parsedDate.getTime());
         // Print the result
         return timestamp;
-        // } catch (ParseException e) {
-        //     e.printStackTrace();
-        // }
-        // return null;
     }
 
 }

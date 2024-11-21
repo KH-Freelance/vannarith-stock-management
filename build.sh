@@ -2,13 +2,13 @@
 
 # build maven
 
-mvn clean install
+./mvnw clean install
 
 # Define the file containing your docker command
 file="build.sh"
 
 # Extract the current version number
-current_version=64
+current_version=74
 
 # Increment the version number by 1
 new_version=$((current_version + 1))

@@ -8,11 +8,6 @@ import com.hfsolution.app.util.AppTools;
 import jakarta.persistence.criteria.*;
 
 import java.math.BigDecimal;
-import java.sql.Timestamp;
-import java.time.LocalDate;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 public class CustomSpecification<T> implements Specification<T> {
@@ -70,41 +65,6 @@ public class CustomSpecification<T> implements Specification<T> {
         return criteriaBuilder.equal(root.get(key), enumValue);
     }
 
-    // @SuppressWarnings({ "rawtypes", "unchecked" })
-    // private Predicate handleStandardField(Root<T> root, CriteriaBuilder criteriaBuilder, String key, String value) {
-    //     if (value.matches("^\\[.*~.*\\]$")) {
-    //         // Range match: k=[min~max]
-    //         String[] range = value.substring(1, value.length() - 1).split("~");
-    //         if (range.length == 2) {
-    //             Comparable min = (Comparable) parseValue(range[0].trim());
-    //             Comparable max = (Comparable) parseValue(range[1].trim());
-    
-    //             // Ensure that min and max are Comparable and use CriteriaBuilder.between
-    //             Expression<? extends Comparable> path = root.get(key);
-    //             return criteriaBuilder.between(path, min, max);
-    //         }
-    //     } else if (value.matches("^\\{.*\\}$")) {
-    //         // Union list: k={v1 v2 v3}
-    //         String[] values = value.substring(1, value.length() - 1).split(" ");
-    //         return root.get(key).in(Arrays.asList(values));
-    //     } else if (value.matches("^\\(.*\\)$")) {
-    //         // Intersection list: k=(v1 v2 v3)
-    //         String[] values = value.substring(1, value.length() - 1).split(" ");
-    //         List<Predicate> orPredicates = new ArrayList<>();
-    //         for (String val : values) {
-    //             orPredicates.add(criteriaBuilder.equal(root.get(key), parseValue(val)));
-    //         }
-    //         return criteriaBuilder.and(orPredicates.toArray(new Predicate[0]));
-    //     } else if (value.startsWith("~")) {
-    //         // Fuzzy match: k=~v
-    //         return criteriaBuilder.like(root.get(key), "%" + value.substring(1) + "%");
-    //     } else {
-    //         // Exact match: k=v
-    //         return criteriaBuilder.equal(root.get(key), parseValue(value));
-    //     }
-    
-    //     return null;
-    // }
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Predicate handleStandardField(Root<T> root, CriteriaBuilder criteriaBuilder, String key, String value) {
         String[] nestedKeys = key.split("\\.");

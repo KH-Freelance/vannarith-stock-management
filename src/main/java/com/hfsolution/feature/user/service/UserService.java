@@ -22,15 +22,13 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
-import com.hfsolution.app.dto.SearchRequest;
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.app.dto.SuccessResponse;
-import com.hfsolution.app.enums.FieldType;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.app.services.CustomSpecification;
-import com.hfsolution.app.services.SearchFilter;
+
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
@@ -61,7 +59,6 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
-    private final SearchFilter<User> searchFilter;
     private final HttpServletResponse response;
     private final String CSV_FILENAME="user";
     // private final CustomSpecification<User> customSpecification;
@@ -163,18 +160,6 @@ public class UserService {
     public User getInfo(Principal connectedUser) {
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
         return user;
-    }
-
-    public Page<User> searchUser(SearchRequestDTO request) {
-        // for (SearchRequest searchRequest : request.getSearchRequest()) {
-        //     if(searchRequest.getFieldType().compareTo(FieldType.ENUM)==1 ){
-        //         searchRequest.setValue(Role.valueOf(searchRequest.getValue().toString().toUpperCase()));
-        //     }
-        // }
-
-        Specification<User> users = searchFilter.getSearchSpecification(request.getSearchRequest(), request.getGlobalOperator());
-        Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
-        return repository.findAll(users,pageable);
     }
 
     @SuppressWarnings("rawtypes")

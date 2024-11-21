@@ -19,12 +19,12 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
-import com.hfsolution.app.services.SearchFilter;
+
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
@@ -46,7 +46,6 @@ public class CustomerServicelmp implements CustomerService {
     private final CustomerDao customerDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
-    private final SearchFilter<Customer> searchFilter;
     private final String CSV_FILENAME= "customer";
     @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
@@ -136,34 +135,7 @@ public class CustomerServicelmp implements CustomerService {
     
     }
 
-    @Override
-    public Object searchCustomer(SearchRequestDTO request) {
-
-        httpServletRequest.setAttribute(ACTION,"SEARCH CUSTOMER");
-        SuccessResponse<Page<Customer>> response = new SuccessResponse<>();
-        try {
-
-            Specification<Customer> Customers = searchFilter.getSearchSpecification(request.getSearchRequest(), request.getGlobalOperator());
-            Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
-            BaseEntityResponseDto<Customer> productResult = customerDao.search(Customers,pageable);
-            if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
-                String msg = AppTools.appGetMessage("015");
-                throw new AppException("015",msg);
-            }
-            response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
-            response.setData(productResult.getPage());
-            return response;
-
-        }catch (DatabaseException e) {
-            throw e;   
-        }catch (AppException e) {
-            throw e;   
-        }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
-        }
-        
-    }
+    
 
     @Override
     public Object addCustomer(CustomerRequest CustomerRequest) {

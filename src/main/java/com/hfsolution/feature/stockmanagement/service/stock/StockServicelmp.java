@@ -21,12 +21,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
-import com.hfsolution.app.dto.SearchRequestDTO;
+
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
-import com.hfsolution.app.services.SearchFilter;
+
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
@@ -51,37 +51,7 @@ public class StockServicelmp implements StockService {
     private final ProductDao productDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
-    private final SearchFilter<Stock> searchFilter;
     private final String CSV_FILENAME="stock";
-
-    @Override
-    public Object searchStock(SearchRequestDTO request) {
-
-        httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
-        SuccessResponse<Page<Stock>> response = new SuccessResponse<>();
-        try {
-
-            Specification<Stock> stocks = searchFilter.getSearchSpecification(request.getSearchRequest(), request.getGlobalOperator());
-            Pageable pageable = new PageRequestDto().getPageable(request.getPageRequestDto());
-            BaseEntityResponseDto<Stock> productResult = stockDao.searchStock(stocks,pageable);
-            if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
-                String msg = AppTools.appGetMessage("024");
-                throw new AppException("024",msg);
-            }
-            response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
-            response.setData(productResult.getPage());
-            return response;
-
-        }catch (DatabaseException e) {
-            throw e;   
-        }catch (AppException e) {
-            throw e;   
-        }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
-        }
-        
-    }
 
     @Override
     public Object addStock(StockRequest stockRequest) {

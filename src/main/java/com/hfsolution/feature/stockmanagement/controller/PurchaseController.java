@@ -7,7 +7,6 @@ import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.DeleteMapping;
-import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -17,9 +16,6 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.hfsolution.app.dto.ExceptionResponse;
-import com.hfsolution.app.dto.SearchRequestDTO;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.service.purchase.PurchaseService;
@@ -33,12 +29,6 @@ public class PurchaseController {
 
     @Autowired
     private PurchaseService purchaseService;
-
-
-    @PostMapping("/search")
-    private Object search(@RequestBody SearchRequestDTO request){
-        return purchaseService.searchPurchase(request);
-    }
 
     @GetMapping("/search")
     @Operation(summary = "List purchases")
