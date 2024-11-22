@@ -1,8 +1,11 @@
 package com.hfsolution.feature.stockmanagement.repository;
 
+import java.util.List;
+
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hfsolution.app.repository.IBaseRepository;
@@ -40,6 +43,9 @@ public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecifi
 
     @Query("SELECT SUM(s.qty) FROM Stock s")
     Long getTotal();
+
+    @Query("SELECT s FROM Stock s WHERE s.product.id IN :productIds")
+    List<Stock> findByProductIds(@Param("productIds") List<Long> productIds);
 
     
 } 

@@ -11,6 +11,8 @@ import static com.hfsolution.feature.user.enums.Role.USER;
 
 import java.io.IOException;
 import lombok.RequiredArgsConstructor;
+
+import org.apache.commons.lang3.math.NumberUtils;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -74,9 +76,9 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           // set this value indentifer who was process the request
           try {
             String username = (String)jwtService.extractClaim(jwt, USERNAME.toString());
-            Integer userId = (Integer)jwtService.extractClaim(jwt, USERID.toString());
+            Long userId = NumberUtils.toLong(String.valueOf(jwtService.extractClaim(jwt, USERID.toString())), 0);
             request.setAttribute(USERNAME, username);
-            request.setAttribute(USERID, userId);
+            request.setAttribute(USERID, Long.valueOf(userId));
           } catch (Exception e) {
             e.printStackTrace();
           }

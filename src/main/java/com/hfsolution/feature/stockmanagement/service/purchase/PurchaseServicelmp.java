@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -35,6 +37,7 @@ import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.PurchaseCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
@@ -204,21 +207,13 @@ public class PurchaseServicelmp implements PurchaseService {
         try {
 
             //GET USER 
-           long userId = (long)Optional.ofNullable(httpServletRequest.getAttribute(USERID)).orElseThrow(() -> new AppException("002", "User ID is null"));
+            Long userId = (Long) Optional.ofNullable(httpServletRequest.getAttribute(USERID)).orElseThrow(() -> new AppException("002", "User ID is null"));
             Optional<User> userResult = userRepository.findById(userId);
             if(!userResult.isPresent()){
                 String msg = AppTools.appGetMessage("002");
                 throw new AppException("002",msg);
             }
             User user = userResult.get();
-
-            //GET PRODUCT
-            BaseEntityResponseDto<Product> productResult = productDao.findById(purchaseRequest.getProductId());
-            if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
-                String msg = AppTools.appGetMessage("006");
-                throw new AppException("006",msg);
-            }
-            Product product = productResult.getEntity();
 
             //GET CUSTOMER 
             BaseEntityResponseDto<Customer> customerResult = customerDao.findById(purchaseRequest.getCustomerId());
@@ -228,73 +223,97 @@ public class PurchaseServicelmp implements PurchaseService {
             }
             Customer customer = customerResult.getEntity();
 
-            // CHECK STOCK
-            BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(purchaseRequest.getProductId());
-            if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
-                String msg = AppTools.appGetMessage("024");
-                throw new AppException("024",msg);
-            }
-            Stock stock = stockResult.getEntity();
-            if(stock.getQty() == null || stock.getQty() <= 0){
-                String msg = AppTools.appGetMessage("042");
-                throw new AppException("042",msg);
-            }
-            if(stock.getQty() < purchaseRequest.getQty()){
-                String msg = AppTools.appGetMessage("043");
-                throw new AppException("043",msg);
-            }
+            //VERIFY PRODUCT & STOCK
+            Map<Long, Product> productMap = new HashMap<>();
+            Map<Long, Stock> stockMap = new HashMap<>();
+            purchaseRequest.getProductPurchases().stream().forEach((data->{
+
+                //CHECK PRODUCT
+                BaseEntityResponseDto<Product> productResult = productDao.findById(data.getProductId());
+                if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
+                    String msg = AppTools.appGetMessage("006");
+                    throw new AppException("006",msg);
+                }
+                Product product = productResult.getEntity();
+                productMap.put(data.getProductId(), product);
+
+                //CHECK STOCK & QTY
+                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(data.getProductId());
+                if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
+                    String msg = AppTools.appGetMessage("046").replace("[product]",product.getProductName());;
+                    throw new AppException("046",msg,"Y");
+                }
+                Stock stock = stockResult.getEntity();
+                stockMap.put(data.getProductId(), stock);
+                if(stock.getQty() == null || stock.getQty() <= 0){
+                    String msg = AppTools.appGetMessage("047").replace("[product]",product.getProductName());;
+                    throw new AppException("047",msg,"Y");
+                }
+                if(stock.getQty() < data.getQty()){
+                    String msg = AppTools.appGetMessage("047").replace("[product]",product.getProductName());;
+                    throw new AppException("047",msg,"Y");
+                }
+                
+
+            }));
+            
+            //PROCESS PURCHASE
+            for (ProductPurchase productPurchase : purchaseRequest.getProductPurchases()){
+
+                Product product = productMap.get(productPurchase.getProductId());
+                Stock stock = stockMap.get(productPurchase.getProductId());
+
+                //CALCULATE
+                BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(productPurchase.getQty()));
+                BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
+                                    .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
+                                    .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
+                BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
+                BigDecimal totalPrice = basePrice.subtract(discountPrice);
+
+
+                Purchase purchase = new Purchase();
+                purchase.setId(purchaseDao.getPurchaseId());
+                purchase.setProduct(product);
+                purchase.setCustomer(customer);
+                purchase.setUser(user);
+                purchase.setQty(productPurchase.getQty());
+                purchase.setDiscount(totalDiscount);
+                purchase.setTotal(basePrice);
+                purchase.setLocation(purchaseRequest.getLocation());
+                purchase.setPaymentType(purchaseRequest.getPaymentType()); 
             
 
-            //CALCULATE
-            BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(purchaseRequest.getQty()));
-            BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
-                                 .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
-                                 .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
-            BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
-            BigDecimal totalPrice = basePrice.subtract(discountPrice);
-
-
-            Purchase purchase = new Purchase();
-            purchase.setId(purchaseDao.getPurchaseId());
-            purchase.setProduct(product);
-            purchase.setCustomer(customer);
-            purchase.setUser(user);
-            purchase.setQty(purchaseRequest.getQty());
-            purchase.setDiscount(totalDiscount);
-            purchase.setTotal(basePrice);
-            purchase.setLocation(purchaseRequest.getLocation());
-            purchase.setPaymentType(purchaseRequest.getPaymentType()); 
-           
-
-            // Check PaymentType return 0 = PAID, -1 = CREDIT
-            if(purchaseRequest.getPaymentType().compareTo(PaymentType.CASH)==0){
-                // Status PAID
-                purchase.setPaymentStatus(PaymentStatus.PAID);
-               
-            }else{
-                // Status CREDIT
-                purchase.setPaymentStatus(PaymentStatus.CREDIT);
-                customer.setCredit(customer.getCredit().add(totalPrice));
-                customerDao.saveEntity(customer);
+                // Check PaymentType return 0 = PAID, -1 = CREDIT
+                if(purchaseRequest.getPaymentType().compareTo(PaymentType.CASH)==0){
+                    // Status PAID
+                    purchase.setPaymentStatus(PaymentStatus.PAID);
+                
+                }else{
+                    // Status CREDIT
+                    purchase.setPaymentStatus(PaymentStatus.CREDIT);
+                    customer.setCredit(customer.getCredit().add(totalPrice));
+                    customerDao.saveEntity(customer);
+                }
+                
+                BaseEntityResponseDto<Purchase> pur = purchaseDao.saveEntity(purchase);
+                if(pur.getEntity().getPaymentStatus().compareTo(PaymentStatus.PAID)==0){
+                    // Save Payment for PAID
+                    Payment payment = new Payment();
+                    payment.setId(paymentDao.getPaymentId());
+                    payment.setPurchase(pur.getEntity());
+                    payment.setAmount(totalPrice);
+                    paymentDao.saveEntity(payment);
+                }
+                
+                // Minus from Stock
+                stock.setQty(stock.getQty()-productPurchase.getQty());
+                stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+                stockDao.saveEntity(stock);
+                
             }
-            
-            BaseEntityResponseDto<Purchase> pur = purchaseDao.saveEntity(purchase);
-            if(pur.getEntity().getPaymentStatus().compareTo(PaymentStatus.PAID)==0){
-                // Save Payment for PAID
-                Payment payment = new Payment();
-                payment.setId(paymentDao.getPaymentId());
-                payment.setPurchase(pur.getEntity());
-                payment.setAmount(totalPrice);
-                paymentDao.saveEntity(payment);
-            }
-            
-            // Minus from Stock
-            stock.setQty(stock.getQty()-purchaseRequest.getQty());
-            stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-            stockDao.saveEntity(stock);
 
             response.setStatus(SUCCESS);
-            response.setData(pur.getEntity());
             response.setCode("034");
             response.setMsg(AppTools.appGetMessage("034"));
             return response;

@@ -78,6 +78,8 @@ public class ProductServicelmp implements ProductService {
             product.setProductName(productRequest.getProductName());
             product.setProductDesc(productRequest.getProductDesc());
             product.setPrice(productRequest.getPrice());
+            product.setImportPrice(productRequest.getImportPrice());
+            product.setFactory(productRequest.getFactory());
             product.setImageUrl(cloudinaryProperties.getDefaultImage());
             product.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             product.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
@@ -121,6 +123,8 @@ public class ProductServicelmp implements ProductService {
             product.setProductName(productRequest.getProductName());
             product.setProductDesc(productRequest.getProductDesc());
             product.setPrice(productRequest.getPrice());
+            product.setImportPrice(productRequest.getImportPrice());
+            product.setFactory(productRequest.getFactory());
             product.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             product.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             product.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
@@ -194,6 +198,8 @@ public class ProductServicelmp implements ProductService {
             Optional.ofNullable(productUpdateRequest.getProductName()).ifPresent(existingProduct::setProductName);
             Optional.ofNullable(productUpdateRequest.getProductDesc()).ifPresent(existingProduct::setProductDesc);
             Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
+            Optional.ofNullable(productUpdateRequest.getImportPrice()).ifPresent(existingProduct::setImportPrice);
+            Optional.ofNullable(productUpdateRequest.getFactory()).ifPresent(existingProduct::setFactory);
             Optional.ofNullable(productUpdateRequest.getExpiryDate())
             .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
             .ifPresent(existingProduct::setExpiryDate);
@@ -250,6 +256,8 @@ public class ProductServicelmp implements ProductService {
             Optional.ofNullable(productUpdateRequest.getProductName()).ifPresent(existingProduct::setProductName);
             Optional.ofNullable(productUpdateRequest.getProductDesc()).ifPresent(existingProduct::setProductDesc);
             Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
+            Optional.ofNullable(productUpdateRequest.getImportPrice()).ifPresent(existingProduct::setImportPrice);
+            Optional.ofNullable(productUpdateRequest.getFactory()).ifPresent(existingProduct::setFactory);
             Optional.ofNullable(productUpdateRequest.getExpiryDate())
             .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
             .ifPresent(existingProduct::setExpiryDate);

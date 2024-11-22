@@ -184,6 +184,23 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   }
 
+  public BaseEntityResponseDto<Stock> findStocksByProductIds(List<Long> productIds) {
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+        List<Stock> stocks = stockRepository.findByProductIds(productIds);
+        var appModel = new BaseEntityResponseDto<Stock>();
+        appModel.setStatus(SUCCESS);
+        appModel.setEntityList(stocks);
+        appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+        return appModel;
+
+    } catch (Exception e) {
+        throw new DatabaseException(FAIL_CODE, e.getMessage(), InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+}
+
 
 
   
