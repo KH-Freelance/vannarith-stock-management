@@ -21,7 +21,7 @@ import com.hfsolution.feature.stockmanagement.repository.PaymentRepository;
 
 
 @Service
-public class PaymentDao extends BaseDBDao<Payment, Long>{
+public class PaymentDao  extends BaseDBDao<Payment, Long>{
 
 
   private PaymentRepository PaymentRepository;

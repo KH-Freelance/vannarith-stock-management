@@ -7,6 +7,8 @@ import java.sql.Timestamp;
 import java.util.List;
 
 import static com.hfsolution.app.constant.AppResponseCode.*;
+
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,13 +24,17 @@ import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.repository.CustomerRepository;
+import com.hfsolution.feature.stockmanagement.service.CacheService;
+
+import lombok.RequiredArgsConstructor;
 
 
 
 @Service
 public class CustomerDao extends BaseDBDao<Customer, Long>{
 
-
+  @Autowired
+  private CacheService cacheService;
   private CustomerRepository customerRepository;
 
   public CustomerDao(CustomerRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {

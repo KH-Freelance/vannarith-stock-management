@@ -19,7 +19,7 @@ public class PurchaseRequest {
     private List<ProductPurchase> productPurchases;
     @Positive(message = "Customer ID must be greater than 0")
     private Long customerId;
-    @Positive(message = "discount must be greater than 0")
+    // @Positive(message = "discount must be greater than 0")
     private BigDecimal discount;
     private String location;
     @NotNull(message = "Payment type cannot be null")
