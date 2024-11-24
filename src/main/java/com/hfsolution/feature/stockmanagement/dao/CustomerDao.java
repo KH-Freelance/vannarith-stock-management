@@ -24,7 +24,6 @@ import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.repository.CustomerRepository;
-import com.hfsolution.feature.stockmanagement.service.CacheService;
 
 import lombok.RequiredArgsConstructor;
 
@@ -33,8 +32,6 @@ import lombok.RequiredArgsConstructor;
 @Service
 public class CustomerDao extends BaseDBDao<Customer, Long>{
 
-  @Autowired
-  private CacheService cacheService;
   private CustomerRepository customerRepository;
 
   public CustomerDao(CustomerRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {
@@ -82,7 +79,6 @@ public class CustomerDao extends BaseDBDao<Customer, Long>{
     long startTime = System.currentTimeMillis();
 
     try {
-
       Page<Customer> entity = customerRepository.findAll(customers,pageable);
       var appModel = new BaseEntityResponseDto<Customer>();
       appModel.setStatus(SUCCESS);

@@ -18,15 +18,17 @@ public abstract class BaseCacheDao extends BaseCache{
  @Autowired
  protected RedisTemplate<String, String> writeCacheDataRedisTemplate;
 
- public BaseCacheDao(String hasKeyName, long timeToLive) {
-  this.hasKeyName = hasKeyName;
-     this.timeToLiveAsSecond = timeToLive;
- }
+    // public BaseCacheDao(String hasKeyName, long timeToLive) {
+    // this.hasKeyName = hasKeyName;
+    //     this.timeToLiveAsSecond = timeToLive;
+    // }
 
   @Async("jpaExecutor")
   public CompletableFuture<Void> saveCacheAsync(String id,String jsonCache) {
     try {
       writeCacheDataRedisTemplate.opsForHash().put(hasKeyName, id, jsonCache);
+      if (timeToLiveAsSecond > 0)
+        writeCacheDataRedisTemplate.expire(hasKeyName, timeToLiveAsSecond, TimeUnit.SECONDS);
     } catch (Exception | Error e) {
     //   String currentClassName = this.getClass().getSimpleName();
     //   String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -35,7 +37,7 @@ public abstract class BaseCacheDao extends BaseCache{
     //   apiLog.setAction(currentClassName + " => " +currentMethodName);
     //   apiLog.setError(e.getMessage());
     //   apiLog.writeSysLog();
-    }
+    }   
     return CompletableFuture.completedFuture(null);
   }
 

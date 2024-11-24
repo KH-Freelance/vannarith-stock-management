@@ -42,6 +42,15 @@ application:
       # expiration: 40 # a day
       refresh-token:
         expiration: 604800000 # 7 days
-
+cache:
+  product:
+    name: product-cache
+    ttl: 1000000
+  customer:
+    name: customer-cache
+    ttl: 10000
+  user: 
+    name: user-cache
+    ttl: 10000
 # logging:
 #   config: classpath:log4j2.xml

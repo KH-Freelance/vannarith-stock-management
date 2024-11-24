@@ -339,14 +339,8 @@ public class ProductServicelmp implements ProductService {
         SuccessResponse<Page<Product>> response = new SuccessResponse<>();
         try {
 
-            Specification<Product> products = new CustomSpecification<>(q);
-            PageRequestDto pageRequestDto = new PageRequestDto();
-            pageRequestDto.setPageNo(pageNo);
-            pageRequestDto.setPageSize(pageSize);
-            pageRequestDto.setSort(sort);
-            pageRequestDto.setSortByColumn(sortByColum);
-            Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
-            BaseEntityResponseDto<Product> productResult = productDao.search(products,pageable);
+            
+            BaseEntityResponseDto<Product> productResult = productDao.search(q, pageNo, pageSize, sort, sortByColum);
             if(!productResult.getStatus().equals(SUCCESS) || productResult.getPage()==null){
                 String msg = AppTools.appGetMessage("006");
             
