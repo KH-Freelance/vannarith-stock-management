@@ -37,7 +37,7 @@ import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
-import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.ProductCsv;
+import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.ProductCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
@@ -152,7 +152,7 @@ public class ProductServicelmp implements ProductService {
         try {
     
             stockDao.deleteStockByProudctID(id);
-            purchaseDao.deleteByProductID(id);
+            //purchaseDao.deleteByProductID(id);
             productDao.deleteByProductID(id);
             String msg = AppTools.appGetMessage("007");
             response.setStatus(SUCCESS);

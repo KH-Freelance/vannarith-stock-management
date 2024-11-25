@@ -32,7 +32,7 @@ import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
-import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.PurchaseCsv;
+import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.PurchaseCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
@@ -40,6 +40,7 @@ import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
+import com.hfsolution.feature.stockmanagement.entity.PurchaseItem;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
@@ -118,8 +119,8 @@ public class PurchaseServicelmp implements PurchaseService {
             purchaseResult.getEntityList().stream().forEach(purchase -> {
                 PurchaseCsv purchaseCsv = new PurchaseCsv();
                 purchaseCsv.setId(purchase.getId());
-                purchaseCsv.setProductName(purchase.getProduct().getProductName());
-                purchaseCsv.setProductId(purchase.getProduct().getId());
+                // purchaseCsv.setProductName(purchase.getProduct().getProductName());
+                // purchaseCsv.setProductId(purchase.getProduct().getId());
                 purchaseCsv.setCustomerName(purchase.getCustomer().getCustomerName());
                 purchaseCsv.setCustomerId(purchase.getCustomer().getId());
                 purchaseCsv.setEmployeeName(purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname());
@@ -167,7 +168,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 }
 
                 Purchase purchase = new Purchase();
-                purchase.setProduct(productResult.getEntity());
+                //purchase.setProduct(productResult.getEntity());
                 purchase.setCustomer(customerResult.getEntity());
                 purchase.setUser(userRepository.findById(purchaseCsv.getEmployeeId()).orElseThrow(() -> new AppException("002", "User not found")));
                 purchase.setQty(purchaseCsv.getQty());
@@ -256,10 +257,12 @@ public class PurchaseServicelmp implements PurchaseService {
                 
 
             }));
+
             
             //PROCESS PURCHASE
             for (ProductPurchase productPurchase : purchaseRequest.getProductPurchases()){
 
+                String purchaseCode = String.format("%04d", purchaseDao.getPurchaseCode());
                 Product product = productMap.get(productPurchase.getProductId());
                 Stock stock = stockMap.get(productPurchase.getProductId());
 
@@ -270,11 +273,11 @@ public class PurchaseServicelmp implements PurchaseService {
                                     .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
                 BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
                 BigDecimal totalPrice = basePrice.subtract(discountPrice);
-
+                
 
                 Purchase purchase = new Purchase();
                 purchase.setId(purchaseDao.getPurchaseId());
-                purchase.setProduct(product);
+                //purchase.setProduct(product);
                 purchase.setCustomer(customer);
                 purchase.setUser(user);
                 purchase.setQty(productPurchase.getQty());
@@ -282,6 +285,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchase.setTotal(basePrice);
                 purchase.setLocation(purchaseRequest.getLocation());
                 purchase.setPaymentType(purchaseRequest.getPaymentType()); 
+                purchase.setPurchaseCode(purchaseCode);
             
 
                 // Check PaymentType return 0 = PAID, -1 = CREDIT

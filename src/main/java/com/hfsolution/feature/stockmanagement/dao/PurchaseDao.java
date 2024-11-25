@@ -33,6 +33,21 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
     this.purchaseRepository = repository;
   }
 
+  public Long getPurchaseCode(){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+      
+      return purchaseRepository.getNextPurchaseCode();
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
   public Long getPurchaseId(){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -169,25 +184,25 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
   }
 
-  @Modifying
-  @Transactional
-  public BaseEntityResponseDto<Purchase> deleteByProductID(Long id){
+  // @Modifying
+  // @Transactional
+  // public BaseEntityResponseDto<Purchase> deleteByProductID(Long id){
 
-    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
-    long startTime = System.currentTimeMillis();
+  //   String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+  //   long startTime = System.currentTimeMillis();
 
-    try {
+  //   try {
 
-      purchaseRepository.deleteByProductId(id);
-      var appModel = new BaseEntityResponseDto<Purchase>();
-      appModel.setStatus(SUCCESS);
-      return appModel;
+  //     purchaseRepository.deleteByProductId(id);
+  //     var appModel = new BaseEntityResponseDto<Purchase>();
+  //     appModel.setStatus(SUCCESS);
+  //     return appModel;
 
-    } catch (Exception e) {
-      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
-    }
+  //   } catch (Exception e) {
+  //     throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+  //   }
 
-  }
+  // }
 
 
 

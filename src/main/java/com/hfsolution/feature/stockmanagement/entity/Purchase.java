@@ -2,7 +2,6 @@ package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -12,7 +11,7 @@ import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.hfsolution.feature.user.entity.User;
 import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.CsvIgnore;
-
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -22,6 +21,8 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.PostLoad;
@@ -41,9 +42,19 @@ public class Purchase {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product;
+    // @ManyToOne(fetch = FetchType.EAGER)
+    // @JoinColumn(name = "product_id", nullable = false)
+    // private Product product;
+
+    // @ManyToMany
+    // @JoinTable(
+    // name = "purchase_product",
+    // joinColumns = @JoinColumn(name = "purchase_id"),
+    // inverseJoinColumns = @JoinColumn(name = "product_id"))
+    // private List<Product> products;
+
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    private List<PurchaseItem> purchaseItems;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "customer_id", nullable = false)
@@ -77,6 +88,9 @@ public class Purchase {
     @Column(name = "discount")
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount;
+
+    @Column(name = "purchase_code")
+    private String purchaseCode;
 
     @Column(name = "created_date")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")

@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dao;
+package com.hfsolution.feature.stockmanagement.dto.cache;
 
 
 import org.springframework.beans.factory.annotation.Autowired;
@@ -8,15 +8,15 @@ import com.hfsolution.app.dao.BaseCacheDao;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.JsonUtil;
-import com.hfsolution.feature.stockmanagement.dto.cache.CustomerCacheDto;
+import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 
 @Service
-public class CustomerCacheDao extends BaseCacheDao{
+public class CustomerCache extends BaseCacheDao{
 
   private @Autowired CustomerDao customerDao;
 
-  public CustomerCacheDao(@Value("${cache.customer.name}") String hasKeyName, @Value("${cache.customer.ttl}") long timeToLive){
+  public CustomerCache(@Value("${cache.customer.name}") String hasKeyName, @Value("${cache.customer.ttl}") long timeToLive){
     super(hasKeyName, timeToLive);
   }
 
@@ -45,6 +45,8 @@ public class CustomerCacheDao extends BaseCacheDao{
     }
     return customer;
   }
+
+ 
 
    private Customer findCustomerFromDB(long customerId){
     Customer customer = new Customer();
