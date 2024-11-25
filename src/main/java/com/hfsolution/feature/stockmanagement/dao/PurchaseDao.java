@@ -63,25 +63,25 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
   }
 
-  public BaseEntityResponseDto<Purchase> findStockByProductID(Long id){
+  // public BaseEntityResponseDto<Purchase> findPurchaseByProductID(Long id){
 
-    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
-    long startTime = System.currentTimeMillis();
+  //   String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+  //   long startTime = System.currentTimeMillis();
 
-    try {
+  //   try {
 
-      Purchase entity = purchaseRepository.findByProductId(id);
-      var appModel = new BaseEntityResponseDto<Purchase>();
-      appModel.setStatus(SUCCESS);
-      appModel.setEntity(entity);
-      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
-      return appModel;
+  //     Purchase entity = purchaseRepository.findByProductId(id);
+  //     var appModel = new BaseEntityResponseDto<Purchase>();
+  //     appModel.setStatus(SUCCESS);
+  //     appModel.setEntity(entity);
+  //     appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+  //     return appModel;
 
-    } catch (Exception e) {
-      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
-    }
+  //   } catch (Exception e) {
+  //     throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+  //   }
 
-  }
+  // }
 
   public BaseEntityResponseDto<Purchase> searchPurchase(Specification<Purchase> purchase, Pageable pageable){
 
@@ -124,25 +124,25 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
   }
 
 
-  public BaseEntityResponseDto<Purchase> findPurchaseByProductName(String name){
+  // public BaseEntityResponseDto<Purchase> findPurchaseByProductName(String name){
 
-    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
-    long startTime = System.currentTimeMillis();
+  //   String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+  //   long startTime = System.currentTimeMillis();
 
-    try {
+  //   try {
 
-      Purchase entity = purchaseRepository.findByProductName(name);
-      var appModel = new BaseEntityResponseDto<Purchase>();
-      appModel.setStatus(SUCCESS);
-      appModel.setEntity(entity);
-      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
-      return appModel;
+  //     Purchase entity = purchaseRepository.findByProductName(name);
+  //     var appModel = new BaseEntityResponseDto<Purchase>();
+  //     appModel.setStatus(SUCCESS);
+  //     appModel.setEntity(entity);
+  //     appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+  //     return appModel;
 
-    } catch (Exception e) {
-      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
-    }
+  //   } catch (Exception e) {
+  //     throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+  //   }
 
-  }
+  // }
 
   public BaseEntityResponseDto<Purchase> findPurchaseByCustomerName(String name){
 
