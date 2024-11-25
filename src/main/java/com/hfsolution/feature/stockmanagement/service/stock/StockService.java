@@ -13,9 +13,12 @@ import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateReque
 public interface StockService {
 
     public Object search(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
+    public Object searchHistory(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
     public void export(String q);
     public Object importData(MultipartFile file);
     public Object addStock(StockRequest productRequest);
+    public Object addQuantity(Long id ,StockUpdateRequest productRequest);
+    public Object removeQuantity(Long id ,StockUpdateRequest productRequest);
     public Object updateStock(Long id , StockUpdateRequest productRequest);   
     public Object deleteStockById(Long id);
     

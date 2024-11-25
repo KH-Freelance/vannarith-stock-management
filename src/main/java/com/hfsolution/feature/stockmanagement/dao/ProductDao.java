@@ -131,10 +131,8 @@ public class ProductDao extends BaseDBDao<Product, Long>{
   }
 
   public BaseEntityResponseDto<Product> search(Specification<Product> products){
-
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
-
     try {
 
       List<Product> entity = productRepository.findAll(products);

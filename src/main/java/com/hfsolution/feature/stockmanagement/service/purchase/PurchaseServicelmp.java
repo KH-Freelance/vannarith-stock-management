@@ -10,8 +10,6 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
-import java.util.stream.Collectors;
-
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -21,7 +19,6 @@ import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
-
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
@@ -34,7 +31,8 @@ import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
-import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.PurchaseCsv;
+import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
+import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.PurchaseCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
@@ -43,6 +41,7 @@ import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
+import com.hfsolution.feature.stockmanagement.entity.StockHistory;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.hfsolution.feature.user.entity.User;
@@ -61,6 +60,7 @@ public class PurchaseServicelmp implements PurchaseService {
 
     private final PurchaseDao purchaseDao;
     private final StockDao stockDao;
+    private final StockHistoryDao stockHistoryDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final UserRepository userRepository;
@@ -309,8 +309,17 @@ public class PurchaseServicelmp implements PurchaseService {
                 // Minus from Stock
                 stock.setQty(stock.getQty()-productPurchase.getQty());
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-                stockDao.saveEntity(stock);
-                
+                stock = stockDao.saveEntity(stock).getEntity();
+
+                // Need to be call async 
+                StockHistory stockHistory = new StockHistory();
+                stockHistory.setId(stockHistoryDao.getStockHistoryId());
+                stockHistory.setStock(stock);
+                stockHistory.setUser(userRepository.findById(userId).get());
+                stockHistory.setRemark("Purchase");
+                stockHistory.setQty(productPurchase.getQty()*-1);
+                stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+                stockHistoryDao.saveEntityAsync(stockHistory);
             }
 
             response.setStatus(SUCCESS);

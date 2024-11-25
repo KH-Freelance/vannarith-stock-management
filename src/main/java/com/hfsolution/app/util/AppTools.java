@@ -4,9 +4,12 @@ import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.Date;
+import java.util.List;
 import java.util.Locale;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.data.domain.Pageable;
 
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 
@@ -46,6 +49,13 @@ public class AppTools {
         }
     }
 
+    public static <T> Page<T> convertListToPage(List<T> list, Pageable pageable) {
+        int start = (int) pageable.getOffset();
+        int end = Math.min((start + pageable.getPageSize()), list.size());
+        List<T> subList = list.subList(start, end);
+
+        return new PageImpl<>(subList, pageable, list.size());
+    }
 
     public static Timestamp formatDateStringToTimestamp(String dateString,String pattern) {
         try {

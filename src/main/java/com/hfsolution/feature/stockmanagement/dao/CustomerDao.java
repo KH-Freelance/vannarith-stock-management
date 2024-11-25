@@ -14,7 +14,6 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.Modifying;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import com.hfsolution.app.config.database.context.IDataSourceContextHolder;
@@ -24,9 +23,6 @@ import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.repository.CustomerRepository;
-
-import lombok.RequiredArgsConstructor;
-
 
 
 @Service
@@ -40,18 +36,13 @@ public class CustomerDao extends BaseDBDao<Customer, Long>{
   }
 
   public Long getCustomerId(){
-
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
-
     try {
-      
       return customerRepository.getNextCustomerId();
-
     } catch (Exception e) {
       throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
     }
-
   }
 
   public BaseEntityResponseDto<Customer> findByCustomerID(Long id){

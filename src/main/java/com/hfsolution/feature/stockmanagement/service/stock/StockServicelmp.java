@@ -3,7 +3,7 @@ package com.hfsolution.feature.stockmanagement.service.stock;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
-
+import static com.hfsolution.app.constant.AppConstant.USERID;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -31,11 +31,15 @@ import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
-import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.StockCsv;
+import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
+import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.StockCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
+import com.hfsolution.feature.stockmanagement.entity.StockHistory;
+import com.hfsolution.feature.user.repository.UserRepository;
+
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -48,6 +52,8 @@ public class StockServicelmp implements StockService {
 
     
     private final StockDao stockDao;
+    private final StockHistoryDao stockHistoryDao;
+    private final UserRepository userRepository;
     private final ProductDao productDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
@@ -65,19 +71,31 @@ public class StockServicelmp implements StockService {
             //check product id
             BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(stockRequest.getProductId());
             if(stockResult.getEntity()!=null){
-                stock = stockResult.getEntity();
-                stock.setQty(stock.getQty()+stockRequest.getQty());
-                stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-            }else{
-                stock = new Stock();
-                BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
-                stock.setId(stockDao.getStockId());
-                stock.setProduct(product.getEntity());
-                stock.setQty(stockRequest.getQty());
-                stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-                stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+                String msg = AppTools.appGetMessage("0240");
+                throw new AppException("0240",msg);
+                // stock = stockResult.getEntity();
+                // stock.setQty(stock.getQty()+stockRequest.getQty());
+                // stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             }
-            stockDao.saveEntity(stock);
+            stock = new Stock();
+            BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
+            stock.setId(stockDao.getStockId());
+            stock.setProduct(product.getEntity());
+            stock.setQty(stockRequest.getQty());
+            stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+            stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+            stock = stockDao.saveEntity(stock).getEntity();
+            // Need to be call async 
+            Long userId = (Long)httpServletRequest.getAttribute(USERID);
+            StockHistory stockHistory = new StockHistory();
+            stockHistory.setId(stockHistoryDao.getStockHistoryId());
+            stockHistory.setStock(stock);
+            stockHistory.setUser(userRepository.findById(userId).get());
+            stockHistory.setRemark("New Creation Product");
+            stockHistory.setQty(stockRequest.getQty());
+            stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+            stockHistoryDao.saveEntityAsync(stockHistory);
+            
             response.setStatus(SUCCESS);
             response.setCode("026");
             response.setMsg(AppTools.appGetMessage("026"));
@@ -236,6 +254,134 @@ public class StockServicelmp implements StockService {
         }
        
     } 
+
+    @Override
+    public Object searchHistory(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
+
+        httpServletRequest.setAttribute(ACTION,"SEARCH STOCK HISTORY");
+        SuccessResponse<Page<StockHistory>> response = new SuccessResponse<>();
+        try {
+
+            Specification<StockHistory> stockHistories = new CustomSpecification<>(q);
+            PageRequestDto pageRequestDto = new PageRequestDto();
+            pageRequestDto.setPageNo(pageNo);
+            pageRequestDto.setPageSize(pageSize);
+            pageRequestDto.setSort(sort);
+            pageRequestDto.setSortByColumn(sortByColum);
+            Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+            BaseEntityResponseDto<StockHistory> stockHistoryResult = stockHistoryDao.search(stockHistories,pageable);
+            if(!stockHistoryResult.getStatus().equals(SUCCESS) || stockHistoryResult.getPage()==null){
+                String msg = AppTools.appGetMessage("024");
+                throw new AppException("024",msg);
+            }
+
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(stockHistoryResult.getPage());
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+       
+    } 
+
+    @Override
+    public Object addQuantity(Long id, StockUpdateRequest stockUpdateRequest) {
+
+        httpServletRequest.setAttribute(ACTION,"ADD QUANTITY TO STOCK");
+        SuccessResponse<Stock> response = new SuccessResponse<>();
+        try {
+
+            BaseEntityResponseDto<Stock> stockResult = stockDao.findById(id);
+            if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("024");
+                throw new AppException("024",msg);
+            }
+            Stock stock = stockResult.getEntity();
+            if(stockUpdateRequest.getQty()>0){
+                stock.setQty(stock.getQty()+stockUpdateRequest.getQty());
+                stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+
+                // Need to be call async 
+                Long userId = (Long)httpServletRequest.getAttribute(USERID);
+                StockHistory stockHistory = new StockHistory();
+                stockHistory.setId(stockHistoryDao.getStockHistoryId());
+                stockHistory.setStock(stock);
+                stockHistory.setUser(userRepository.findById(userId).get());
+                stockHistory.setRemark(stockUpdateRequest.getRemark());
+                stockHistory.setQty(stockUpdateRequest.getQty());
+                stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+                stockHistoryDao.saveEntityAsync(stockHistory);
+            }
+            stockDao.saveEntity(stock);
+            response.setStatus(SUCCESS);
+            response.setCode("0241");
+            response.setMsg(AppTools.appGetMessage("0241"));
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+    @Override
+    public Object removeQuantity(Long id, StockUpdateRequest stockUpdateRequest) {
+        httpServletRequest.setAttribute(ACTION,"REMOVE QUANTITY TO STOCK");
+        SuccessResponse<Stock> response = new SuccessResponse<>();
+        try {
+
+            BaseEntityResponseDto<Stock> stockResult = stockDao.findById(id);
+            if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("024");
+                throw new AppException("024",msg);
+            }
+            Stock stock = stockResult.getEntity();
+            // Check the remaining quantity of stock
+            if(stock.getQty()-stockUpdateRequest.getQty()<0){
+                String msg = AppTools.appGetMessage("0243").replace("[qty]", String.valueOf(stock.getQty()));
+                throw new AppException("0243",msg,"Y");
+            }
+
+            if(stockUpdateRequest.getQty()>0){
+                stock.setQty(stock.getQty()-stockUpdateRequest.getQty());
+                stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+
+                // Need to be call async 
+                Long userId = (Long)httpServletRequest.getAttribute(USERID);
+                StockHistory stockHistory = new StockHistory();
+                stockHistory.setId(stockHistoryDao.getStockHistoryId());
+                stockHistory.setStock(stock);
+                stockHistory.setUser(userRepository.findById(userId).get());
+                stockHistory.setRemark(stockUpdateRequest.getRemark());
+                stockHistory.setQty(stockUpdateRequest.getQty()*-1);
+                stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+                stockHistoryDao.saveEntityAsync(stockHistory);
+            }
+            stockDao.saveEntity(stock);
+            response.setStatus(SUCCESS);
+            response.setCode("0242");
+            response.setMsg(AppTools.appGetMessage("0242"));
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+
 
     public void calculatePercentageOfQty(Page<Stock> stockPage) {
         Long totalQty = stockDao.getTotal();

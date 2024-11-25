@@ -9,5 +9,6 @@ public class StockUpdateRequest {
 
     @Positive(message = "Qty must be greater than 0")
     private Long qty;
+    private String remark;
     
 }

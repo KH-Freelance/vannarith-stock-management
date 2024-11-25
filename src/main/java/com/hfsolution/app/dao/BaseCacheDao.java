@@ -18,11 +18,18 @@ public abstract class BaseCacheDao extends BaseCache{
  @Autowired
  protected RedisTemplate<String, String> writeCacheDataRedisTemplate;
 
-    // public BaseCacheDao(String hasKeyName, long timeToLive) {
-    // this.hasKeyName = hasKeyName;
-    //     this.timeToLiveAsSecond = timeToLive;
-    // }
-
+    public BaseCacheDao(String hasKeyName, long timeToLive) {
+    this.hasKeyName = hasKeyName;
+        this.timeToLiveAsSecond = timeToLive;
+    }
+public boolean getCacheByKeyOnly(String cacheKey) {
+    try {
+        return writeCacheDataRedisTemplate.hasKey(cacheKey);
+    } catch (Exception | Error e) {
+        // handle exception
+    }
+    return false;
+}
   @Async("jpaExecutor")
   public CompletableFuture<Void> saveCacheAsync(String id,String jsonCache) {
     try {
@@ -60,12 +67,30 @@ public abstract class BaseCacheDao extends BaseCache{
     }
   }
 
-  @Async("jpaExecutor")
-  public CompletableFuture<Void> SaveCacheByIndividuel(String id,String jsonCache,long timeToLive){
+  public void SaveCacheByIndividuel(String id,String jsonCache,long timeToLive){
    try {
     String haseKey = hasKeyName + "-" + id;
     writeCacheDataRedisTemplate.opsForHash().put(haseKey , id, jsonCache);
-    writeCacheDataRedisTemplate.expire(haseKey, timeToLive, TimeUnit.SECONDS);
+    if (timeToLive > 0)
+        writeCacheDataRedisTemplate.expire(hasKeyName, timeToLive, TimeUnit.SECONDS);
+   }catch (Exception | Error e) {
+    //    String currentClassName = this.getClass().getSimpleName();
+    //    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    //    var apiLog = new AppServiceLog<>();
+    //    apiLog.setRegId(hasKeyName);
+    //    apiLog.setAction(currentClassName + " => " +currentMethodName);
+    //    apiLog.setError(e.getMessage());
+    //    apiLog.writeSysLog();
+   }
+  }
+
+  @Async("jpaExecutor")
+  public CompletableFuture<Void> SaveCacheByIndividuelAysnc(String id,String jsonCache,long timeToLive){
+   try {
+    String haseKey = hasKeyName + "-" + id;
+    writeCacheDataRedisTemplate.opsForHash().put(haseKey , id, jsonCache);
+    if (timeToLive > 0)
+        writeCacheDataRedisTemplate.expire(hasKeyName, timeToLive, TimeUnit.SECONDS);
    }catch (Exception | Error e) {
     //    String currentClassName = this.getClass().getSimpleName();
     //    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

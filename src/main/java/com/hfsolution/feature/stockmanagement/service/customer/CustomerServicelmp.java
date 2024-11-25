@@ -28,7 +28,7 @@ import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
-import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.CustomerCsv;
+import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.CustomerCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
@@ -47,6 +47,7 @@ public class CustomerServicelmp implements CustomerService {
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final String CSV_FILENAME= "customer";
+    
     @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 

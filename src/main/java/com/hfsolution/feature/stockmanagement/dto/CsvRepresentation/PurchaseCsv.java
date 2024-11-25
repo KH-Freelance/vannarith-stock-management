@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.CsvRepresentation;
+package com.hfsolution.feature.stockmanagement.dto.csvrepresentation;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.opencsv.bean.CsvBindByPosition;
