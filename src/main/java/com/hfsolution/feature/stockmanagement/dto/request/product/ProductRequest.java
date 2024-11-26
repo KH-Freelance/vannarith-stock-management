@@ -16,7 +16,7 @@ public class ProductRequest {
     @NotBlank(message = "Product name is required.")
     private String productName;
     private String productDesc;
-    @NotBlank(message = "Factory name is required.")
+    // @NotBlank(message = "Factory name is required.")
     private String factory;
     @Positive(message = "Import Price must be greater than 0")
     private BigDecimal importPrice; 

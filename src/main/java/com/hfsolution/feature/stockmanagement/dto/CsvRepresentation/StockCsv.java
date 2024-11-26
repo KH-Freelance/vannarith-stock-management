@@ -1,5 +1,7 @@
-package com.hfsolution.feature.stockmanagement.dto.CsvRepresentation;
+package com.hfsolution.feature.stockmanagement.dto.csvrepresentation;
 
+
+import java.sql.Timestamp;
 
 import com.opencsv.bean.CsvBindByPosition;
 
@@ -26,10 +28,10 @@ public class StockCsv {
     private Double percentage;
 
     @CsvBindByPosition(position = 5)
-    private String createdDate;
+    private Timestamp createdDate;
 
     @CsvBindByPosition(position = 6)
-    private String updatedDate;
+    private Timestamp updatedDate;
 
 
 }

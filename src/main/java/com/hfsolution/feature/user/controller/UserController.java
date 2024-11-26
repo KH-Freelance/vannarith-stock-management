@@ -76,16 +76,16 @@ public class UserController {
         return ResponseEntity.ok(successResponse);
     }
 
-    @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<?> register2(
-        @ModelAttribute RegisterRequest request
-    ) throws IOException {
-        SuccessResponse<AuthenticationResponse> successResponse =  new SuccessResponse<>();
-        successResponse.setCode(SUCCESS_CODE);
-        successResponse.setData(authService.register(request,request.getFile()));
-        successResponse.setMsg(SUCCESS);
-        return ResponseEntity.ok(successResponse);
-    }
+    // @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    // public ResponseEntity<?> register2(
+    //     @ModelAttribute RegisterRequest request
+    // ) throws IOException {
+    //     SuccessResponse<AuthenticationResponse> successResponse =  new SuccessResponse<>();
+    //     successResponse.setCode(SUCCESS_CODE);
+    //     successResponse.setData(authService.register(request,request.getFile()));
+    //     successResponse.setMsg(SUCCESS);
+    //     return ResponseEntity.ok(successResponse);
+    // }
 
     @DeleteMapping("/delete/{id}")
     public ResponseEntity<?> deleteUser(
@@ -164,25 +164,25 @@ public class UserController {
         return ResponseEntity.ok(successResponse);
     }
 
-    @PutMapping(value = "/v2/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    public ResponseEntity<?> update2(
-          @PathVariable int id,
-          @ModelAttribute UserUpdateRequest userUpdateRequest
+    // @PutMapping(value = "/v2/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    // public ResponseEntity<?> update2(
+    //       @PathVariable int id,
+    //       @ModelAttribute UserUpdateRequest userUpdateRequest
 
-            // @RequestPart(value = "file", required = false) MultipartFile file,
-            // // @RequestPart(value = "userUpdateRequest", required = false) UserUpdateRequest userUpdateRequest
-            // @RequestParam String firstname,
-            // @RequestParam String lastname
-    ) {
-        // UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
-        // userUpdateRequest.setFirstname(firstname);
-        // userUpdateRequest.setLastname(lastname);
-        userService.update(id, userUpdateRequest, userUpdateRequest.getFile());
-        SuccessResponse<?> successResponse =  new SuccessResponse<>();
-        successResponse.setCode(SUCCESS_CODE);
-        successResponse.setMsg(SUCCESS);
-        return ResponseEntity.ok(successResponse);
-    }
+    //         // @RequestPart(value = "file", required = false) MultipartFile file,
+    //         // // @RequestPart(value = "userUpdateRequest", required = false) UserUpdateRequest userUpdateRequest
+    //         // @RequestParam String firstname,
+    //         // @RequestParam String lastname
+    // ) {
+    //     // UserUpdateRequest userUpdateRequest = new UserUpdateRequest();
+    //     // userUpdateRequest.setFirstname(firstname);
+    //     // userUpdateRequest.setLastname(lastname);
+    //     userService.update(id, userUpdateRequest, userUpdateRequest.getFile());
+    //     SuccessResponse<?> successResponse =  new SuccessResponse<>();
+    //     successResponse.setCode(SUCCESS_CODE);
+    //     successResponse.setMsg(SUCCESS);
+    //     return ResponseEntity.ok(successResponse);
+    // }
 
     @GetMapping("/current-info")
     public ResponseEntity<?> getInfo(

@@ -37,7 +37,7 @@ import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
-import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.ProductCsv;
+import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.ProductCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;

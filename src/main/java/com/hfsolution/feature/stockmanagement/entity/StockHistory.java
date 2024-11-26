@@ -53,5 +53,4 @@ public class StockHistory {
             this.createdDate = new Timestamp(System.currentTimeMillis());
         }
     }
-
 }

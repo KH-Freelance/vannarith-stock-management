@@ -85,12 +85,12 @@ public class ProductController {
     }
 
 
-    @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    private Object addProduct2(        
-        @ModelAttribute ProductRequest productRequest
-        ){
-        return productService.addProduct(productRequest,productRequest.getFile());
-    }
+    // @PostMapping(value = "/v2/add", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    // private Object addProduct2(        
+    //     @ModelAttribute ProductRequest productRequest
+    //     ){
+    //     return productService.addProduct(productRequest,productRequest.getFile());
+    // }
 
     @DeleteMapping("/delete/{id}")
     private Object deleteProductById( @PathVariable long id){
@@ -102,12 +102,12 @@ public class ProductController {
         return productService.updateProductById(id,productUpdateRequest);
     }
 
-    @PutMapping(value = "/v2/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
-    private Object updateProductById2(@PathVariable long id,
-        @ModelAttribute ProductUpdateRequest productUpdateRequest
-    ){
-        return productService.updateProductById(id,productUpdateRequest,productUpdateRequest.getFile());
-    }
+    // @PutMapping(value = "/v2/update/{id}", consumes = {MediaType.MULTIPART_FORM_DATA_VALUE}, produces = {MediaType.APPLICATION_JSON_VALUE})
+    // private Object updateProductById2(@PathVariable long id,
+    //     @ModelAttribute ProductUpdateRequest productUpdateRequest
+    // ){
+    //     return productService.updateProductById(id,productUpdateRequest,productUpdateRequest.getFile());
+    // }
 
   
 

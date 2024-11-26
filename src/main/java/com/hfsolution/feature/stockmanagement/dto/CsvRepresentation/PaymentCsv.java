@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.CsvRepresentation;
+package com.hfsolution.feature.stockmanagement.dto.csvrepresentation;
 
 import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;

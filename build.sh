@@ -8,7 +8,7 @@
 file="build.sh"
 
 # Extract the current version number
-current_version=77
+current_version=80
 
 # Increment the version number by 1
 new_version=$((current_version + 1))

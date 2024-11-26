@@ -32,7 +32,7 @@ import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
-import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.PurchaseCsv;
+import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.PurchaseCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
@@ -130,7 +130,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchaseCsv.setPaymentStatus(purchase.getPaymentStatus());
                 purchaseCsv.setPaymentType(purchase.getPaymentType());
                 purchaseCsv.setLocation(purchase.getLocation());
-                purchaseCsv.setDiscount(purchase.getDiscount());
+                // purchaseCsv.setDiscount(purchase.getDiscount());
                 purchaseCsv.setCreatedDate(purchase.getCreatedDate());
                 purchaseCsv.setUpdateDate(purchase.getUpdatedDate());
                 purchaseCsvs.add(purchaseCsv);
@@ -172,7 +172,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchase.setCustomer(customerResult.getEntity());
                 purchase.setUser(userRepository.findById(purchaseCsv.getEmployeeId()).orElseThrow(() -> new AppException("002", "User not found")));
                 purchase.setQty(purchaseCsv.getQty());
-                purchase.setDiscount(purchaseCsv.getDiscount());
+                // purchase.setDiscount(purchaseCsv.getDiscount());
                 purchase.setTotal(purchaseCsv.getTotal());
                 purchase.setLocation(purchaseCsv.getLocation());
                 purchase.setPaymentType(purchaseCsv.getPaymentType());
@@ -260,46 +260,77 @@ public class PurchaseServicelmp implements PurchaseService {
 
             
             //PROCESS PURCHASE
-            for (ProductPurchase productPurchase : purchaseRequest.getProductPurchases()){
+            if(purchaseRequest.getProductPurchases() != null && purchaseRequest.getProductPurchases().size() > 0){
+               
 
-                String purchaseCode = String.format("%04d", purchaseDao.getPurchaseCode());
-                Product product = productMap.get(productPurchase.getProductId());
-                Stock stock = stockMap.get(productPurchase.getProductId());
-
-                //CALCULATE
-                BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(productPurchase.getQty()));
-                BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
-                                    .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
-                                    .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
-                BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
-                BigDecimal totalPrice = basePrice.subtract(discountPrice);
-                
-
+                // List<PurchaseItem> purchaseItems = new ArrayList<>();
                 Purchase purchase = new Purchase();
+                String purchaseCode = String.format("%04d", purchaseDao.getPurchaseCode());
+                BigDecimal totalPrice = BigDecimal.ZERO;
+                long totalQty = 0;
+
                 purchase.setId(purchaseDao.getPurchaseId());
-                //purchase.setProduct(product);
                 purchase.setCustomer(customer);
                 purchase.setUser(user);
-                purchase.setQty(productPurchase.getQty());
-                purchase.setDiscount(totalDiscount);
-                purchase.setTotal(basePrice);
                 purchase.setLocation(purchaseRequest.getLocation());
                 purchase.setPaymentType(purchaseRequest.getPaymentType()); 
                 purchase.setPurchaseCode(purchaseCode);
-            
+
+               
+                
+                for (ProductPurchase productPurchase : purchaseRequest.getProductPurchases()){
+                    PurchaseItem purchaseItem = new PurchaseItem();
+                    Product product = productMap.get(productPurchase.getProductId());
+                    Stock stock = stockMap.get(productPurchase.getProductId());
+    
+                   
+                     //CALCULATE
+                    BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(productPurchase.getQty()));
+                    BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
+                                        .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
+                                        .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
+                    BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
+                    BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice);
+    
+                    
+                    purchaseItem.setDiscount(discountPrice);
+                    purchaseItem.setPrice(totalProdcutPrice);
+                    purchaseItem.setProduct(product);
+                    purchaseItem.setQty(productPurchase.getQty());
+                    purchase.addPurchaseItem(purchaseItem);
+                    
+                    // Minus from Stock
+                    
+                    stock.setQty(stock.getQty()-productPurchase.getQty());
+                    // stock.addStockHistory(stockHistory);
+                    stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+                    stock = stockDao.saveEntity(stock).getEntity();
+                    StockHistory stockHistory = new StockHistory();
+                    stockHistory.setId(stockHistoryDao.getStockHistoryId());
+                    stockHistory.setUser(userRepository.findById(userId).get());
+                    stockHistory.setRemark("Purchase");
+                    stockHistory.setQty(productPurchase.getQty()*-1);
+                    stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+                    stockHistory.setStock(stock);
+                    stockHistoryDao.saveEntityAsync(stockHistory);
+
+                    totalPrice = totalPrice.add(totalProdcutPrice);
+                    totalQty += productPurchase.getQty();
+                }
 
                 // Check PaymentType return 0 = PAID, -1 = CREDIT
                 if(purchaseRequest.getPaymentType().compareTo(PaymentType.CASH)==0){
                     // Status PAID
                     purchase.setPaymentStatus(PaymentStatus.PAID);
-                
+
                 }else{
                     // Status CREDIT
                     purchase.setPaymentStatus(PaymentStatus.CREDIT);
                     customer.setCredit(customer.getCredit().add(totalPrice));
                     customerDao.saveEntity(customer);
                 }
-                
+                purchase.setQty(totalQty);
+                purchase.setTotal(totalPrice);
                 BaseEntityResponseDto<Purchase> pur = purchaseDao.saveEntity(purchase);
                 if(pur.getEntity().getPaymentStatus().compareTo(PaymentStatus.PAID)==0){
                     // Save Payment for PAID
@@ -309,22 +340,9 @@ public class PurchaseServicelmp implements PurchaseService {
                     payment.setAmount(totalPrice);
                     paymentDao.saveEntity(payment);
                 }
-                
-                // Minus from Stock
-                stock.setQty(stock.getQty()-productPurchase.getQty());
-                stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-                stock = stockDao.saveEntity(stock).getEntity();
 
-                // Need to be call async 
-                StockHistory stockHistory = new StockHistory();
-                stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                stockHistory.setStock(stock);
-                stockHistory.setUser(userRepository.findById(userId).get());
-                stockHistory.setRemark("Purchase");
-                stockHistory.setQty(productPurchase.getQty()*-1);
-                stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-                stockHistoryDao.saveEntityAsync(stockHistory);
             }
+            
 
             response.setStatus(SUCCESS);
             response.setCode("034");

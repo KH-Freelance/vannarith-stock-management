@@ -2,6 +2,8 @@ package com.hfsolution.feature.stockmanagement.entity;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.List;
+
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -10,6 +12,7 @@ import com.opencsv.bean.CsvBindByName;
 import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.CsvIgnore;
 
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
@@ -17,6 +20,7 @@ import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
 import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
@@ -40,6 +44,9 @@ public class Stock {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
+    // @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    // private List<StockHistory> stockHistories;
+
     @Column(name = "qty")
     private Long qty;
 
@@ -54,6 +61,16 @@ public class Stock {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp updatedDate;
 
+    // Getters and Setters
+    // public void addStockHistory(StockHistory stockHistory) {
+    //     stockHistories.add(stockHistory);
+    //     stockHistory.setStock(this);
+    // }
+
+    // public void removeStockHistory(StockHistory stockHistory) {
+    //     stockHistories.remove(stockHistory);
+    //     stockHistory.setStock(null);
+    // }
 
     @PrePersist
     public void preInsert() {

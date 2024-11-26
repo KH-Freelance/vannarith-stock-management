@@ -51,6 +51,27 @@ public class StockHistoryDao extends BaseDBDao<StockHistory,Long>{
 
   }
 
+  public BaseEntityResponseDto<StockHistory> findAllByStockId(long stockId, Pageable pageable){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      Page<StockHistory> entity = stockHistoryRepository.findAllByStockId(stockId,pageable);
+      var appModel = new BaseEntityResponseDto<StockHistory>();
+      appModel.setStatus(SUCCESS);
+      appModel.setPage(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+
   public BaseEntityResponseDto<StockHistory> search(Specification<StockHistory> stockHistories, Pageable pageable){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

@@ -121,7 +121,7 @@ public class CustomSpecification<T> implements Specification<T> {
         } catch (NumberFormatException e2) {
             // Attempt to parse as LocalDateTime
             try {
-                return AppTools.formatDateStringToTimestamp(value,"yyyy-MM-dd HH:mm:ss");
+                return AppTools.formatDateStringToTimestamp(value,"yyyy-MM-dd HH:mm:ss.SSS");
             } catch (Exception e3) {
                 // Handle strings with quotes
                 return value.replace("\"", "").replace("'", "");
