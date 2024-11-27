@@ -35,7 +35,7 @@ public class PurchaseItem {
     private BigDecimal price;
 
     @Column(name = "discount")
-    @JsonSerialize(using = BigDecimalSerializer.class) 
+    // @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount;
 
 }

@@ -37,6 +37,8 @@ public interface StockHistoryRepository extends IBaseRepository<StockHistory,Lon
 
     Page<StockHistory> findAllByStockId(long stockId, Pageable page);
 
+    List<StockHistory> findAllByStockId(long stockId);
+
     @Query(value = "SELECT nextval('stock_history_id_seq')", nativeQuery = true)
     Long getNextStockHistoryId();
 

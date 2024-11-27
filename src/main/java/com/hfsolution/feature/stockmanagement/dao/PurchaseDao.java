@@ -3,6 +3,7 @@ package com.hfsolution.feature.stockmanagement.dao;
 
 import static com.hfsolution.app.constant.AppResponseStatus.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import static com.hfsolution.app.constant.AppResponseCode.*;
@@ -155,6 +156,46 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
       var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<Purchase> findPurchaseByCustomerId(long customerId){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Purchase> entity = purchaseRepository.findAllByCustomerId(customerId);
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<Purchase> findPurchaseByCustomerIdAndCreatedDateBetween(long customerId, String startDate, String endDate){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Purchase> entity = purchaseRepository.findAllByCustomerIdAndCreatedDateBetween(customerId, Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
       return appModel;
 

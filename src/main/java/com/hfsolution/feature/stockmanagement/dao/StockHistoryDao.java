@@ -71,6 +71,26 @@ public class StockHistoryDao extends BaseDBDao<StockHistory,Long>{
 
   }
 
+  public BaseEntityResponseDto<StockHistory> findAllByStockId(long stockId){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<StockHistory> entity = stockHistoryRepository.findAllByStockId(stockId);
+      var appModel = new BaseEntityResponseDto<StockHistory>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
 
   public BaseEntityResponseDto<StockHistory> search(Specification<StockHistory> stockHistories, Pageable pageable){
 
@@ -83,6 +103,26 @@ public class StockHistoryDao extends BaseDBDao<StockHistory,Long>{
       var appModel = new BaseEntityResponseDto<StockHistory>();
       appModel.setStatus(SUCCESS);
       appModel.setPage(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<StockHistory> search(Specification<StockHistory> stockHistories){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<StockHistory> entity = stockHistoryRepository.findAll(stockHistories);
+      var appModel = new BaseEntityResponseDto<StockHistory>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
       return appModel;
 

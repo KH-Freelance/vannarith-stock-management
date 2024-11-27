@@ -51,6 +51,7 @@ public class DataResponseAdviser implements ResponseBodyAdvice<Object>{
         // appLog.setRequest(requestInfo);
         // appLog.setResponse(body);
         // appLog.writeToLog();
+       
         return body;
     }
 

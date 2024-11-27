@@ -45,6 +45,7 @@ public class Stock {
     private Product product;
 
     // @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    // // @JsonIgnore
     // private List<StockHistory> stockHistories;
 
     @Column(name = "qty")

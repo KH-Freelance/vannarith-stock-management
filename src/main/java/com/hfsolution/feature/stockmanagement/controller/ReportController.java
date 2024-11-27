@@ -19,13 +19,22 @@ import lombok.RequiredArgsConstructor;
 public class ReportController {
     final ReportService reportService;
     @GetMapping("/stock")
-    public Object searchStockHistory( 
+    public Object reportStock( 
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
         String startDate,
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate
         ) {
-        // return stockService.searchHistory(id,pageNo,pageSize,sort,sortByColum);
         return reportService.reportStock(startDate, endDate);
+    }
+
+    @GetMapping("/customer")
+    public Object reportCustomer( 
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String startDate,
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String endDate
+        ) {
+        return reportService.reportCustomer(startDate, endDate);
     }
 }

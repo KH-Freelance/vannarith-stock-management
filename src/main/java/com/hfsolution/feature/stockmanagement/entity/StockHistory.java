@@ -3,6 +3,7 @@ package com.hfsolution.feature.stockmanagement.entity;
 import java.sql.Timestamp;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hfsolution.feature.user.entity.User;
 
 import jakarta.persistence.Column;
@@ -28,8 +29,9 @@ public class StockHistory {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "stock_id", nullable = false)
+    @JsonIgnore
     private Stock stock;
 
     @ManyToOne(fetch = FetchType.EAGER)

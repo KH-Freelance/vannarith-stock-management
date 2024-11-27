@@ -1,5 +1,6 @@
 package com.hfsolution.feature.stockmanagement.repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -25,6 +26,11 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
 
     @Query("SELECT pu FROM Purchase pu WHERE pu.customer.customerName = :name")
     Purchase findByCustomerName(String name);
+
+    List<Purchase> findAllByCustomerId(long custoemrId);
+
+
+    List<Purchase> findAllByCustomerIdAndCreatedDateBetween(long customerId, Timestamp startDate,Timestamp endDate);
 
     // @Modifying
     // @Transactional
