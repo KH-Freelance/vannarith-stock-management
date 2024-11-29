@@ -44,10 +44,6 @@ public class Stock {
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
-    // @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    // // @JsonIgnore
-    // private List<StockHistory> stockHistories;
-
     @Column(name = "qty")
     private Long qty;
 
@@ -62,17 +58,7 @@ public class Stock {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
     private Timestamp updatedDate;
 
-    // Getters and Setters
-    // public void addStockHistory(StockHistory stockHistory) {
-    //     stockHistories.add(stockHistory);
-    //     stockHistory.setStock(this);
-    // }
-
-    // public void removeStockHistory(StockHistory stockHistory) {
-    //     stockHistories.remove(stockHistory);
-    //     stockHistory.setStock(null);
-    // }
-
+  
     @PrePersist
     public void preInsert() {
         // Set default values or modify fields before inserting

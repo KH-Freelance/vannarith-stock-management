@@ -76,7 +76,7 @@ public class SecurityConfiguration {
                                 
                                 
                                 // Endpoint for management and admin
-                                .requestMatchers("/user/**").hasAnyRole(MANAGER.name(),ADMIN.name())
+                                // .requestMatchers("/user/**").hasAnyRole(MANAGER.name(),ADMIN.name())
                                 // .requestMatchers("/users/change-role/**").hasAnyRole(ADMIN.name())
 
                                 // .requestMatchers(DELETE,"/users/**").hasAnyAuthority(ADMIN_DELETE.name(),MANAGER_DELETE.name())
@@ -109,7 +109,7 @@ public class SecurityConfiguration {
     CorsConfigurationSource corsConfigurationSource() {
         CorsConfiguration configuration = new CorsConfiguration();
         configuration.setAllowedOrigins(List.of("*"));  // Allow all origins, or specify specific ones
-        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE"));
+        configuration.setAllowedMethods(List.of("GET", "POST", "PUT", "DELETE", "OPTIONS"));
         configuration.setAllowedHeaders(List.of("*"));
 
         UrlBasedCorsConfigurationSource source = new UrlBasedCorsConfigurationSource();

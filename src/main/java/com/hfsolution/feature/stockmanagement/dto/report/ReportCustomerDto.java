@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.response;
+package com.hfsolution.feature.stockmanagement.dto.report;
 
 import java.math.BigDecimal;
 
@@ -10,13 +10,13 @@ import lombok.Setter;
 public class ReportCustomerDto {
     private Long customerId;
     private String customerName;
-    private CreditCategoies creditCategoies;
+    private CreditCategories creditCategories;
     private BigDecimal currentCredit;
     private BigDecimal totalCredit;
 
     @Setter
     @Getter
-    public static class CreditCategoies {
+    public static class CreditCategories {
         private BigDecimal creditDay1To30 = BigDecimal.ZERO;
         private BigDecimal creditDay31To60 = BigDecimal.ZERO;
         private BigDecimal creditDay61To90 = BigDecimal.ZERO;

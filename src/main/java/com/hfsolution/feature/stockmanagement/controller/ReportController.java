@@ -37,4 +37,14 @@ public class ReportController {
         ) {
         return reportService.reportCustomer(startDate, endDate);
     }
+
+    @GetMapping("/purchase")
+    public Object reportPurchase( 
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String startDate,
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String endDate
+        ) {
+        return reportService.reportPurchase(startDate, endDate);
+    }
 }

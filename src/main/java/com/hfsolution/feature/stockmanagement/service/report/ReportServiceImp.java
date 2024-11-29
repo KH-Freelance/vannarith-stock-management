@@ -11,13 +11,18 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
 
 import com.hfsolution.app.dto.BaseEntityResponseDto;
+import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
@@ -28,8 +33,13 @@ import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
-import com.hfsolution.feature.stockmanagement.dto.response.ReportCustomerDto;
-import com.hfsolution.feature.stockmanagement.dto.response.ReportStockDto;
+import com.hfsolution.feature.stockmanagement.dto.report.CustomerDto;
+import com.hfsolution.feature.stockmanagement.dto.report.PaymentSummary;
+import com.hfsolution.feature.stockmanagement.dto.report.PurchaseDto;
+import com.hfsolution.feature.stockmanagement.dto.report.PurchaseItem;
+import com.hfsolution.feature.stockmanagement.dto.report.ReportCustomerDto;
+import com.hfsolution.feature.stockmanagement.dto.report.ReportPurchaseDto;
+import com.hfsolution.feature.stockmanagement.dto.report.ReportStockDto;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
@@ -50,7 +60,6 @@ public class ReportServiceImp  implements ReportService{
     private final StockHistoryDao stockHistoryDao;
     private final PurchaseDao purchaseDao;
     private final CustomerDao customerDao;
-    private final ProductDao productDao;
     private final HttpServletRequest httpServletRequest;
 
     @Override
@@ -72,7 +81,7 @@ public class ReportServiceImp  implements ReportService{
                 Timestamp end = Timestamp.valueOf(endDate);
 
                 
-                for (StockHistory stockHistory : stockHistoryDao.findAllByStockId(stockSaled).getEntityList()) {
+                for (StockHistory stockHistory : stockHistoryDao.findAllByStockId(stock.getId()).getEntityList()) {
                     if(stockHistory.getCreatedDate().after(start) && stockHistory.getCreatedDate().before(end)){
                         if(stockHistory.getQty() < 0){
                             stockSaled +=(stockHistory.getQty()*-1);
@@ -130,7 +139,7 @@ public class ReportServiceImp  implements ReportService{
                 cusomerReport.setCurrentCredit(customer.getCredit());
 
                 BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findPurchaseByCustomerIdAndCreatedDateBetween(customer.getId(),startDate,endDate);
-                ReportCustomerDto.CreditCategoies creditCategoies = new ReportCustomerDto.CreditCategoies();
+                ReportCustomerDto.CreditCategories creditCategoies = new ReportCustomerDto.CreditCategories();
 
                 
                 for (Purchase purchase : purchaseResult.getEntityList()) {
@@ -156,7 +165,7 @@ public class ReportServiceImp  implements ReportService{
                     }
                 }
                 BigDecimal totalCredit = creditCategoies.getCreditDay1To30().add(creditCategoies.getCreditDay31To60().add(creditCategoies.getCreditDay61To90().add(creditCategoies.getCreditMoreThan90())));
-                cusomerReport.setCreditCategoies(creditCategoies);
+                cusomerReport.setCreditCategories(creditCategoies);
                 cusomerReport.setCurrentCredit(customer.getCredit());
                 cusomerReport.setTotalCredit(totalCredit);
                 reportCustomerDtos.add(cusomerReport);
@@ -173,5 +182,92 @@ public class ReportServiceImp  implements ReportService{
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
+    }
+
+    @Override
+    public Object reportPurchase(String startDate, String endDate) {
+        httpServletRequest.setAttribute(ACTION,"REPORT PURCHASE");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        try {
+
+            ReportPurchaseDto reportPurchaseDto = new ReportPurchaseDto();
+            List<PurchaseDto> purchaseDtos = new ArrayList<>();
+            long totalProductSoldCount = 0;
+            BigDecimal totalCostSold = BigDecimal.ZERO;
+            
+            
+            BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findPurchaseByCreatedDateBetween(startDate,endDate);
+            for (Purchase purchase : purchaseResult.getEntityList()) {
+                PurchaseDto purchaseDto = new PurchaseDto();
+                purchaseDto.setId(purchase.getId());
+                purchaseDto.setQty(purchase.getQty());
+                purchaseDto.setTotal(purchase.getTotal());
+                purchaseDto.setPaymentStatus(purchase.getPaymentStatus());
+                purchaseDto.setPaymentType(purchase.getPaymentType());
+                purchaseDto.setCreatedDate(purchase.getCreatedDate());
+                purchaseDto.setLocation(purchase.getLocation());
+                purchaseDto.setPurchaseCode(purchase.getPurchaseCode());
+                purchaseDto.setUpdatedDate(purchase.getUpdatedDate());
+
+
+                // Set Customer
+                CustomerDto customerDto = new CustomerDto();
+                BeanUtils.copyProperties(purchase.getCustomer(), customerDto);
+
+                // Set PaymentSummary
+                List<PaymentSummary> transactionSummaries = new ArrayList<>();
+                for (Payment payment : purchase.getPayments()) {
+                    PaymentSummary paymentSummary = new PaymentSummary();
+                    paymentSummary.setId(payment.getId());
+                    paymentSummary.setAmount(payment.getAmount());
+                    paymentSummary.setCreatedDate(payment.getCreatedDate());
+                    paymentSummary.setUpdateDate(payment.getUpdateDate());
+
+                    // Set TotalCostSold
+                    totalCostSold = totalCostSold.add(payment.getAmount());
+
+                    transactionSummaries.add(paymentSummary);
+                }
+
+                // Set PurchaseItem
+                List<PurchaseItem> purchaseItems = new ArrayList<>();
+                for (com.hfsolution.feature.stockmanagement.entity.PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
+                    PurchaseItem purchaseItemDto = new PurchaseItem();
+                    purchaseItemDto.setId(purchaseItem.getId());
+                    purchaseItemDto.setProductDesc(purchaseItem.getProduct().getProductDesc());
+                    purchaseItemDto.setProductName(purchaseItem.getProduct().getProductName());
+                    purchaseItemDto.setFactory(purchaseItem.getProduct().getFactory());
+                    purchaseItemDto.setQty(purchaseItem.getQty());
+                    purchaseItemDto.setPrice(purchaseItem.getPrice());
+                    purchaseItemDto.setImportPrice(purchaseItem.getProduct().getImportPrice());
+                    purchaseItemDto.setDiscount(purchaseItem.getProduct().getDiscount());
+                    purchaseItemDto.setCreatedDate(purchaseItem.getProduct().getCreatedDate());
+                    purchaseItemDto.setExpiryDate(purchaseItem.getProduct().getExpiryDate());
+
+                    // Set TotalProductSoldCount
+                    totalProductSoldCount+=purchaseItem.getQty();
+
+                    purchaseItems.add(purchaseItemDto);
+                }
+                purchaseDto.setTransactionSummaries(transactionSummaries);
+                purchaseDto.setPurchaseItems(purchaseItems);
+                purchaseDto.setCustomer(customerDto);
+                purchaseDtos.add(purchaseDto);
+            }
+            reportPurchaseDto.setPurchaseOrders(purchaseDtos);
+            reportPurchaseDto.setTotalCostSold(totalCostSold);
+            reportPurchaseDto.setTotalProductSoldCount(totalProductSoldCount);
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(reportPurchaseDto);
+            return response;
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+
     }
 }

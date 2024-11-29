@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.response;
+package com.hfsolution.feature.stockmanagement.dto.report;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;

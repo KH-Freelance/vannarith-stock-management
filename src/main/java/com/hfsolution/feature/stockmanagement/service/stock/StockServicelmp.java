@@ -256,20 +256,21 @@ public class StockServicelmp implements StockService {
     } 
 
     @Override
-    public Object searchHistory(long stockId, int pageNo, int pageSize, Direction sort, String sortByColum) {
+    public Object searchHistory(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK HISTORY");
         SuccessResponse<Page<StockHistory>> response = new SuccessResponse<>();
         try {
-
-            // Specification<StockHistory> stockHistories = new CustomSpecification<>(q);
+            // q.concat(q+",stock.id="+stockId);
+            Specification<StockHistory> stockHistories = new CustomSpecification<>(q);
             PageRequestDto pageRequestDto = new PageRequestDto();
             pageRequestDto.setPageNo(pageNo);
             pageRequestDto.setPageSize(pageSize);
             pageRequestDto.setSort(sort);
             pageRequestDto.setSortByColumn(sortByColum);
             Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
-            BaseEntityResponseDto<StockHistory> stockHistoryResult = stockHistoryDao.findAllByStockId(stockId,pageable);
+            // BaseEntityResponseDto<StockHistory> stockHistoryResult = stockHistoryDao.findAllByStockId(stockId,pageable);
+            BaseEntityResponseDto<StockHistory> stockHistoryResult = stockHistoryDao.search(stockHistories,pageable);
             if(!stockHistoryResult.getStatus().equals(SUCCESS) || stockHistoryResult.getPage()==null){
                 String msg = AppTools.appGetMessage("024");
                 throw new AppException("024",msg);
