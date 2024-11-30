@@ -3,6 +3,9 @@ package com.hfsolution.app.util;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDateTime;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
@@ -55,6 +58,33 @@ public class AppTools {
         List<T> subList = list.subList(start, end);
 
         return new PageImpl<>(subList, pageable, list.size());
+    }
+
+    public static List<String> generateMonthAndYear(String startDateStr,String endDateStr){
+
+        // Define a custom formatter to parse the input format
+        DateTimeFormatter inputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss.SSS");
+
+        // Parse the strings into LocalDateTime objects
+        LocalDateTime startDate = LocalDateTime.parse(startDateStr, inputFormatter);
+        LocalDateTime endDate = LocalDateTime.parse(endDateStr, inputFormatter);
+
+        // List to store the resulting strings
+        List<String> monthYearList = new ArrayList<>();
+
+        // Formatter to generate the desired output format
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("MMM yy");
+
+        // Generate the list of months and years
+        while (!startDate.isAfter(endDate)) {
+            // Format the current date and add to the list
+            monthYearList.add(startDate.format(outputFormatter));
+            // Move to the next month
+            startDate = startDate.plusMonths(1);
+        }
+
+       
+        return monthYearList;
     }
 
     public static Timestamp formatDateStringToTimestamp(String dateString,String pattern) {

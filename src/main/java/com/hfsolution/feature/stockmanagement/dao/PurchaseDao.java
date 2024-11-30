@@ -4,6 +4,7 @@ package com.hfsolution.feature.stockmanagement.dao;
 import static com.hfsolution.app.constant.AppResponseStatus.*;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 
 import static com.hfsolution.app.constant.AppResponseCode.*;
@@ -19,6 +20,7 @@ import com.hfsolution.app.dao.BaseDBDao;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
+import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.repository.PurchaseRepository;
 
@@ -174,6 +176,26 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
       List<Purchase> entity = purchaseRepository.findAllByCustomerId(customerId);
       var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<PurchaseSummaryDTO> findByPurchaseInDateRange(String startDate, String endDate){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<PurchaseSummaryDTO> entity = purchaseRepository.findByPurchaseInDateRange(Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
+      var appModel = new BaseEntityResponseDto<PurchaseSummaryDTO>();
       appModel.setStatus(SUCCESS);
       appModel.setEntityList(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));

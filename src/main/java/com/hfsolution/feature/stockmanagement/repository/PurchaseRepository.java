@@ -1,6 +1,7 @@
 package com.hfsolution.feature.stockmanagement.repository;
 
 import java.sql.Timestamp;
+import java.util.HashMap;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -8,9 +9,11 @@ import org.springframework.data.jpa.domain.Specification;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hfsolution.app.repository.IBaseRepository;
+import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 
 public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaSpecificationExecutor<Purchase>{
@@ -27,10 +30,30 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
     @Query("SELECT pu FROM Purchase pu WHERE pu.customer.customerName = :name")
     Purchase findByCustomerName(String name);
 
+    @Query("""
+        SELECT new com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO(
+            FUNCTION('TO_CHAR', p.createdDate, 'FMMon YY'),
+            SUM(p.total),
+            p.customer.id,
+            c.customerName
+        )
+        FROM Purchase p
+        JOIN Customer c ON p.customer.id = c.id
+        WHERE p.createdDate >= :startDate AND p.createdDate <= :endDate
+        GROUP BY FUNCTION('TO_CHAR', p.createdDate, 'FMMon YY'), p.customer.id, c.customerName
+        ORDER BY FUNCTION('TO_CHAR', p.createdDate, 'FMMon YY'), p.customer.id
+    """)
+    List<PurchaseSummaryDTO> findByPurchaseInDateRange(
+        @Param("startDate") Timestamp startDate,
+        @Param("endDate") Timestamp endDate
+    );
+    
+
     List<Purchase> findAllByCustomerId(long custoemrId);
 
 
     List<Purchase> findAllByCustomerIdAndCreatedDateBetween(long customerId, Timestamp startDate,Timestamp endDate);
+
     List<Purchase> findAllByCreatedDateBetween(Timestamp startDate,Timestamp endDate);
 
     // @Modifying
