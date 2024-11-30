@@ -454,5 +454,30 @@ public class PurchaseServicelmp implements PurchaseService {
         }
     }
 
+
+    @Override
+    public Object getUnpaidByCustomerId(long customerId) {
+        httpServletRequest.setAttribute(ACTION,"PAYMENT");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        try {
+            BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findAllByCustomerIdAndPaymentStatus(customerId, PaymentStatus.CREDIT);
+            if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getEntityList()==null){
+                String msg = AppTools.appGetMessage("032");
+                throw new AppException("032",msg);
+            }
+            response.setStatus(SUCCESS);
+            response.setCode("041");
+            response.setData(purchaseResult.getEntityList());
+            response.setMsg(SUCCESS);
+            return response;
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
     
 }

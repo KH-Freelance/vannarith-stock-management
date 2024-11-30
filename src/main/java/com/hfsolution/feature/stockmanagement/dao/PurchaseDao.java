@@ -22,6 +22,7 @@ import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
+import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.repository.PurchaseRepository;
 
 
@@ -97,6 +98,26 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
       var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       appModel.setPage(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<Purchase> findAllByCustomerIdAndPaymentStatus(long customerId, PaymentStatus paymentStatus){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Purchase> entity = purchaseRepository.findAllByCustomerIdAndPaymentStatus(customerId, paymentStatus);
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
       return appModel;
 

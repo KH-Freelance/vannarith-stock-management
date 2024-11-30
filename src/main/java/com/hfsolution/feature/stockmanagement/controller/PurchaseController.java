@@ -42,7 +42,15 @@ public class PurchaseController {
 
         ) {
         return purchaseService.search(q,pageNo,pageSize,sort,sortByColum);
-    }   
+    }  
+    
+    @GetMapping("/unpaid/{customerId}")
+    @Operation(summary = "List purchases")
+    public Object getUnpaidByCustomerId( 
+            @PathVariable long customerId
+        ) {
+        return purchaseService.getUnpaidByCustomerId(customerId);
+    }  
 
     @GetMapping("/export")
     private void exportData(

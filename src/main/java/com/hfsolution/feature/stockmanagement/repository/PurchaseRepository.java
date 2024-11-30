@@ -15,6 +15,7 @@ import org.springframework.transaction.annotation.Transactional;
 import com.hfsolution.app.repository.IBaseRepository;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
+import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 
 public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaSpecificationExecutor<Purchase>{
 
@@ -29,6 +30,9 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
 
     @Query("SELECT pu FROM Purchase pu WHERE pu.customer.customerName = :name")
     Purchase findByCustomerName(String name);
+
+
+    List<Purchase> findAllByCustomerIdAndPaymentStatus(long customerId, PaymentStatus paymentStatus);
 
     @Query("""
         SELECT new com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO(
