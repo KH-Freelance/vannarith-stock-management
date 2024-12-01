@@ -48,6 +48,7 @@ public class Stock {
     private Long qty;
 
     @Transient // This field will not be persisted in the database
+    @JsonIgnore
     private Double percentage;
 
     @Column(name = "created_date")

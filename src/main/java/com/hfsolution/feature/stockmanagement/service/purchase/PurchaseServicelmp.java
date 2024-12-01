@@ -10,6 +10,8 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -36,6 +38,8 @@ import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.PurchaseCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
+import com.hfsolution.feature.stockmanagement.dto.response.stock.PurchaseDto;
+import com.hfsolution.feature.stockmanagement.dto.response.stock.StockDto;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
@@ -461,14 +465,79 @@ public class PurchaseServicelmp implements PurchaseService {
         SuccessResponse<Object> response = new SuccessResponse<>();
         try {
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findAllByCustomerIdAndPaymentStatus(customerId, PaymentStatus.CREDIT);
-            if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getEntityList()==null){
+            response.setStatus(SUCCESS);
+            response.setCode("000");
+            response.setData(purchaseResult.getEntityList());
+            response.setMsg(SUCCESS);
+            return response;
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+
+    @Override
+    public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
+        httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        try {
+            Map<String, Class<? extends Enum>> enumFields = new HashMap<>();
+            enumFields.put("paymentType", PaymentType.class); 
+            enumFields.put("paymentStatus", PaymentStatus.class); 
+            Specification<Purchase> purchases = new CustomSpecification<>(q,enumFields);
+            PageRequestDto pageRequestDto = new PageRequestDto();
+            pageRequestDto.setPageNo(pageNo);
+            pageRequestDto.setPageSize(pageSize);
+            pageRequestDto.setSort(sort);
+            pageRequestDto.setSortByColumn(sortByColum);
+            Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+            BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases,pageable);
+            if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getPage()==null){
                 String msg = AppTools.appGetMessage("032");
                 throw new AppException("032",msg);
             }
+
+            Page<PurchaseDto> purchaseDtoPage = purchaseResult.getPage().map(purchase ->{
+                PurchaseDto purchaseDto = new PurchaseDto();
+                BeanUtils.copyProperties(purchase, purchaseDto);
+                purchaseDto.setCustomer(new PurchaseDto.Customer(purchase.getCustomer().getId(), purchase.getCustomer().getCustomerName()));
+                purchaseDto.setUser(new PurchaseDto.User(purchase.getUser().getId(), purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname()));
+                return purchaseDto;
+            });
+
             response.setStatus(SUCCESS);
-            response.setCode("041");
-            response.setData(purchaseResult.getEntityList());
-            response.setMsg(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(purchaseDtoPage);
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+
+    @Override
+    public Object searchDetail(long id) {
+        httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE DETAIL BY ID");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        try {
+            BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findById(id);
+            if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("032");
+                throw new AppException("032",msg);
+            }
+
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(purchaseResult.getEntity());
             return response;
         }catch (DatabaseException e) {
             throw e;   

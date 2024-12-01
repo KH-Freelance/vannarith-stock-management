@@ -13,7 +13,8 @@ import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateReque
 public interface StockService {
 
     public Object search(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
-    // public Object searchHistory(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
+    public Object searchV2(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
+    public Object searchDetail(long id);
     public Object searchHistory(String q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
     public void export(String q);
     public Object importData(MultipartFile file);

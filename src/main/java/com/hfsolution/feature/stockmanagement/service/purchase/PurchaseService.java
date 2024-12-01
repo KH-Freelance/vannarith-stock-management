@@ -15,6 +15,8 @@ public interface PurchaseService {
 
     
     public Object search(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
+    public Object searchV2(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
+    public Object searchDetail(long id);
     public Object getUnpaidByCustomerId(long customerId);
     public void export(String q);
     public Object importData(MultipartFile file);

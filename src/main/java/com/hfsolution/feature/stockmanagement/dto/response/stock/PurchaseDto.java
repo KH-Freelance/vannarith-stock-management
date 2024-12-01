@@ -1,0 +1,62 @@
+package com.hfsolution.feature.stockmanagement.dto.response.stock;
+
+import java.math.BigDecimal;
+import java.sql.Timestamp;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.hfsolution.app.util.BigDecimalSerializer;
+import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
+import com.hfsolution.feature.stockmanagement.enums.PaymentType;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.Setter;
+
+@Setter
+@Getter
+public class PurchaseDto {
+    
+    private Long id;
+
+    private Customer customer;
+
+    private User user; 
+
+    private Long qty;
+
+    @JsonSerialize(using = BigDecimalSerializer.class) 
+    private BigDecimal total;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentType paymentType = PaymentType.CASH;
+
+    @Enumerated(EnumType.STRING)
+    private PaymentStatus paymentStatus = PaymentStatus.PAID;
+
+    private String location;
+
+    private String purchaseCode;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
+    private Timestamp createdDate;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
+    private Timestamp updatedDate;
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    public static class Customer{
+        long id;
+        String name;
+    }
+
+    @Setter
+    @Getter
+    @AllArgsConstructor
+    public static class User{
+        long id;
+        String name;
+    }
+}

@@ -3,7 +3,7 @@ package com.hfsolution.feature.stockmanagement.service.stock;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
-import static com.hfsolution.app.constant.AppConstant.USERID;
+
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -13,6 +13,7 @@ import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
@@ -35,6 +36,7 @@ import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.csvrepresentation.StockCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
+import com.hfsolution.feature.stockmanagement.dto.response.stock.StockDto;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
@@ -220,6 +222,47 @@ public class StockServicelmp implements StockService {
     }
 
     @Override
+    public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
+
+        httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        try {
+
+            Specification<Stock> stocks = new CustomSpecification<>(q);
+            PageRequestDto pageRequestDto = new PageRequestDto();
+            pageRequestDto.setPageNo(pageNo);
+            pageRequestDto.setPageSize(pageSize);
+            pageRequestDto.setSort(sort);
+            pageRequestDto.setSortByColumn(sortByColum);
+            Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+            BaseEntityResponseDto<Stock> stockResult = stockDao.searchStock(stocks,pageable);
+            if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getPage()==null){
+                String msg = AppTools.appGetMessage("024");
+                throw new AppException("024",msg);
+            }
+            
+            calculatePercentageOfQty(stockResult.getPage());
+            Page<StockDto> userDtoPage = stockResult.getPage().map(stock ->{
+                StockDto stockDto = new StockDto();
+                BeanUtils.copyProperties(stock, stockDto);
+                stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
+                return stockDto;
+            });
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(userDtoPage);
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+       
+    } 
+    @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
@@ -396,6 +439,30 @@ public class StockServicelmp implements StockService {
             double percentage = ((double) stock.getQty() / totalQty) * 100;
             BigDecimal bd = new BigDecimal(percentage).setScale(2, RoundingMode.HALF_UP);
             stock.setPercentage(bd.doubleValue());
+        }
+    }
+
+    @Override
+    public Object searchDetail(long id) {
+        httpServletRequest.setAttribute(ACTION,"SEARCH STOCK DETAIL BY ID");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        try {
+            BaseEntityResponseDto<Stock> stockResult = stockDao.findById(id);
+            if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("024");
+                throw new AppException("024",msg);
+            }
+
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(stockResult.getEntity());
+            return response;
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
     }
     
