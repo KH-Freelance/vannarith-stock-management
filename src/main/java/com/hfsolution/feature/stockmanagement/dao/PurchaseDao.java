@@ -37,6 +37,26 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
     this.purchaseRepository = repository;
   }
 
+  public BaseEntityResponseDto<Purchase>  findByPurchaseCode(String purchaseCode){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+      
+      Purchase entity = purchaseRepository.findByPurchaseCode(purchaseCode);
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntity(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
   public Long getPurchaseCode(){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

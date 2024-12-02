@@ -28,6 +28,9 @@ public class PurchaseItem {
     // @JsonIgnore
     private Product product;
 
+    @Column(name = "status")
+    private String status;
+
     @Column(name = "qty", nullable = false)
     private Long qty;
 
@@ -37,5 +40,13 @@ public class PurchaseItem {
     @Column(name = "discount")
     // @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount;
+
+    @PrePersist
+    public void preInsert() {
+        if(this.status==null || this.status.isBlank() || this.status.isEmpty()){
+            this.status =  "ACTIVE";
+        }
+    }
+
 
 }

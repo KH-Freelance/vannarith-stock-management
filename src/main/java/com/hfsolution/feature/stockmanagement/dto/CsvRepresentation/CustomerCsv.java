@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.csvrepresentation;
+package com.hfsolution.feature.stockmanagement.dto.CsvRepresentation;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import com.opencsv.bean.CsvBindByPosition;

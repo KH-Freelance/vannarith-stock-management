@@ -81,5 +81,7 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
     @Query(value = "SELECT nextval('purchase_code_seq')", nativeQuery = true)
     Long getNextPurchaseCode();
 
+    Purchase findByPurchaseCode(String purchaseCode);
+
     
 } 
