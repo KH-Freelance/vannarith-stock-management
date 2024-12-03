@@ -10,12 +10,16 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.enums.Role;
 
+import jakarta.transaction.Transactional;
+
 public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificationExecutor<User> {
+
   Optional<User> findByEmail(String email);
   Page<User> findByEmailLike(String email,Pageable pageable);
   List<User> findByEmailLike(String email);
   List<User> findByEmailLikeOrderByLastnameAsc(String email);
   List<User> findByFirstnameLike(String firstname);
   List<User> findByLastnameLike(String lastname);
-  List<User> findByRoleLike(Role role);
+  // List<User> findByRoleLike(Role role);
+  // List<User> findByRoleLike(Role role);
 }

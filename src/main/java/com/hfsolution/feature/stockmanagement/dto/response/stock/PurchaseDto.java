@@ -26,7 +26,10 @@ public class PurchaseDto {
     private Long qty;
 
     @JsonSerialize(using = BigDecimalSerializer.class) 
-    private BigDecimal total;
+    private BigDecimal total = BigDecimal.ZERO;
+
+    @JsonSerialize(using = BigDecimalSerializer.class) 
+    private BigDecimal remainingPayment = BigDecimal.ZERO;
 
     @Enumerated(EnumType.STRING)
     private PaymentType paymentType = PaymentType.CASH;

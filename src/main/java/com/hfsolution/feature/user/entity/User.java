@@ -8,10 +8,19 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.JoinTable;
+import jakarta.persistence.ManyToMany;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.Table;
+
+import java.util.ArrayList;
 import java.util.Collection;
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
+
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -21,7 +30,6 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hfsolution.feature.token.entity.Token;
-import com.hfsolution.feature.user.enums.Role;
 import com.opencsv.bean.CsvBindByPosition;
 
 @Data
@@ -45,7 +53,8 @@ public class User implements UserDetails {
   @CsvBindByPosition(position = 4)
   private String password;
 
-  @Enumerated(EnumType.STRING)
+  @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "role_id", nullable = false)
   @CsvBindByPosition(position = 5)
   private Role role;
 
@@ -53,13 +62,14 @@ public class User implements UserDetails {
   @Column(name = "image_url")
   private String imageUrl;
 
-  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY)
+  @OneToMany(mappedBy = "user", fetch = FetchType.LAZY, cascade = CascadeType.ALL)
   @JsonIgnore
   private List<Token> tokens;
 
   @Override
   @JsonIgnore
   public Collection<? extends GrantedAuthority> getAuthorities() {
+    // return new ArrayList<>();
     return role.getAuthorities();
   }
 
@@ -80,6 +90,8 @@ public class User implements UserDetails {
   public boolean isAccountNonExpired() {
     return true;
   }
+
+
 
   @Override
   @JsonIgnore

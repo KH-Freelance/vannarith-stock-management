@@ -506,6 +506,11 @@ public class PurchaseServicelmp implements PurchaseService {
                 BeanUtils.copyProperties(purchase, purchaseDto);
                 purchaseDto.setCustomer(new PurchaseDto.Customer(purchase.getCustomer().getId(), purchase.getCustomer().getCustomerName()));
                 purchaseDto.setUser(new PurchaseDto.User(purchase.getUser().getId(), purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname()));
+                BigDecimal remainingPayment = purchase.getTotal();
+                for (Payment payment : purchase.getPayments()) {
+                    remainingPayment = remainingPayment.subtract(payment.getAmount());
+                }
+                purchaseDto.setRemainingPayment(remainingPayment);
                 return purchaseDto;
             });
 
@@ -534,7 +539,6 @@ public class PurchaseServicelmp implements PurchaseService {
                 String msg = AppTools.appGetMessage("032");
                 throw new AppException("032",msg);
             }
-
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
             response.setData(purchaseResult.getEntity());

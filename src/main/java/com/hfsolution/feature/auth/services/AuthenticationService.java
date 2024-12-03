@@ -13,7 +13,9 @@ import com.hfsolution.feature.auth.dto.AuthenticationResponse;
 import com.hfsolution.feature.token.entity.Token;
 import com.hfsolution.feature.token.repository.TokenRepository;
 import com.hfsolution.feature.user.dto.RegisterRequest;
+import com.hfsolution.feature.user.entity.Role;
 import com.hfsolution.feature.user.entity.User;
+import com.hfsolution.feature.user.repository.RoleRepository;
 import com.hfsolution.feature.user.repository.UserRepository;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -40,6 +42,7 @@ public class AuthenticationService {
   private final CloudinaryProperties cloudinaryProperties;
   private final UserRepository repository;
   private final TokenRepository tokenRepository;
+  private final RoleRepository roleRepository;
   private final UserRepository userRepository;
   private final PasswordEncoder passwordEncoder;
   private final JwtService jwtService;
@@ -48,13 +51,14 @@ public class AuthenticationService {
   public AuthenticationResponse register(RegisterRequest request) {
     Optional<User> existUser = userRepository.findByEmail(request.getEmail());
     if(!existUser.isPresent()){
+      Role role = roleRepository.findById(request.getRoleId()).get();
       var user = User.builder()
       .firstname(request.getFirstname())
       .lastname(request.getLastname())
       .email(request.getEmail())
       .imageUrl(cloudinaryProperties.getDefaultImage())
       .password(passwordEncoder.encode(request.getPassword()))
-      .role(request.getRole())
+      .role(role)
       .build();
       var savedUser = repository.save(user);
       Map<String, Object> extraClaims = new HashMap<>();
@@ -82,13 +86,14 @@ public class AuthenticationService {
       }else{
         imageUrl = (String)uploadImage(file, STOCK_USER+"/"+request.getFirstname()+request.getLastname()).get("secure_url");
       }
+      Role role = roleRepository.findById(request.getRoleId()).get();
       var user = User.builder()
       .firstname(request.getFirstname())
       .lastname(request.getLastname())
       .email(request.getEmail())
       .imageUrl(imageUrl)
       .password(passwordEncoder.encode(request.getPassword()))
-      .role(request.getRole())
+      .role(role)
       .build();
       var savedUser = repository.save(user);
       Map<String, Object> extraClaims = new HashMap<>();

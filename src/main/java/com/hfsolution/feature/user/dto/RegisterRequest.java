@@ -28,6 +28,7 @@ public class RegisterRequest {
   private String email;
   @NotBlank(message = "password is required.")
   private String password;
-  private Role role;
+  private long roleId;
+  // private Role role;
   private MultipartFile file;
 }

@@ -17,5 +17,5 @@ import lombok.Setter;
 @AllArgsConstructor
 public class ChangeRoleRequest {
     @Enumerated(EnumType.STRING)
-    private Role newRole;
+    private Long roleId;
 }

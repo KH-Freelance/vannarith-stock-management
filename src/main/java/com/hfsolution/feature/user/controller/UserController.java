@@ -50,7 +50,6 @@ public class UserController {
     private final UserService userService;
 
     //ADMIN
-    @PreAuthorize("hasRole('ADMIN') or hasAuthority('admin:update')")
     @PutMapping("/change-role/{id}")
     public ResponseEntity<?> changeRole(
           @RequestBody ChangeRoleRequest request,

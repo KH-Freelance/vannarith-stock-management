@@ -75,17 +75,35 @@ public class SecurityConfiguration {
                                 .permitAll()
                                 
                                 
-                                // Endpoint for management and admin
-                                // .requestMatchers("/user/**").hasAnyRole(MANAGER.name(),ADMIN.name())
-                                // .requestMatchers("/users/change-role/**").hasAnyRole(ADMIN.name())
+                                .requestMatchers(GET,"/product/**").hasAnyAuthority("product:READ", "*")
+                                .requestMatchers(POST,"/product/**").hasAnyAuthority("product:CREATE", "*")
+                                .requestMatchers(DELETE,"/product/**").hasAnyAuthority("product:DELETE", "*")
+                                .requestMatchers(PUT,"/product/**").hasAnyAuthority("product:UPDATE", "*")
 
-                                // .requestMatchers(DELETE,"/users/**").hasAnyAuthority(ADMIN_DELETE.name(),MANAGER_DELETE.name())
-                                // .requestMatchers(POST,"/users/**").hasAnyAuthority(ADMIN_CREATE.name(),MANAGER_CREATE.name())
-                                // .requestMatchers(PUT, "/users/**").hasAnyAuthority(ADMIN_UPDATE.name(),MANAGER_UPDATE.name())
-                                // .requestMatchers(GET,"/users/**").hasAnyAuthority(ADMIN_READ.name())
-                                
-                                // Endpoint for admin
-                                // .requestMatchers(PUT,"/users/change-role/**").hasAnyAuthority(ADMIN_UPDATE.name())
+                                .requestMatchers(GET,"/stock/**").hasAnyAuthority("stock:READ", "*")
+                                .requestMatchers(POST,"/stock/**").hasAnyAuthority("stock:CREATE", "*")
+                                .requestMatchers(DELETE,"/stock/**").hasAnyAuthority("stock:DELETE", "*")
+                                .requestMatchers(PUT,"/stock/**").hasAnyAuthority("stock:UPDATE", "*")
+
+                                .requestMatchers(GET,"/customer/**").hasAnyAuthority("customer:READ", "*")
+                                .requestMatchers(POST,"/customer/**").hasAnyAuthority("customer:CREATE", "*")
+                                .requestMatchers(DELETE,"/customer/**").hasAnyAuthority("customer:DELETE", "*")
+                                .requestMatchers(PUT,"/customer/**").hasAnyAuthority("customer:UPDATE", "*")
+
+                                .requestMatchers(GET,"/user/**").hasAnyAuthority("user:READ", "*")
+                                .requestMatchers(POST,"/user/**").hasAnyAuthority("user:CREATE", "*")
+                                .requestMatchers(DELETE,"/user/**").hasAnyAuthority("user:DELETE", "*")
+                                .requestMatchers(PUT,"/user/**").hasAnyAuthority("user:UPDATE", "*")
+
+                                .requestMatchers(GET,"/purchase/**").hasAnyAuthority("purchase:READ", "*")
+                                .requestMatchers(POST,"/purchase/**").hasAnyAuthority("purchase:CREATE", "*")
+                                .requestMatchers(DELETE,"/purchase/**").hasAnyAuthority("purchase:DELETE", "*")
+                                .requestMatchers(PUT,"/purchase/**").hasAnyAuthority("purchase:UPDATE", "*")
+
+                                .requestMatchers(GET,"/role/**").hasAnyAuthority("role:READ", "*")
+                                .requestMatchers(POST,"/role/**").hasAnyAuthority("role:CREATE", "*")
+                                .requestMatchers(DELETE,"/role/**").hasAnyAuthority("role:DELETE", "*")
+                                .requestMatchers(PUT,"/role/**").hasAnyAuthority("role:UPDATE", "*")
 
                                 // Any Endpoint
                                 .anyRequest()

@@ -17,18 +17,16 @@ import static com.hfsolution.app.constant.AppConstant.STOCK_USER;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
-
+import com.hfsolution.feature.user.entity.Role;
 import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
-
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.app.services.CustomSpecification;
-
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
@@ -39,7 +37,7 @@ import com.hfsolution.feature.user.dto.DeleteUserRequest;
 import com.hfsolution.feature.user.dto.ResetPasswordRequest;
 import com.hfsolution.feature.user.dto.UserUpdateRequest;
 import com.hfsolution.feature.user.entity.User;
-import com.hfsolution.feature.user.enums.Role;
+import com.hfsolution.feature.user.repository.RoleRepository;
 import com.hfsolution.feature.user.repository.UserRepository;
 
 import jakarta.servlet.http.HttpServletResponse;
@@ -60,9 +58,12 @@ public class UserService {
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
     private final HttpServletResponse response;
+    private final RoleRepository roleRepository;
     private final String CSV_FILENAME="user";
     // private final CustomSpecification<User> customSpecification;
 
+
+    
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
 
@@ -152,7 +153,12 @@ public class UserService {
             // throw new IllegalStateException("User not Found");
         }
         // // update the password
-        opUser.get().setRole(request.getNewRole());
+        Optional<Role> opRole = roleRepository.findById(request.getRoleId());
+        if(!opRole.isPresent()){
+            throw new AppException("040");
+        }
+
+        opUser.get().setRole(opRole.get());
         // save the new password
         repository.save(opUser.get());
     }
@@ -162,12 +168,14 @@ public class UserService {
         return user;
     }
 
+    
+
     @SuppressWarnings("rawtypes")
     public Page<User> searchUser(String q, int page,int size, Sort.Direction sort,String sortByColumn) {
 
         // Define ENUM fields in the entity and their types
         Map<String, Class<? extends Enum>> enumFields = new HashMap<>();
-        enumFields.put("role", Role.class);  // Assuming "status" is an ENUM field in the entity
+        // enumFields.put("role", Role.class);  // Assuming "status" is an ENUM field in the entity
         Specification<User> users = new CustomSpecification<>(q,enumFields);
         PageRequestDto pageRequestDto = new PageRequestDto();
         pageRequestDto.setPageNo(page);
