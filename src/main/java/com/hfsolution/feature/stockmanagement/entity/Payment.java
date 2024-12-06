@@ -63,7 +63,7 @@ public class Payment {
     @Column(name = "updated_date")
     @CsvBindByPosition(position = 4)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
-    private Timestamp updateDate;
+    private Timestamp updatedDate;
 
     @PrePersist
     public void preInsert() {
@@ -72,7 +72,7 @@ public class Payment {
             this.createdDate = new Timestamp(System.currentTimeMillis());
         }
         // Always update datetime if insert or update
-        this.updateDate = new Timestamp(System.currentTimeMillis());
+        this.updatedDate = new Timestamp(System.currentTimeMillis());
     }
 
 }
