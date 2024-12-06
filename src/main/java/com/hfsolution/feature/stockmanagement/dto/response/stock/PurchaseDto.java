@@ -52,7 +52,7 @@ public class PurchaseDto {
     @AllArgsConstructor
     public static class Customer{
         long id;
-        String name;
+        String customerName;
     }
 
     @Setter
@@ -60,6 +60,7 @@ public class PurchaseDto {
     @AllArgsConstructor
     public static class User{
         long id;
-        String name;
+        String firstname;
+        String lastname;
     }
 }

@@ -40,6 +40,7 @@ import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseReque
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
 import com.hfsolution.feature.stockmanagement.dto.response.stock.PurchaseDto;
 import com.hfsolution.feature.stockmanagement.dto.response.stock.StockDto;
+import com.hfsolution.feature.stockmanagement.dto.response.stock.UnpaidDto;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
@@ -465,9 +466,11 @@ public class PurchaseServicelmp implements PurchaseService {
         SuccessResponse<Object> response = new SuccessResponse<>();
         try {
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findAllByCustomerIdAndPaymentStatus(customerId, PaymentStatus.CREDIT);
+            UnpaidDto unpaidDto = new UnpaidDto();
+            unpaidDto.setContent(purchaseResult.getEntityList());
             response.setStatus(SUCCESS);
             response.setCode("000");
-            response.setData(purchaseResult.getEntityList());
+            response.setData(unpaidDto);
             response.setMsg(SUCCESS);
             return response;
         }catch (DatabaseException e) {
@@ -505,7 +508,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 PurchaseDto purchaseDto = new PurchaseDto();
                 BeanUtils.copyProperties(purchase, purchaseDto);
                 purchaseDto.setCustomer(new PurchaseDto.Customer(purchase.getCustomer().getId(), purchase.getCustomer().getCustomerName()));
-                purchaseDto.setUser(new PurchaseDto.User(purchase.getUser().getId(), purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname()));
+                purchaseDto.setUser(new PurchaseDto.User(purchase.getUser().getId(), purchase.getUser().getFirstname(),purchase.getUser().getLastname()));
                 BigDecimal remainingPayment = purchase.getTotal();
                 for (Payment payment : purchase.getPayments()) {
                     remainingPayment = remainingPayment.subtract(payment.getAmount());

@@ -12,8 +12,6 @@ import lombok.Setter;
 public class StockDto {
 
     private Long id;
-    private String productName;
-    private long productId;
     private Product product;
     private Long qty;
     private Double percentage;
@@ -27,6 +25,6 @@ public class StockDto {
     @AllArgsConstructor
     public static class Product {
         long id;
-        String name;
+        String productName;
     }
 }
