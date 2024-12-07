@@ -170,7 +170,7 @@ public class CustomSpecification<T> implements Specification<T> {
                 return AppTools.formatDateStringToTimestamp(value,"yyyy-MM-dd HH:mm:ss.SSS");
             } catch (Exception e3) {
                 // Handle strings with quotes
-                return value.replace("\"", "").replace("'", "");
+                return value;
             }
         }
     }
