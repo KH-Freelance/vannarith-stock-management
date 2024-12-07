@@ -71,6 +71,26 @@ public class StockHistoryDao extends BaseDBDao<StockHistory,Long>{
 
   }
 
+  @Modifying
+  @Transactional
+  public BaseEntityResponseDto<Stock> deleteHistoryByStockID(Long id){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      stockHistoryRepository.deleteByStockId(id);
+      var appModel = new BaseEntityResponseDto<Stock>();
+      appModel.setStatus(SUCCESS);
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
   public BaseEntityResponseDto<StockHistory> findAllByStockId(long stockId){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

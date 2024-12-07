@@ -1,6 +1,7 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -35,7 +36,7 @@ public class Return {
     private Purchase purchase;
 
     @OneToMany(mappedBy = "returnEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
-    private List<ReturnItem> returnItems;
+    private List<ReturnItem> returnItems = new ArrayList<>();
 
     @Column(name = "total_qty")
     private Long totalQty;

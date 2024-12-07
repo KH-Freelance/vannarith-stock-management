@@ -206,6 +206,7 @@ public class PurchaseServicelmp implements PurchaseService {
 
 
     @Override
+    @Transactional
     public Object addPurchase(PurchaseRequest purchaseRequest) {
 
         httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");

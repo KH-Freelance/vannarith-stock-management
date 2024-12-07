@@ -5,7 +5,9 @@ import java.util.List;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.hfsolution.app.repository.IBaseRepository;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
@@ -38,6 +40,10 @@ public interface StockHistoryRepository extends IBaseRepository<StockHistory,Lon
     Page<StockHistory> findAllByStockId(long stockId, Pageable page);
 
     List<StockHistory> findAllByStockId(long stockId);
+
+    @Modifying
+    @Transactional
+    void deleteByStockId(Long id);
 
     @Query(value = "SELECT nextval('stock_history_id_seq')", nativeQuery = true)
     Long getNextStockHistoryId();

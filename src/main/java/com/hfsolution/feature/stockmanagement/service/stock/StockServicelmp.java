@@ -119,6 +119,7 @@ public class StockServicelmp implements StockService {
         SuccessResponse<Stock> response = new SuccessResponse<>();
         try {
     
+            stockHistoryDao.deleteHistoryByStockID(id);
             stockDao.deleteStockByID(id);
             String msg = AppTools.appGetMessage("025");
             response.setStatus(SUCCESS);

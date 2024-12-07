@@ -41,6 +41,8 @@ import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.ProductCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.service.stock.StockService;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 import lombok.RequiredArgsConstructor;
@@ -52,11 +54,11 @@ public class ProductServicelmp implements ProductService {
     
     private final CloudinaryProperties cloudinaryProperties;
     private final ProductDao productDao;
-    private final PurchaseDao purchaseDao;
     private final StockDao stockDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final String CSV_FILENAME = "product";
+    private final StockService stockService;
 
    
 
@@ -151,7 +153,7 @@ public class ProductServicelmp implements ProductService {
         SuccessResponse<Product> response = new SuccessResponse<>();
         try {
     
-            stockDao.deleteStockByProudctID(id);
+            // stockService.deleteStockByProudctID(id);
             //purchaseDao.deleteByProductID(id);
             productDao.deleteByProductID(id);
             String msg = AppTools.appGetMessage("007");
