@@ -33,7 +33,7 @@ public class Purchase {
     @Column(name = "id")
     private Long id;
 
-    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.EAGER , orphanRemoval = true)
     private List<PurchaseItem> purchaseItems = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -44,7 +44,7 @@ public class Purchase {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; 
 
-    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
     private List<Payment> payments = new ArrayList<>();
 
     @Column(name = "qty")
@@ -64,10 +64,6 @@ public class Purchase {
 
     @Column(name = "location")
     private String location;
-
-    // @Column(name = "discount")
-    // @JsonSerialize(using = BigDecimalSerializer.class) 
-    // private BigDecimal discount;
 
     @Column(name = "purchase_code")
     private String purchaseCode;
@@ -93,10 +89,7 @@ public class Purchase {
 
     @PrePersist
     public void preInsert() {
-        // Set default values or modify fields before inserting
-        // if(this.discount==null){
-        //     this.discount = BigDecimal.ZERO;
-        // }
+
         if(this.createdDate==null){
             this.createdDate = new Timestamp(System.currentTimeMillis());
         }

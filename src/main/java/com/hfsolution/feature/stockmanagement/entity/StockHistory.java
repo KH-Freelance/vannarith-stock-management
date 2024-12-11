@@ -29,12 +29,10 @@ public class StockHistory {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "stock_id", nullable = false)
-    // @JsonIgnore
+    @ManyToOne(fetch = FetchType.LAZY)
     private Stock stock;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 

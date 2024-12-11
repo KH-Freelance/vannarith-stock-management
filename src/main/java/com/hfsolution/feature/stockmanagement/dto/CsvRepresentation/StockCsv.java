@@ -1,10 +1,7 @@
 package com.hfsolution.feature.stockmanagement.dto.CsvRepresentation;
 
-
 import java.sql.Timestamp;
-
 import com.opencsv.bean.CsvBindByPosition;
-
 import lombok.Getter;
 import lombok.Setter;
 

@@ -55,6 +55,7 @@ import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 
 import static com.hfsolution.app.constant.AppConstant.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 
 @Service
@@ -68,6 +69,7 @@ public class ReportServiceImp  implements ReportService{
     private final HttpServletRequest httpServletRequest;
 
     @Override
+    @Transactional
     public Object reportStock(String startDate, String endDate) {
         httpServletRequest.setAttribute(ACTION,"REPORT STOCK");
         SuccessResponse<Object> response = new SuccessResponse<>();

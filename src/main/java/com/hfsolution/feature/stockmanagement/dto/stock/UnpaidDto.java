@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.response.stock;
+package com.hfsolution.feature.stockmanagement.dto.stock;
 
 import java.util.List;
 

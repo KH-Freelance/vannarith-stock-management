@@ -2,6 +2,7 @@ package com.hfsolution.feature.stockmanagement.entity;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -40,12 +41,15 @@ public class Stock {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.EAGER)
+    @OneToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "product_id", nullable = false)
     private Product product;
 
     @Column(name = "qty")
     private Long qty;
+
+    @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
+    private List<StockHistory> stockHistories = new ArrayList<>();
 
     @Transient // This field will not be persisted in the database
     @JsonIgnore

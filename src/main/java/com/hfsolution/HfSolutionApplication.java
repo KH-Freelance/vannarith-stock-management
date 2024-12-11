@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.ComponentScan;
 import com.hfsolution.feature.auth.services.AuthenticationService;
 import com.hfsolution.feature.user.dto.RegisterRequest;
+import com.hfsolution.feature.user.entity.Role;
 
 
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
@@ -49,12 +50,12 @@ public class HfSolutionApplication {
 			// 		.lastname("Admin")
 			// 		.email("admin@mail.com")
 			// 		.password("password")
-			// 		.role(ADMIN)
+			// 		.role(new Role().)
 			// 		.build();
 			// System.out.println("Admin token: " + service.register(admin).getAccessToken());
 
-			// var manager = RegisterRequest.builder()
-			// 		.firstname("Admin")
+			// // var manager = RegisterRequest.builder()
+			// // 		.firstname("Admin")
 			// 		.lastname("Admin")
 			// 		.email("manager@mail.com")
 			// 		.password("password")

@@ -35,12 +35,12 @@ import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.PurchaseCsv;
+import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseDto;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
-import com.hfsolution.feature.stockmanagement.dto.response.stock.PurchaseDto;
-import com.hfsolution.feature.stockmanagement.dto.response.stock.StockDto;
-import com.hfsolution.feature.stockmanagement.dto.response.stock.UnpaidDto;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockDto;
+import com.hfsolution.feature.stockmanagement.dto.stock.UnpaidDto;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
@@ -317,7 +317,7 @@ public class PurchaseServicelmp implements PurchaseService {
                     stockHistory.setRemark("Purchase");
                     stockHistory.setQty(productPurchase.getQty()*-1);
                     stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-                    stockHistory.setStock(stock);
+                    // stockHistory.setStock(stock);
                     stockHistoryDao.saveEntityAsync(stockHistory);
 
                     totalPrice = totalPrice.add(totalProdcutPrice);
@@ -356,9 +356,9 @@ public class PurchaseServicelmp implements PurchaseService {
             return response;
 
         }catch (DatabaseException e) {
-            throw e;   
+            throw e;
         }catch (AppException e) {
-            throw e;   
+            throw e;
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
@@ -370,7 +370,6 @@ public class PurchaseServicelmp implements PurchaseService {
         httpServletRequest.setAttribute(ACTION,"DELETE PURCHASE BY ID");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
         try {
-            paymentDao.deleteByPurchaseId(id);
             purchaseDao.deletePurchaseByID(id);
             String msg = AppTools.appGetMessage("033");
             response.setStatus(SUCCESS);

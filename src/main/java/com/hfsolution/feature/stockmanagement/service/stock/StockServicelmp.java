@@ -34,9 +34,13 @@ import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.StockCsv;
+import com.hfsolution.feature.stockmanagement.dto.product.ProductDto;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
-import com.hfsolution.feature.stockmanagement.dto.response.stock.StockDto;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockDetailDto;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockDto;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockHistoryDto;
+import com.hfsolution.feature.stockmanagement.dto.user.User;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
@@ -45,6 +49,7 @@ import com.hfsolution.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
 import static com.hfsolution.app.constant.AppConstant.*;
 
@@ -91,7 +96,7 @@ public class StockServicelmp implements StockService {
             Long userId = (Long)httpServletRequest.getAttribute(USERID);
             StockHistory stockHistory = new StockHistory();
             stockHistory.setId(stockHistoryDao.getStockHistoryId());
-            stockHistory.setStock(stock);
+            // stockHistory.setStock(stock);
             stockHistory.setUser(userRepository.findById(userId).get());
             stockHistory.setRemark("New Creation Product");
             stockHistory.setQty(stockRequest.getQty());
@@ -119,7 +124,6 @@ public class StockServicelmp implements StockService {
         SuccessResponse<Stock> response = new SuccessResponse<>();
         try {
     
-            stockHistoryDao.deleteHistoryByStockID(id);
             stockDao.deleteStockByID(id);
             String msg = AppTools.appGetMessage("025");
             response.setStatus(SUCCESS);
@@ -223,6 +227,7 @@ public class StockServicelmp implements StockService {
     }
 
     @Override
+    @Transactional
     public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
@@ -356,7 +361,7 @@ public class StockServicelmp implements StockService {
                 Long userId = (Long)httpServletRequest.getAttribute(USERID);
                 StockHistory stockHistory = new StockHistory();
                 stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                stockHistory.setStock(stock);
+                // stockHistory.setStock(stock);
                 stockHistory.setUser(userRepository.findById(userId).get());
                 stockHistory.setRemark(stockUpdateRequest.getRemark());
                 stockHistory.setQty(stockUpdateRequest.getQty());
@@ -404,7 +409,7 @@ public class StockServicelmp implements StockService {
                 Long userId = (Long)httpServletRequest.getAttribute(USERID);
                 StockHistory stockHistory = new StockHistory();
                 stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                stockHistory.setStock(stock);
+                // stockHistory.setStock(stock);
                 stockHistory.setUser(userRepository.findById(userId).get());
                 stockHistory.setRemark(stockUpdateRequest.getRemark());
                 stockHistory.setQty(stockUpdateRequest.getQty()*-1);
@@ -444,6 +449,7 @@ public class StockServicelmp implements StockService {
     }
 
     @Override
+    @Transactional
     public Object searchDetail(long id) {
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK DETAIL BY ID");
         SuccessResponse<Object> response = new SuccessResponse<>();
@@ -454,9 +460,36 @@ public class StockServicelmp implements StockService {
                 throw new AppException("024",msg);
             }
 
+            //COPY StockDetailDto Property
+            StockDetailDto stockDetailDto = new StockDetailDto();
+            BeanUtils.copyProperties(stockResult.getEntity(), stockDetailDto);
+
+            //COPY StockHistoryDto Property
+            List<StockHistoryDto> stockHistoryDtos = new ArrayList<>();
+            for (StockHistory stockHistory : stockResult.getEntity().getStockHistories()) {
+
+                //COPY StockHistory Property
+                StockHistoryDto stockHistoryDto = new StockHistoryDto();
+                BeanUtils.copyProperties(stockHistory, stockHistoryDto);
+
+                //COPY User Property
+                User user = new User();
+                BeanUtils.copyProperties(stockHistory.getUser(), user);
+                stockHistoryDto.setUser(user);
+
+                stockHistoryDtos.add(stockHistoryDto);
+            }
+
+            //COPY Product Property
+            ProductDto productDto = new ProductDto();
+            BeanUtils.copyProperties(stockResult.getEntity().getProduct(), productDto);
+
+            stockDetailDto.setStockHistories(stockHistoryDtos);
+            stockDetailDto.setProduct(productDto);
+
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setData(stockResult.getEntity());
+            response.setData(stockDetailDto);
             return response;
         }catch (DatabaseException e) {
             throw e;   

@@ -152,9 +152,6 @@ public class ProductServicelmp implements ProductService {
         httpServletRequest.setAttribute(ACTION,"DELETE PRODUCT BY ID");
         SuccessResponse<Product> response = new SuccessResponse<>();
         try {
-    
-            // stockService.deleteStockByProudctID(id);
-            //purchaseDao.deleteByProductID(id);
             productDao.deleteByProductID(id);
             String msg = AppTools.appGetMessage("007");
             response.setStatus(SUCCESS);

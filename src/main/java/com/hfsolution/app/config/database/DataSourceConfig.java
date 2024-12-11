@@ -30,6 +30,7 @@ public class DataSourceConfig {
 		hikariConfig.addDataSourceProperty("prepStmtCacheSize", "256");
 		hikariConfig.addDataSourceProperty("prepStmtCacheSqlLimit", "2048");
 		hikariConfig.setKeepaliveTime(Integer.parseInt(postgressConnectionProperties.getKeepAlive()));
+		// hikariConfig.
 		final var dataSource = new HikariDataSource(hikariConfig);
 		return dataSource;
 

@@ -24,22 +24,28 @@ public class ProductCsv {
     private BigDecimal price;
 
     @CsvBindByPosition(position = 4)
+    private String factory;
+
+    @CsvBindByPosition(position = 5)
+    private BigDecimal importPrice;
+
+    @CsvBindByPosition(position = 6)
     private BigDecimal discount;
     
     @CsvDate(value = "yyyy-MM-dd hh:mm:ss")
-    @CsvBindByPosition(position = 5)
+    @CsvBindByPosition(position = 7)
     private Timestamp createdDate;
 
     
     @CsvDate(value = "yyyy-MM-dd hh:mm:ss")
-    @CsvBindByPosition(position = 6)
+    @CsvBindByPosition(position = 8)
     private Timestamp updatedDate;
 
-    @CsvBindByPosition(position = 7)
+    @CsvBindByPosition(position = 9)
     @CsvDate(value = "yyyy-MM-dd")
     private Timestamp expiryDate;
 
-    @CsvBindByPosition(position = 8)
+    @CsvBindByPosition(position = 10)
     private String imageUrl;
   
 }

@@ -33,7 +33,7 @@ postgress-connection:
   hibernate:
     ddl-auto: update
     dialect: org.hibernate.dialect.PostgreSQLDialect
-    enable_lazy_load_no_trans: true
+    enable_lazy_load_no_trans: false
 
 application:
   security:

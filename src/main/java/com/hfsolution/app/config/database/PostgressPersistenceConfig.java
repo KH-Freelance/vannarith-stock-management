@@ -45,10 +45,11 @@ public class PostgressPersistenceConfig {
 		properties.setProperty("hibernate.jdbc.time_zone", environment.getProperty("spring.jpa.jdbc.time_zone"));
 		properties.setProperty("hibernate.show_sql", environment.getProperty("spring.jpa.show-sql"));
 		properties.setProperty("hibernate.jdbc.batch_size", environment.getProperty("spring.jpa.jdbc.batch_size"));
-		properties.setProperty("hibernate.able_lazy_load_no_trans",environment.getProperty("postgress-connection.hibernate.enable_lazy_load_no_trans"));
+		// properties.setProperty("hibernate.able_lazy_load_no_trans",environment.getProperty("postgress-connection.hibernate.enable_lazy_load_no_trans"));
 		properties.setProperty("hibernate.hbm2ddl.auto", environment.getProperty("postgress-connection.hibernate.ddl-auto"));
 		properties.setProperty("hibernate.event.merge.entity_copy_observer", "allow");
 		properties.setProperty("hibernate.dialect", environment.getProperty("postgress-connection.hibernate.dialect"));
+		properties.setProperty("hibernate.enable_lazy_load_no_trans", environment.getProperty("postgress-connection.hibernate.enable_lazy_load_no_trans"));
 		entityManagerFactoryBean.setJpaProperties(properties);
 		HibernateJpaVendorAdapter jpaVendorAdapter = new HibernateJpaVendorAdapter();
 		jpaVendorAdapter.setDatabase(Database.POSTGRESQL);

@@ -25,6 +25,8 @@ import com.hfsolution.app.enums.EDataSourceType;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.interfaces.IBaseDBDao;
 import com.hfsolution.app.repository.IBaseRepository;
+
+import jakarta.transaction.Transactional;
 import lombok.Cleanup;
 
 public abstract class BaseDBDao<T, ID> implements IBaseDBDao<T, ID> {

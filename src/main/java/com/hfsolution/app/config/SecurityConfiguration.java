@@ -68,8 +68,6 @@ public class SecurityConfiguration {
                         throw new AccessDeniedException("Access Denied");
                     })
             )
-                // .exceptionHandling(exception -> exception.accessDeniedHandler(new CustomAccessDeniedException())
-                // .authenticationEntryPoint(new CustomAuthenticationEntryPoint()))
                 .authorizeHttpRequests(req ->
                         req.requestMatchers(WHITE_LIST_URL)
                                 .permitAll()

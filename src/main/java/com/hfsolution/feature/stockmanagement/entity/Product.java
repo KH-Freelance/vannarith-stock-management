@@ -3,9 +3,13 @@ package com.hfsolution.feature.stockmanagement.entity;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
+
+import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Getter;
@@ -53,6 +57,11 @@ public class Product {
 
     @Column(name = "image_url")
     private String imageUrl;
+
+    // @OneToOne(mappedBy = "product", cascade = CascadeType.ALL, orphanRemoval = true)
+    // @JsonIgnore
+    // private Stock stock;
+    
 
     @PrePersist
     public void preInsert() {
