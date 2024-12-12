@@ -72,17 +72,20 @@ public class SecurityConfiguration {
                         req.requestMatchers(WHITE_LIST_URL)
                                 .permitAll()
                                 
+                                .requestMatchers(GET, "/user/current-info").authenticated()
                                 
                                 .requestMatchers(GET,"/product/**").hasAnyAuthority("product:READ", "*")
                                 .requestMatchers(POST,"/product/**").hasAnyAuthority("product:CREATE", "*")
                                 .requestMatchers(DELETE,"/product/**").hasAnyAuthority("product:DELETE", "*")
                                 .requestMatchers(PUT,"/product/**").hasAnyAuthority("product:UPDATE", "*")
 
+                                .requestMatchers(GET,"/report/stock").hasAnyAuthority("stock:READ", "*")
                                 .requestMatchers(GET,"/stock/**").hasAnyAuthority("stock:READ", "*")
                                 .requestMatchers(POST,"/stock/**").hasAnyAuthority("stock:CREATE", "*")
                                 .requestMatchers(DELETE,"/stock/**").hasAnyAuthority("stock:DELETE", "*")
                                 .requestMatchers(PUT,"/stock/**").hasAnyAuthority("stock:UPDATE", "*")
 
+                                .requestMatchers(GET,"/report/customer").hasAnyAuthority("customer:READ", "*")
                                 .requestMatchers(GET,"/customer/**").hasAnyAuthority("customer:READ", "*")
                                 .requestMatchers(POST,"/customer/**").hasAnyAuthority("customer:CREATE", "*")
                                 .requestMatchers(DELETE,"/customer/**").hasAnyAuthority("customer:DELETE", "*")
@@ -93,6 +96,12 @@ public class SecurityConfiguration {
                                 .requestMatchers(DELETE,"/user/**").hasAnyAuthority("user:DELETE", "*")
                                 .requestMatchers(PUT,"/user/**").hasAnyAuthority("user:UPDATE", "*")
 
+                                .requestMatchers(GET,"/report/return").hasAnyAuthority("return:READ", "*")
+                                .requestMatchers(GET,"/purchase/return/**").hasAnyAuthority("return:READ", "*")
+                                .requestMatchers(POST,"/purchase/return").hasAnyAuthority("return:CREATE", "*")
+                                .requestMatchers(DELETE,"/purchase/return/**").hasAnyAuthority("return:DELETE", "*")
+                                .requestMatchers(PUT,"/purchase/return/**").hasAnyAuthority("return:UPDATE", "*")
+
                                 .requestMatchers(GET,"/purchase/**").hasAnyAuthority("purchase:READ", "*")
                                 .requestMatchers(POST,"/purchase/**").hasAnyAuthority("purchase:CREATE", "*")
                                 .requestMatchers(DELETE,"/purchase/**").hasAnyAuthority("purchase:DELETE", "*")
@@ -102,6 +111,8 @@ public class SecurityConfiguration {
                                 .requestMatchers(POST,"/role/**").hasAnyAuthority("role:CREATE", "*")
                                 .requestMatchers(DELETE,"/role/**").hasAnyAuthority("role:DELETE", "*")
                                 .requestMatchers(PUT,"/role/**").hasAnyAuthority("role:UPDATE", "*")
+
+
 
                                 // Any Endpoint
                                 .anyRequest()

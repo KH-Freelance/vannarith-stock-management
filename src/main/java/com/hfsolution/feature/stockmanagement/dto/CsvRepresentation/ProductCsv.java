@@ -35,7 +35,6 @@ public class ProductCsv {
     @CsvDate(value = "yyyy-MM-dd hh:mm:ss")
     @CsvBindByPosition(position = 7)
     private Timestamp createdDate;
-
     
     @CsvDate(value = "yyyy-MM-dd hh:mm:ss")
     @CsvBindByPosition(position = 8)

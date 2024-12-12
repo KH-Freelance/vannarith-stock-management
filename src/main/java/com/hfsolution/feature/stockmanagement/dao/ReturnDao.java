@@ -20,7 +20,7 @@ import com.hfsolution.app.dao.BaseDBDao;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
-import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.Return;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;

@@ -55,13 +55,25 @@ public class Stock {
     @JsonIgnore
     private Double percentage;
 
-    @Column(name = "created_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 
-    @Column(name = "updated_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
+
+    public void removeStockHistory(StockHistory stockHistory) {
+        this.stockHistories.remove(stockHistory);
+    }
+
+    public void addStockHistory(StockHistory stockHistory) {
+        if (this.stockHistories == null) {
+            this.stockHistories = new ArrayList<>();
+        }
+        this.stockHistories.add(stockHistory);
+        stockHistory.setStock(this);
+    }
 
   
     @PrePersist

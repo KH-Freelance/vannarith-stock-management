@@ -42,15 +42,15 @@ public class DataResponseAdviser implements ResponseBodyAdvice<Object>{
         ? httpServletRequest.getAttribute(USERNAME).toString()
         : "";
         
-        // var appLog = new AppLog<>();
-        // appLog.setReqId(reqId);
-        // appLog.setUri(uri);
-        // appLog.setUserId(userId);
-        // appLog.setUsername(username);
-        // appLog.setAction(action);
-        // appLog.setRequest(requestInfo);
-        // appLog.setResponse(body);
-        // appLog.writeToLog();
+        var appLog = new AppLog<>();
+        appLog.setReqId(reqId);
+        appLog.setUri(uri);
+        appLog.setUserId(userId);
+        appLog.setUsername(username);
+        appLog.setAction(action);
+        appLog.setRequest(requestInfo);
+        appLog.setResponse(body);
+        appLog.writeToLog();
        
         return body;
     }

@@ -8,6 +8,7 @@ import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -40,6 +41,7 @@ import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateReque
 import com.hfsolution.feature.stockmanagement.dto.stock.StockDetailDto;
 import com.hfsolution.feature.stockmanagement.dto.stock.StockDto;
 import com.hfsolution.feature.stockmanagement.dto.stock.StockHistoryDto;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto;
 import com.hfsolution.feature.stockmanagement.dto.user.User;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
@@ -86,22 +88,24 @@ public class StockServicelmp implements StockService {
             }
             stock = new Stock();
             BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
+
+            // Need to be call async 
+            Long userId = (Long)httpServletRequest.getAttribute(USERID);
+            StockHistory stockHistory = new StockHistory();
+            stockHistory.setId(stockHistoryDao.getStockHistoryId());
+            stockHistory.setUser(userRepository.findById(userId).get());
+            stockHistory.setRemark("New Creation Product");
+            stockHistory.setQty(stockRequest.getQty());
+            stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+
             stock.setId(stockDao.getStockId());
             stock.setProduct(product.getEntity());
             stock.setQty(stockRequest.getQty());
             stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+            stock.addStockHistory(stockHistory);
             stock = stockDao.saveEntity(stock).getEntity();
-            // Need to be call async 
-            Long userId = (Long)httpServletRequest.getAttribute(USERID);
-            StockHistory stockHistory = new StockHistory();
-            stockHistory.setId(stockHistoryDao.getStockHistoryId());
-            // stockHistory.setStock(stock);
-            stockHistory.setUser(userRepository.findById(userId).get());
-            stockHistory.setRemark("New Creation Product");
-            stockHistory.setQty(stockRequest.getQty());
-            stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-            stockHistoryDao.saveEntityAsync(stockHistory);
+            
             
             response.setStatus(SUCCESS);
             response.setCode("026");
@@ -341,6 +345,7 @@ public class StockServicelmp implements StockService {
     } 
 
     @Override
+    @Transactional
     public Object addQuantity(Long id, StockUpdateRequest stockUpdateRequest) {
 
         httpServletRequest.setAttribute(ACTION,"ADD QUANTITY TO STOCK");
@@ -361,12 +366,11 @@ public class StockServicelmp implements StockService {
                 Long userId = (Long)httpServletRequest.getAttribute(USERID);
                 StockHistory stockHistory = new StockHistory();
                 stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                // stockHistory.setStock(stock);
                 stockHistory.setUser(userRepository.findById(userId).get());
                 stockHistory.setRemark(stockUpdateRequest.getRemark());
                 stockHistory.setQty(stockUpdateRequest.getQty());
                 stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-                stockHistoryDao.saveEntityAsync(stockHistory);
+                stock.addStockHistory(stockHistory);
             }
             stockDao.saveEntity(stock);
             response.setStatus(SUCCESS);
@@ -384,6 +388,7 @@ public class StockServicelmp implements StockService {
     }
 
     @Override
+    @Transactional
     public Object removeQuantity(Long id, StockUpdateRequest stockUpdateRequest) {
         httpServletRequest.setAttribute(ACTION,"REMOVE QUANTITY TO STOCK");
         SuccessResponse<Stock> response = new SuccessResponse<>();
@@ -409,12 +414,11 @@ public class StockServicelmp implements StockService {
                 Long userId = (Long)httpServletRequest.getAttribute(USERID);
                 StockHistory stockHistory = new StockHistory();
                 stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                // stockHistory.setStock(stock);
                 stockHistory.setUser(userRepository.findById(userId).get());
                 stockHistory.setRemark(stockUpdateRequest.getRemark());
                 stockHistory.setQty(stockUpdateRequest.getQty()*-1);
                 stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-                stockHistoryDao.saveEntityAsync(stockHistory);
+                stock.addStockHistory(stockHistory);
             }
             stockDao.saveEntity(stock);
             response.setStatus(SUCCESS);
@@ -433,19 +437,30 @@ public class StockServicelmp implements StockService {
 
 
 
-    public void calculatePercentageOfQty(Page<Stock> stockPage) {
-        Long totalQty = stockDao.getTotal();
-        if (totalQty == null || totalQty == 0) {
-            System.out.println("Total quantity is zero. Cannot calculate percentages.");
-            return;
+    private void calculatePercentageOfQty(Page<Stock> stockPage) {
+        BaseEntityResponseDto<StockPercentageDto> stockPercentage = stockDao.findPercentage(stockPage.stream().map(stock -> stock.getId()).toList());
+        
+        for (StockPercentageDto stockPercentageDto : stockPercentage.getEntityList()) {
+            for (Stock stock : stockPage) {
+                if (stock.getId() == stockPercentageDto.getId()){
+                    BigDecimal bd = new BigDecimal(stockPercentageDto.getPercentage()).setScale(2, RoundingMode.HALF_UP);
+                    stock.setPercentage(bd.doubleValue());
+                }
+            }
         }
 
-        // Calculate and print the percentage for each stock entry
-        for (Stock stock : stockPage) {
-            double percentage = ((double) stock.getQty() / totalQty) * 100;
-            BigDecimal bd = new BigDecimal(percentage).setScale(2, RoundingMode.HALF_UP);
-            stock.setPercentage(bd.doubleValue());
+    }
+
+    private void calculatePercentageOfQty(Stock stock) {
+        BaseEntityResponseDto<StockPercentageDto> stockPercentage = stockDao.findPercentage(Arrays.asList(stock.getId()));
+        
+        for (StockPercentageDto stockPercentageDto : stockPercentage.getEntityList()) {
+            if (stock.getId() == stockPercentageDto.getId()){
+                BigDecimal bd = new BigDecimal(stockPercentageDto.getPercentage()).setScale(2, RoundingMode.HALF_UP);
+                stock.setPercentage(bd.doubleValue());
+            }
         }
+
     }
 
     @Override
@@ -480,13 +495,15 @@ public class StockServicelmp implements StockService {
                 stockHistoryDtos.add(stockHistoryDto);
             }
 
+            calculatePercentageOfQty(stockResult.getEntity());
+            Double stockPercentage = stockResult.getEntity().getPercentage();
+
             //COPY Product Property
             ProductDto productDto = new ProductDto();
             BeanUtils.copyProperties(stockResult.getEntity().getProduct(), productDto);
-
             stockDetailDto.setStockHistories(stockHistoryDtos);
             stockDetailDto.setProduct(productDto);
-
+            stockDetailDto.setPercentage(stockPercentage);
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
             response.setData(stockDetailDto);

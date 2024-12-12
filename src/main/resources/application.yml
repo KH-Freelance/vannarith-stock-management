@@ -10,13 +10,14 @@ spring:
       max-request-size: 20MB
   jpa:
     jdbc:
-      time_zone: UTC
+      time_zone: Asia/Phnom_Penh
       batch_size: 1000
     open-in-view: true
-    show-sql: true
+    show-sql: false
 cloudinary: 
   url: ${CLOUDINARY_URL:cloudinary://878231315371161:_v9bFowIqhd8RQ1bw1LKtoFkmtM@dohtq6cbz}
-  default-image: https://res.cloudinary.com/dohtq6cbz/image/upload/v1731051235/empty_mjkuxf.jpg
+  default-image: https://res.cloudinary.com/dohtq6cbz/image/upload/v1731050338/stock-user/test2test2.png
+  # default-image: https://res.cloudinary.com/dohtq6cbz/image/upload/v1731051235/empty_mjkuxf.jpg
 postgress-connection:
   # jdbc-url: jdbc:postgresql://${DB_HOST:localhost}:5432/stock-new2
   jdbc-url: jdbc:postgresql://${DB_HOST:ec2-3-17-133-210.us-east-2.compute.amazonaws.com}:5432/stockmanagement

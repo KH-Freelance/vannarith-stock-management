@@ -42,8 +42,8 @@ public class StockHistory {
     @Column(name = "remark")
     private String remark;
 
-    @Column(name = "created_date")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 
     @PrePersist

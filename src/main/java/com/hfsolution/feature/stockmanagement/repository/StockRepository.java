@@ -9,6 +9,7 @@ import org.springframework.data.repository.query.Param;
 import org.springframework.transaction.annotation.Transactional;
 
 import com.hfsolution.app.repository.IBaseRepository;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 
 public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecificationExecutor<Stock>{
@@ -18,6 +19,20 @@ public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecifi
 
     @Query("SELECT s FROM Stock s WHERE s.product.productName = :name")
     Stock findByProductName(String name);
+
+
+    @Query("""
+        SELECT new com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto(
+            id,
+            qty,
+            (qty * 100.0 / total_qty) AS percentage_qty
+        )
+
+        FROM
+            Stock  ,
+            (SELECT SUM(qty) AS total_qty FROM Stock) AS total where id in :ids
+        """)
+    List<StockPercentageDto> findPercentage(List<Long> ids);
     
 
     // @Query("SELECT s FROM Stock s WHERE s.product.id = :id")

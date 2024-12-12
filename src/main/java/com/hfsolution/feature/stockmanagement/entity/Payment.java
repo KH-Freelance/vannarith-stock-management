@@ -37,7 +37,6 @@ public class Payment {
 
     @Id
     @Column(name = "id")
-    @CsvBindByPosition(position = 0)
     private Long id;
 
     @ManyToOne(fetch = FetchType.LAZY)
@@ -48,21 +47,17 @@ public class Payment {
 
     @Transient // This field will not be persisted in the database
     @JsonIgnore
-    @CsvBindByPosition(position = 1)
     private Long purchId;
 
     @Column(name = "amount")
-    @CsvBindByPosition(position = 2)
     private BigDecimal amount;
 
-    @Column(name = "created_date")
-    @CsvBindByPosition(position = 3)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
+    @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 
-    @Column(name = "updated_date")
-    @CsvBindByPosition(position = 4)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "MMMM dd, yyyy h:mm a")
+    @Column(name = "updated_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
 
     @PrePersist

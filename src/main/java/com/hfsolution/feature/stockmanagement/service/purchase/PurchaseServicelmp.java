@@ -306,19 +306,25 @@ public class PurchaseServicelmp implements PurchaseService {
                     purchase.addPurchaseItem(purchaseItem);
                     
                     // Minus from Stock
-                    
-                    stock.setQty(stock.getQty()-productPurchase.getQty());
-                    // stock.addStockHistory(stockHistory);
-                    stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-                    stock = stockDao.saveEntity(stock).getEntity();
                     StockHistory stockHistory = new StockHistory();
                     stockHistory.setId(stockHistoryDao.getStockHistoryId());
                     stockHistory.setUser(userRepository.findById(userId).get());
                     stockHistory.setRemark("Purchase");
                     stockHistory.setQty(productPurchase.getQty()*-1);
                     stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+                    
+                    stock.setQty(stock.getQty()-productPurchase.getQty());
+                    stock.addStockHistory(stockHistory);
+                    stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+                    stock = stockDao.saveEntity(stock).getEntity();
+                    // StockHistory stockHistory = new StockHistory();
+                    // stockHistory.setId(stockHistoryDao.getStockHistoryId());
+                    // stockHistory.setUser(userRepository.findById(userId).get());
+                    // stockHistory.setRemark("Purchase");
+                    // stockHistory.setQty(productPurchase.getQty()*-1);
+                    // stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
                     // stockHistory.setStock(stock);
-                    stockHistoryDao.saveEntityAsync(stockHistory);
+                    // stockHistoryDao.saveEntityAsync(stockHistory);
 
                     totalPrice = totalPrice.add(totalProdcutPrice);
                     totalQty += productPurchase.getQty();

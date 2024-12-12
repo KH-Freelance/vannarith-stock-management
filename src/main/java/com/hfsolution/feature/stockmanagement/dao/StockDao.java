@@ -18,6 +18,7 @@ import com.hfsolution.app.dao.BaseDBDao;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.util.InfoGenerator;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.repository.StockRepository;
 
@@ -75,6 +76,25 @@ public class StockDao extends BaseDBDao<Stock,Long>{
       var appModel = new BaseEntityResponseDto<Stock>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<StockPercentageDto> findPercentage(List<Long> ids){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+      List<StockPercentageDto> entities = stockRepository.findPercentage(ids);
+      var appModel = new BaseEntityResponseDto<StockPercentageDto>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entities);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
       return appModel;
 
