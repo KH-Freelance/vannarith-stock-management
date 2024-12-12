@@ -74,22 +74,25 @@ public class SecurityConfiguration {
                                 
                                 .requestMatchers(GET, "/user/current-info").authenticated()
                                 
-                                .requestMatchers(GET,"/product/**").hasAnyAuthority("product:READ", "*")
-                                .requestMatchers(POST,"/product/**").hasAnyAuthority("product:CREATE", "*")
-                                .requestMatchers(DELETE,"/product/**").hasAnyAuthority("product:DELETE", "*")
-                                .requestMatchers(PUT,"/product/**").hasAnyAuthority("product:UPDATE", "*")
-
+                                
                                 .requestMatchers(GET,"/stock/**").hasAnyAuthority("stock:READ", "*")
+                                .requestMatchers(GET,"/stock/product/**").hasAnyAuthority("stock:UPDATE","stock:CREATE", "*")
                                 .requestMatchers(POST,"/stock/**").hasAnyAuthority("stock:CREATE", "*")
                                 .requestMatchers(DELETE,"/stock/**").hasAnyAuthority("stock:DELETE", "*")
                                 .requestMatchers(PUT,"/stock/**").hasAnyAuthority("stock:UPDATE", "*")
 
+                                .requestMatchers(GET,"/product/**").hasAnyAuthority("product:READ", "*")
+                                .requestMatchers(POST,"/product/**").hasAnyAuthority("product:CREATE", "*")
+                                .requestMatchers(DELETE,"/product/**").hasAnyAuthority("product:DELETE", "*")
+                                .requestMatchers(PUT,"/product/**").hasAnyAuthority("product:UPDATE", "*")
+                                
                                 .requestMatchers(GET,"/customer/**").hasAnyAuthority("customer:READ", "*")
                                 .requestMatchers(POST,"/customer/**").hasAnyAuthority("customer:CREATE", "*")
                                 .requestMatchers(DELETE,"/customer/**").hasAnyAuthority("customer:DELETE", "*")
                                 .requestMatchers(PUT,"/customer/**").hasAnyAuthority("customer:UPDATE", "*")
 
                                 .requestMatchers(GET,"/user/**").hasAnyAuthority("user:READ", "*")
+                                .requestMatchers(GET,"/user/role/**").hasAnyAuthority("user:CREATE","user:UPDATE", "*")
                                 .requestMatchers(POST,"/user/**").hasAnyAuthority("user:CREATE", "*")
                                 .requestMatchers(DELETE,"/user/**").hasAnyAuthority("user:DELETE", "*")
                                 .requestMatchers(PUT,"/user/**").hasAnyAuthority("user:UPDATE", "*")
@@ -100,6 +103,8 @@ public class SecurityConfiguration {
                                 .requestMatchers(PUT,"/purchase/return/**").hasAnyAuthority("return:UPDATE", "*")
 
                                 .requestMatchers(GET,"/purchase/**").hasAnyAuthority("purchase:READ", "*")
+                                .requestMatchers(GET,"/purchase/product/**").hasAnyAuthority("purchase:CREATE","purchase:UPDATE", "*")
+                                .requestMatchers(GET,"/purchase/customer/**").hasAnyAuthority("purchase:CREATE","purchase:UPDATE", "*")
                                 .requestMatchers(POST,"/purchase/**").hasAnyAuthority("purchase:CREATE", "*")
                                 .requestMatchers(DELETE,"/purchase/**").hasAnyAuthority("purchase:DELETE", "*")
                                 .requestMatchers(PUT,"/purchase/**").hasAnyAuthority("purchase:UPDATE", "*")

@@ -34,6 +34,7 @@ import com.hfsolution.feature.user.dto.RegisterRequest;
 import com.hfsolution.feature.user.dto.ResetPasswordRequest;
 import com.hfsolution.feature.user.dto.UserUpdateRequest;
 import com.hfsolution.feature.user.entity.User;
+import com.hfsolution.feature.user.service.RoleService;
 import com.hfsolution.feature.user.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -48,6 +49,7 @@ public class UserController {
 
     private final AuthenticationService authService;
     private final UserService userService;
+    private final RoleService roleService;
 
     //ADMIN
     @PutMapping("/change-role/{id}")
@@ -57,6 +59,20 @@ public class UserController {
     ) {
         userService.changeRole(request, id);
         SuccessResponse<?> successResponse =  new SuccessResponse<>();
+        successResponse.setCode(SUCCESS_CODE);
+        successResponse.setMsg(SUCCESS);
+        return ResponseEntity.ok(successResponse);
+    }
+
+    @GetMapping("/role/search")
+    public ResponseEntity<?> searchRoles(
+        @RequestParam(required = false) String  q,
+        @RequestParam(defaultValue = "1") int pageNo,
+        @RequestParam(defaultValue = "10") int pageSize,
+        @RequestParam(defaultValue = "ASC") Sort.Direction sort,
+        @RequestParam(defaultValue = "id") String sortByColum) {
+        SuccessResponse<Object> successResponse =  new SuccessResponse<>();
+        successResponse.setData(roleService.search(q, pageNo, pageSize, sort, sortByColum));
         successResponse.setCode(SUCCESS_CODE);
         successResponse.setMsg(SUCCESS);
         return ResponseEntity.ok(successResponse);
