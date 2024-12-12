@@ -79,13 +79,11 @@ public class SecurityConfiguration {
                                 .requestMatchers(DELETE,"/product/**").hasAnyAuthority("product:DELETE", "*")
                                 .requestMatchers(PUT,"/product/**").hasAnyAuthority("product:UPDATE", "*")
 
-                                .requestMatchers(GET,"/report/stock").hasAnyAuthority("stock:READ", "*")
                                 .requestMatchers(GET,"/stock/**").hasAnyAuthority("stock:READ", "*")
                                 .requestMatchers(POST,"/stock/**").hasAnyAuthority("stock:CREATE", "*")
                                 .requestMatchers(DELETE,"/stock/**").hasAnyAuthority("stock:DELETE", "*")
                                 .requestMatchers(PUT,"/stock/**").hasAnyAuthority("stock:UPDATE", "*")
 
-                                .requestMatchers(GET,"/report/customer").hasAnyAuthority("customer:READ", "*")
                                 .requestMatchers(GET,"/customer/**").hasAnyAuthority("customer:READ", "*")
                                 .requestMatchers(POST,"/customer/**").hasAnyAuthority("customer:CREATE", "*")
                                 .requestMatchers(DELETE,"/customer/**").hasAnyAuthority("customer:DELETE", "*")
@@ -96,7 +94,6 @@ public class SecurityConfiguration {
                                 .requestMatchers(DELETE,"/user/**").hasAnyAuthority("user:DELETE", "*")
                                 .requestMatchers(PUT,"/user/**").hasAnyAuthority("user:UPDATE", "*")
 
-                                .requestMatchers(GET,"/report/return").hasAnyAuthority("return:READ", "*")
                                 .requestMatchers(GET,"/purchase/return/**").hasAnyAuthority("return:READ", "*")
                                 .requestMatchers(POST,"/purchase/return").hasAnyAuthority("return:CREATE", "*")
                                 .requestMatchers(DELETE,"/purchase/return/**").hasAnyAuthority("return:DELETE", "*")
@@ -112,7 +109,10 @@ public class SecurityConfiguration {
                                 .requestMatchers(DELETE,"/role/**").hasAnyAuthority("role:DELETE", "*")
                                 .requestMatchers(PUT,"/role/**").hasAnyAuthority("role:UPDATE", "*")
 
-
+                                .requestMatchers(GET,"/report/**").hasAnyAuthority("report:READ", "*")
+                                .requestMatchers(POST,"/report/**").hasAnyAuthority("report:CREATE", "*")
+                                .requestMatchers(DELETE,"/report/**").hasAnyAuthority("report:DELETE", "*")
+                                .requestMatchers(PUT,"/report/**").hasAnyAuthority("report:UPDATE", "*")
 
                                 // Any Endpoint
                                 .anyRequest()
