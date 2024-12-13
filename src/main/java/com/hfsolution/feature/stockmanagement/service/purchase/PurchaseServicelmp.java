@@ -431,6 +431,7 @@ public class PurchaseServicelmp implements PurchaseService {
 
 
     @Override
+    @Transactional
     public Object pay(Long id, PayRequest payRequest) {
         httpServletRequest.setAttribute(ACTION,"PAYMENT");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
@@ -503,13 +504,48 @@ public class PurchaseServicelmp implements PurchaseService {
 
 
     @Override
+    @Transactional
     public Object getUnpaidByCustomerId(long customerId) {
         httpServletRequest.setAttribute(ACTION,"PAYMENT");
         SuccessResponse<Object> response = new SuccessResponse<>();
         try {
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findAllByCustomerIdAndPaymentStatus(customerId, PaymentStatus.CREDIT);
             UnpaidDto unpaidDto = new UnpaidDto();
-            unpaidDto.setContent(purchaseResult.getEntityList());
+            List<PurchaseDetailDto> purchaseDetailDtos = new ArrayList<>();
+            for (Purchase purchase : purchaseResult.getEntityList()) {
+                PurchaseDetailDto purchaseDto = new PurchaseDetailDto();
+                BeanUtils.copyProperties(purchase, purchaseDto);
+
+                CustomerDto customerDto = new CustomerDto();
+                BeanUtils.copyProperties(purchase.getCustomer(), customerDto);
+
+                com.hfsolution.feature.stockmanagement.dto.user.User userDto = new com.hfsolution.feature.stockmanagement.dto.user.User();
+                BeanUtils.copyProperties(purchase.getUser(), userDto);
+
+                List<PurchaseItemDto> purchaseItemDtos = new ArrayList<>();
+                for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
+                    PurchaseItemDto purchaseItemDto = new PurchaseItemDto();
+                    BeanUtils.copyProperties(purchaseItem, purchaseItemDto);
+                    ProductDto productDto = new ProductDto();
+                    BeanUtils.copyProperties(purchaseItem.getProduct(), productDto);
+                    purchaseItemDto.setProduct(productDto);
+                    purchaseItemDtos.add(purchaseItemDto);
+                }
+
+                List<PaymentDto> paymentDtos = new ArrayList<>();
+                for (Payment payment : purchase.getPayments()) {
+                    PaymentDto paymentDto = new PaymentDto();
+                    BeanUtils.copyProperties(payment, paymentDto);
+                    paymentDtos.add(paymentDto);
+                }
+                
+                purchaseDto.setPurchaseItems(purchaseItemDtos);
+                purchaseDto.setPayments(paymentDtos);
+                purchaseDto.setCustomer(customerDto);
+                purchaseDto.setUser(userDto);
+                purchaseDetailDtos.add(purchaseDto);
+            }
+            unpaidDto.setContent(purchaseDetailDtos);
             response.setStatus(SUCCESS);
             response.setCode("000");
             response.setData(unpaidDto);

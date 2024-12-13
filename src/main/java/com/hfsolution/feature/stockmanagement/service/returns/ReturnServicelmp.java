@@ -38,6 +38,7 @@ import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 // import jakarta.transaction.Transactional;
+import jakarta.transaction.Transactional;
 
 import static com.hfsolution.app.constant.AppConstant.*;
 
@@ -49,11 +50,11 @@ public class ReturnServicelmp implements ReturnService {
     private final PurchaseItemDao purchaseItemDao;
     private final StockDao stockDao;
     private final HttpServletRequest httpServletRequest;
-    private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
     private final ReturnDao returnDao;
 
     @Override
+    @Transactional
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH RETURN");
@@ -89,6 +90,7 @@ public class ReturnServicelmp implements ReturnService {
     } 
 
     @Override
+    @Transactional
     public Object returnPurchase(ReturnRequest returnRequest) {
 
         httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");
@@ -173,8 +175,8 @@ public class ReturnServicelmp implements ReturnService {
             returnDao.saveEntityAsync(returns);
 
             //UPDATE PURCHASE SUBTRACT RETURN PRODUCT PRICE
-            sourcePurchase.setTotal(sourcePurchase.getTotal().subtract(totalSourceItemAmt));
-            purchaseDao.saveEntityAsync(sourcePurchase);
+            // sourcePurchase.setTotal(sourcePurchase.getTotal().subtract(totalSourceItemAmt));
+            // purchaseDao.saveEntityAsync(sourcePurchase);
 
             //TOTAL OLD PAY WITH NEW PAY
             BigDecimal total = totalSourceItemAmt;

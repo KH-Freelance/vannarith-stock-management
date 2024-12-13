@@ -25,8 +25,12 @@ public class RoleController {
     @PostMapping("/add")
     public ResponseEntity<?>  createRole(
             @RequestBody RoleRequest request) {
+        SuccessResponse<Object> successResponse =  new SuccessResponse<>();
         Role createdRole = roleService.createRole(request.getName(), request.getDescription(), request.getPermissionIds());
-        return ResponseEntity.ok(createdRole);
+        successResponse.setData(createdRole);
+        successResponse.setCode(SUCCESS_CODE);
+        successResponse.setMsg(SUCCESS);
+        return ResponseEntity.ok(successResponse);
     }
 
     @GetMapping("/search")
