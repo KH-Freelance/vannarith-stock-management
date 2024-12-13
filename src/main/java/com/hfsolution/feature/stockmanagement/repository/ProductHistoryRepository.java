@@ -9,16 +9,16 @@ import org.springframework.data.jpa.repository.Query;
 
 import com.hfsolution.app.repository.IBaseRepository;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
-import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 
-public interface ProductRepository extends IBaseRepository<Product,Long>, JpaSpecificationExecutor<Product>{
+public interface ProductHistoryRepository extends IBaseRepository<ProductHistory,Long>, JpaSpecificationExecutor<ProductHistory>{
 
 
-    Product findByProductName(String name);
-    // List<Customer> findByCreatedDateBetween(Timestamp d1, Timestamp d2);
+    ProductHistory findByProductName(String name);
+    List<Customer> findByCreatedDateBetween(Timestamp d1, Timestamp d2);
 
     
     @Query(value = "SELECT nextval('product_id_seq')", nativeQuery = true)
-    Long getNextProductId();
+    Long getNextProductHistoryId();
 
 } 

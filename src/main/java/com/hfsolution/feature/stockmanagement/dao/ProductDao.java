@@ -6,9 +6,11 @@ import static com.hfsolution.app.constant.AppResponseStatus.*;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Optional;
 
 import static com.hfsolution.app.constant.AppResponseCode.*;
 
+import org.springframework.beans.BeanUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.beans.factory.annotation.Value;
@@ -38,6 +40,8 @@ import com.hfsolution.feature.stockmanagement.repository.ProductRepository;
 public class ProductDao extends BaseDBDao<Product, Long>{
   
   private ProductRepository productRepository;
+  @Autowired
+  private ProductHistoryDao productHistoryDao;
 
   public ProductDao(ProductRepository repository, @Qualifier("postgressDataSourceContextHolder") IDataSourceContextHolder dataSourceDCContextHolder) {
     super(repository, dataSourceDCContextHolder);
@@ -65,8 +69,13 @@ public class ProductDao extends BaseDBDao<Product, Long>{
     long startTime = System.currentTimeMillis();
     try {
      
-      Product product = productRepository.findById(id).get();
-
+      Optional<Product> productOpt = productRepository.findById(id);
+      Product product = new Product();
+      if(productOpt.isPresent()){
+        product = productOpt.get();
+      }else{
+        BeanUtils.copyProperties(productHistoryDao.findByProductHistoryID(id).getEntity(), product);
+      }
     
       var appModel = new BaseEntityResponseDto<Product>();
       appModel.setStatus(SUCCESS);
@@ -156,9 +165,10 @@ public class ProductDao extends BaseDBDao<Product, Long>{
     long startTime = System.currentTimeMillis();
 
     try {
-
+      Product product = productRepository.findById(id).get();
       productRepository.deleteById(id);
       var appModel = new BaseEntityResponseDto<Product>();
+      appModel.setEntity(product);
       appModel.setStatus(SUCCESS);
       return appModel;
 

@@ -99,7 +99,7 @@ public class StockServicelmp implements StockService {
             stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
 
             stock.setId(stockDao.getStockId());
-            stock.setProduct(product.getEntity());
+            stock.setProductId(product.getEntity().getId());
             stock.setQty(stockRequest.getQty());
             stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
@@ -185,8 +185,8 @@ public class StockServicelmp implements StockService {
             stockResult.getEntityList().stream().forEach(stock->{
                 StockCsv stockCsv = new StockCsv();
                 BeanUtils.copyProperties(stock, stockCsv);
-                stockCsv.setProductId(stock.getProduct().getId());
-                stockCsv.setProductName(stock.getProduct().getProductName());
+                // stockCsv.setProductId(stock.getProduct().getId());
+                // stockCsv.setProductName(stock.getProduct().getProductName());
                 stockCsvs.add(stockCsv);
             });
             csvService.export(stockCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
@@ -210,7 +210,7 @@ public class StockServicelmp implements StockService {
             stockCsvList.forEach(stockCsv->{
                 Stock stock = new Stock();
                 BeanUtils.copyProperties(stockCsv, stock);
-                stock.setProduct(productDao.findById(stockCsv.getProductId()).getEntity());
+                stock.setProductId(productDao.findByProductID(stockCsv.getProductId()).getEntity().getId());
                 stockList.add(stock);
             });
             stockDao.saveEntities(stockList);
@@ -252,15 +252,16 @@ public class StockServicelmp implements StockService {
             }
             
             calculatePercentageOfQty(stockResult.getPage());
-            Page<StockDto> userDtoPage = stockResult.getPage().map(stock ->{
+            Page<StockDto> stockDtoPage = stockResult.getPage().map(stock ->{
                 StockDto stockDto = new StockDto();
                 BeanUtils.copyProperties(stock, stockDto);
+
                 stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
                 return stockDto;
             });
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setData(userDtoPage);
+            response.setData(stockDtoPage);
             return response;
 
         }catch (DatabaseException e) {
@@ -309,10 +310,11 @@ public class StockServicelmp implements StockService {
     } 
 
     @Override
+    @Transactional
     public Object searchHistory(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK HISTORY");
-        SuccessResponse<Page<StockHistory>> response = new SuccessResponse<>();
+        SuccessResponse<Object> response = new SuccessResponse<>();
         try {
             // q.concat(q+",stock.id="+stockId);
             Specification<StockHistory> stockHistories = new CustomSpecification<>(q);
@@ -322,16 +324,36 @@ public class StockServicelmp implements StockService {
             pageRequestDto.setSort(sort);
             pageRequestDto.setSortByColumn(sortByColum);
             Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
-            // BaseEntityResponseDto<StockHistory> stockHistoryResult = stockHistoryDao.findAllByStockId(stockId,pageable);
             BaseEntityResponseDto<StockHistory> stockHistoryResult = stockHistoryDao.search(stockHistories,pageable);
             if(!stockHistoryResult.getStatus().equals(SUCCESS) || stockHistoryResult.getPage()==null){
                 String msg = AppTools.appGetMessage("024");
                 throw new AppException("024",msg);
             }
 
+            Page<StockHistoryDto> stockHistoryDtoPage = stockHistoryResult.getPage().map(stockHistory ->{
+                StockHistoryDto stockHistoryDto = new StockHistoryDto();
+                BeanUtils.copyProperties(stockHistory, stockHistoryDto);
+
+                User userDto = new User();
+                BeanUtils.copyProperties(stockHistory.getUser(), userDto);
+                stockHistoryDto.setUser(userDto);
+
+                StockDetailDto stockDto = new StockDetailDto();
+                BeanUtils.copyProperties(stockHistory.getStock(), stockDto);
+
+                ProductDto productDto = new ProductDto();
+                BeanUtils.copyProperties(stockHistory.getStock().getProduct(), productDto);
+                stockDto.setProduct(productDto);
+
+                stockHistoryDto.setStock(stockDto);
+
+
+                return stockHistoryDto;
+            });
+
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setData(stockHistoryResult.getPage());
+            response.setData(stockHistoryDtoPage);
             return response;
 
         }catch (DatabaseException e) {
@@ -500,7 +522,7 @@ public class StockServicelmp implements StockService {
 
             //COPY Product Property
             ProductDto productDto = new ProductDto();
-            BeanUtils.copyProperties(stockResult.getEntity().getProduct(), productDto);
+            BeanUtils.copyProperties(stockResult.getEntity().getProduct()  , productDto);
             stockDetailDto.setStockHistories(stockHistoryDtos);
             stockDetailDto.setProduct(productDto);
             stockDetailDto.setPercentage(stockPercentage);

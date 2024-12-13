@@ -14,8 +14,8 @@ import lombok.Setter;
 @Setter
 @Getter
 @Entity
-@Table(name = "Product")
-public class Product {
+@Table(name = "product_history")
+public class ProductHistory {
 
     @Id
     @Column(name = "id")
@@ -50,6 +50,10 @@ public class Product {
     @Column(name = "expiry_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
     private Timestamp expiryDate;
+
+    @Column(name = "deleted_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
+    private Timestamp deletedDate;
 
     @Column(name = "image_url")
     private String imageUrl;

@@ -15,11 +15,13 @@ public class StockHistoryDto {
 
     private User user;
 
+    private StockDetailDto stock;
+
     private Long qty;
 
     private String remark;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 
    

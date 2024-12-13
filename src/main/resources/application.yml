@@ -32,7 +32,7 @@ postgress-connection:
   max-lifetime: 30000
   keep-alive: 30000
   hibernate:
-    ddl-auto: update
+    ddl-auto: none
     dialect: org.hibernate.dialect.PostgreSQLDialect
     enable_lazy_load_no_trans: false
 

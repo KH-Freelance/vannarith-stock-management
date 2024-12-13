@@ -4,11 +4,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;

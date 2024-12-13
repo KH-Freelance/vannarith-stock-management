@@ -29,7 +29,11 @@ import com.hfsolution.app.properties.CloudinaryProperties;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
+import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
+import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
+import com.hfsolution.feature.stockmanagement.entity.Purchase;
+import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.token.repository.TokenRepository;
 import com.hfsolution.feature.user.dto.ChangePasswordRequest;
 import com.hfsolution.feature.user.dto.ChangeRoleRequest;
@@ -57,6 +61,8 @@ public class UserService {
     private final PasswordEncoder passwordEncoder;
     private final UserRepository repository;
     private final TokenRepository tokenRepository;
+    private final PurchaseDao purchaseDao;
+    private final StockDao stockDao;
     private final HttpServletResponse response;
     private final RoleRepository roleRepository;
     private final String CSV_FILENAME="user";
@@ -239,6 +245,21 @@ public class UserService {
         if(!opUser.isPresent()){
             throw new AppException("002");
         }
+
+        BaseEntityResponseDto<Purchase>  purchaseResult =  purchaseDao.findPurchaseByUserId(userId);
+        if(purchaseResult.getEntityList()!=null && purchaseResult.getEntityList().size() > 0){
+            String msg = AppTools.appGetMessage("0050").replace("[purchaseCodes]", String.join(", ", purchaseResult.getEntityList().stream().limit(3).map(purchase->purchase.getPurchaseCode()).toArray(String[]::new)) + (purchaseResult.getEntityList().size() > 3 ? "..." : ""));
+            throw new AppException("0050",msg, "Y");
+        }
+
+        BaseEntityResponseDto<Stock>  stockResult =  stockDao.findStockByUserID(userId);
+        if(stockResult.getEntityList()!=null && stockResult.getEntityList().size() > 0){
+            String msg = AppTools.appGetMessage("0051").replace("[stockIds]", String.join(", ", stockResult.getEntityList().stream().limit(3).map(stock->stock.getId()).toArray(String[]::new)) + (stockResult.getEntityList().size() > 3 ? "..." : ""));
+            throw new AppException("0051",msg, "Y");
+        }
+
+        
+
         tokenRepository.deleteByUserId(opUser.get().getId());
         repository.deleteById(opUser.get().getId());
 

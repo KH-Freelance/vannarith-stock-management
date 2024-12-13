@@ -35,7 +35,12 @@ import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.PurchaseCsv;
+import com.hfsolution.feature.stockmanagement.dto.customer.CustomerDto;
+import com.hfsolution.feature.stockmanagement.dto.product.ProductDto;
+import com.hfsolution.feature.stockmanagement.dto.purchase.PaymentDto;
+import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseDetailDto;
 import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseDto;
+import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseItemDto;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
@@ -80,7 +85,7 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
-        SuccessResponse<Page<Purchase>> response = new SuccessResponse<>();
+        SuccessResponse<Object> response = new SuccessResponse<>();
         try {
             Map<String, Class<? extends Enum>> enumFields = new HashMap<>();
             enumFields.put("paymentType", PaymentType.class); 
@@ -97,9 +102,49 @@ public class PurchaseServicelmp implements PurchaseService {
                 String msg = AppTools.appGetMessage("032");
                 throw new AppException("032",msg);
             }
+
+            Page<PurchaseDetailDto> PurchaseDetaitDtoPage = purchaseResult.getPage().map(purchase ->{
+               
+
+                PurchaseDetailDto purchaseDto = new PurchaseDetailDto();
+                BeanUtils.copyProperties(purchase, purchaseDto);
+
+                CustomerDto customerDto = new CustomerDto();
+                BeanUtils.copyProperties(purchase.getCustomer(), customerDto);
+
+                com.hfsolution.feature.stockmanagement.dto.user.User userDto = new com.hfsolution.feature.stockmanagement.dto.user.User();
+                BeanUtils.copyProperties(purchase.getUser(), userDto);
+
+                List<PurchaseItemDto> purchaseItemDtos = new ArrayList<>();
+                for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
+                    PurchaseItemDto purchaseItemDto = new PurchaseItemDto();
+                    BeanUtils.copyProperties(purchaseItem, purchaseItemDto);
+                    ProductDto productDto = new ProductDto();
+                    BeanUtils.copyProperties(purchaseItem.getProduct(), productDto);
+                    purchaseItemDto.setProduct(productDto);
+                    purchaseItemDtos.add(purchaseItemDto);
+                }
+
+                List<PaymentDto> paymentDtos = new ArrayList<>();
+                for (Payment payment : purchase.getPayments()) {
+                    PaymentDto paymentDto = new PaymentDto();
+                    BeanUtils.copyProperties(payment, paymentDto);
+                    paymentDtos.add(paymentDto);
+                }
+                
+                purchaseDto.setPurchaseItems(purchaseItemDtos);
+                purchaseDto.setPayments(paymentDtos);
+                purchaseDto.setCustomer(customerDto);
+                purchaseDto.setUser(userDto);
+                return purchaseDto;
+               
+            });
+
+            
+
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setData(purchaseResult.getPage());
+            response.setData(PurchaseDetaitDtoPage);
             return response;
 
         }catch (DatabaseException e) {
@@ -317,15 +362,6 @@ public class PurchaseServicelmp implements PurchaseService {
                     stock.addStockHistory(stockHistory);
                     stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
                     stock = stockDao.saveEntity(stock).getEntity();
-                    // StockHistory stockHistory = new StockHistory();
-                    // stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                    // stockHistory.setUser(userRepository.findById(userId).get());
-                    // stockHistory.setRemark("Purchase");
-                    // stockHistory.setQty(productPurchase.getQty()*-1);
-                    // stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
-                    // stockHistory.setStock(stock);
-                    // stockHistoryDao.saveEntityAsync(stockHistory);
-
                     totalPrice = totalPrice.add(totalProdcutPrice);
                     totalQty += productPurchase.getQty();
                 }
@@ -338,8 +374,8 @@ public class PurchaseServicelmp implements PurchaseService {
                 }else{
                     // Status CREDIT
                     purchase.setPaymentStatus(PaymentStatus.CREDIT);
-                    customer.setCredit(customer.getCredit().add(totalPrice));
-                    customerDao.saveEntity(customer);
+                    // customer.setCredit(customer.getCredit().add(totalPrice));
+                    // customerDao.saveEntity(customer);
                 }
                 purchase.setQty(totalQty);
                 purchase.setTotal(totalPrice);
@@ -490,6 +526,7 @@ public class PurchaseServicelmp implements PurchaseService {
 
 
     @Override
+    @Transactional
     public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
         SuccessResponse<Object> response = new SuccessResponse<>();
@@ -539,6 +576,7 @@ public class PurchaseServicelmp implements PurchaseService {
 
 
     @Override
+    @Transactional
     public Object searchDetail(long id) {
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE DETAIL BY ID");
         SuccessResponse<Object> response = new SuccessResponse<>();
@@ -548,9 +586,44 @@ public class PurchaseServicelmp implements PurchaseService {
                 String msg = AppTools.appGetMessage("032");
                 throw new AppException("032",msg);
             }
+
+            Purchase purchase = purchaseResult.getEntity();
+
+            PurchaseDetailDto purchaseDto = new PurchaseDetailDto();
+            BeanUtils.copyProperties(purchase, purchaseDto);
+
+            CustomerDto customerDto = new CustomerDto();
+            BeanUtils.copyProperties(purchase.getCustomer(), customerDto);
+
+            com.hfsolution.feature.stockmanagement.dto.user.User userDto = new com.hfsolution.feature.stockmanagement.dto.user.User();
+            BeanUtils.copyProperties(purchase.getUser(), userDto);
+
+            List<PurchaseItemDto> purchaseItemDtos = new ArrayList<>();
+            for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
+                PurchaseItemDto purchaseItemDto = new PurchaseItemDto();
+                BeanUtils.copyProperties(purchaseItem, purchaseItemDto);
+                ProductDto productDto = new ProductDto();
+                BeanUtils.copyProperties(purchaseItem.getProduct(), productDto);
+                purchaseItemDto.setProduct(productDto);
+                purchaseItemDtos.add(purchaseItemDto);
+            }
+
+            List<PaymentDto> paymentDtos = new ArrayList<>();
+            for (Payment payment : purchase.getPayments()) {
+                PaymentDto paymentDto = new PaymentDto();
+                BeanUtils.copyProperties(payment, paymentDto);
+                paymentDtos.add(paymentDto);
+            }
+            
+            purchaseDto.setPurchaseItems(purchaseItemDtos);
+            purchaseDto.setPayments(paymentDtos);
+            purchaseDto.setCustomer(customerDto);
+            purchaseDto.setUser(userDto);
+            
+
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setData(purchaseResult.getEntity());
+            response.setData(purchaseDto);
             return response;
         }catch (DatabaseException e) {
             throw e;   

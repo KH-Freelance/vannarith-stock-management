@@ -35,13 +35,13 @@ import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
-import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
-import com.hfsolution.feature.stockmanagement.dao.StockDao;
+import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
+
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.ProductCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.service.stock.StockService;
+import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -54,11 +54,10 @@ public class ProductServicelmp implements ProductService {
     
     private final CloudinaryProperties cloudinaryProperties;
     private final ProductDao productDao;
-    private final StockDao stockDao;
+    private final ProductHistoryDao productHistoryDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final String CSV_FILENAME = "product";
-    private final StockService stockService;
 
    
 
@@ -152,7 +151,11 @@ public class ProductServicelmp implements ProductService {
         httpServletRequest.setAttribute(ACTION,"DELETE PRODUCT BY ID");
         SuccessResponse<Product> response = new SuccessResponse<>();
         try {
-            productDao.deleteByProductID(id);
+            Product product =  productDao.deleteByProductID(id).getEntity();
+            ProductHistory productHistory = new ProductHistory();
+            BeanUtils.copyProperties(product, productHistory);
+            productHistoryDao.saveEntityAsync(productHistory);
+            productHistory.setDeletedDate(new Timestamp(System.currentTimeMillis()));
             String msg = AppTools.appGetMessage("007");
             response.setStatus(SUCCESS);
             response.setCode("007");

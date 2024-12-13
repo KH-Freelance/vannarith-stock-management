@@ -3,10 +3,8 @@ package com.hfsolution.feature.stockmanagement.entity;
 import jakarta.persistence.*;
 import lombok.Data;
 import java.math.BigDecimal;
-
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.hfsolution.app.util.BigDecimalSerializer;
+
 
 @Data
 @Entity
@@ -38,7 +36,6 @@ public class PurchaseItem {
     private BigDecimal price;
 
     @Column(name = "discount")
-    // @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount;
 
     @PrePersist

@@ -1,31 +1,20 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
-import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
-import com.hfsolution.app.util.BigDecimalSerializer;
-import com.opencsv.bean.CsvBindByName;
-import com.opencsv.bean.CsvBindByPosition;
-import com.opencsv.bean.CsvIgnore;
-
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
-import jakarta.persistence.GeneratedValue;
-import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
 import jakarta.persistence.OneToOne;
-import jakarta.persistence.PostLoad;
 import jakarta.persistence.PrePersist;
-import jakarta.persistence.SequenceGenerator;
 import jakarta.persistence.Table;
 import jakarta.persistence.Transient;
 import lombok.Getter;
@@ -41,9 +30,12 @@ public class Stock {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "product_id", nullable = false)
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
     private Product product;
+
+    @Column(name = "product_id")
+    private Long productId;
 
     @Column(name = "qty")
     private Long qty;

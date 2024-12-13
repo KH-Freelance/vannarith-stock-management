@@ -1,30 +1,24 @@
-package com.hfsolution.feature.stockmanagement.dto.stock;
+package com.hfsolution.feature.stockmanagement.dto.purchase;
 
 import java.sql.Timestamp;
 import com.fasterxml.jackson.annotation.JsonFormat;
-
-import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.Setter;
+import java.math.BigDecimal;
 
 @Setter
 @Getter
-public class StockDto {
+public class PaymentDto {
+
 
     private Long id;
-    private Product product;
-    private Long qty;
-    private Double percentage;
+
+    private BigDecimal amount;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
 
-    @Setter
-    @Getter
-    @AllArgsConstructor
-    public static class Product {
-        long id;
-        String productName;
-    }
 }

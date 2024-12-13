@@ -93,4 +93,8 @@ INSERT INTO permissions (id, description, name) VALUES
 (26, 'permission to UPDATE return', 'return:UPDATE'),
 (27, 'permission to CREATE return', 'return:CREATE'),
 (28, 'permission to READ return', 'return:READ'),
-(29, 'Full permission for all action', '*');
+(29, 'Full permission for all action', '*'),
+(30, 'permission to DELETE role', 'role:DELETE'),
+(31, 'permission to UPDATE role', 'role:UPDATE'),
+(32, 'permission to CREATE role', 'role:CREATE'),
+(33, 'permission to READ role', 'role:READ');

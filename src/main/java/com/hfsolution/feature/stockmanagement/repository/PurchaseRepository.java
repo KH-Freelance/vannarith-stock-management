@@ -53,7 +53,8 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
     );
     
 
-    List<Purchase> findAllByCustomerId(long custoemrId);
+    List<Purchase> findAllByCustomerId(long customerId);
+    List<Purchase> findAllByUserId(long userId);
 
 
     List<Purchase> findAllByCustomerIdAndCreatedDateBetween(long customerId, Timestamp startDate,Timestamp endDate);

@@ -1,11 +1,8 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
-
 import java.math.BigDecimal;
-
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;

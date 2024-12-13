@@ -1,21 +1,16 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
-
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.hfsolution.feature.user.entity.User;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
-import jakarta.persistence.Transient;
 import lombok.Getter;
 import lombok.Setter;
 

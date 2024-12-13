@@ -4,6 +4,7 @@ import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
@@ -28,13 +29,23 @@ import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
+import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.CustomerCsv;
+import com.hfsolution.feature.stockmanagement.dto.customer.CustomerDto;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
+import com.hfsolution.feature.stockmanagement.dto.stock.StockDto;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
+import com.hfsolution.feature.stockmanagement.entity.Payment;
+import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.entity.Purchase;
+import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
+import com.hfsolution.feature.stockmanagement.enums.PaymentType;
+
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
+import jakarta.transaction.Transactional;
 
 import static com.hfsolution.app.constant.AppConstant.*;
 
@@ -44,15 +55,17 @@ public class CustomerServicelmp implements CustomerService {
 
     
     private final CustomerDao customerDao;
+    private final PurchaseDao purchaseDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final String CSV_FILENAME= "customer";
 
     @Override
+    @Transactional
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH CUSTOMER");
-        SuccessResponse<Page<Customer>> response = new SuccessResponse<>();
+        SuccessResponse<Object> response = new SuccessResponse<>();
         try {
 
             Specification<Customer> customers = new CustomSpecification<>(q);
@@ -68,9 +81,36 @@ public class CustomerServicelmp implements CustomerService {
             
                 throw new AppException("015",msg);
             }
+
+            for (Customer customer : customerResult.getPage().getContent()) {
+                BigDecimal credit = BigDecimal.ZERO;
+                for (Purchase purchase : customer.getPurchases()) {
+                    if(purchase.getPaymentType().compareTo(PaymentType.CASH) == 0 || purchase.getPaymentStatus().compareTo(PaymentStatus.PAID) == 0) continue;
+                    BigDecimal totalAoumtPaid = BigDecimal.ZERO;
+                    for (Payment payment : purchase.getPayments()) {
+                        totalAoumtPaid = totalAoumtPaid.add(payment.getAmount());
+                    }
+                    credit = credit.add(purchase.getTotal().subtract(totalAoumtPaid));
+                    
+                }
+
+                customer.setCredit(credit);
+            }
+
+            Page<CustomerDto> customerDtoPage = customerResult.getPage().map(customer ->{
+                CustomerDto customerDto = new CustomerDto();
+                BeanUtils.copyProperties(customer, customerDto);
+
+                // Product product = productDao.findByProductID(stock.getProductId()).getEntity();
+
+                // stockDto.setProduct(new StockDto.Product(product.getId(), product.getProductName()));
+                return customerDto;
+            });
+            
+            
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setData(customerResult.getPage());
+            response.setData(customerDtoPage);
             return response;
 
         }catch (DatabaseException e) {
@@ -183,6 +223,12 @@ public class CustomerServicelmp implements CustomerService {
         SuccessResponse<Customer> response = new SuccessResponse<>();
         try {
     
+            BaseEntityResponseDto<Purchase>  purchaseResult =  purchaseDao.findPurchaseByCustomerId(id);
+            if(purchaseResult.getEntityList()!=null && purchaseResult.getEntityList().size() > 0){
+                String msg = AppTools.appGetMessage("0160").replace("[purchaseCodes]", String.join(", ", purchaseResult.getEntityList().stream().limit(3).map(purchase->purchase.getPurchaseCode()).toArray(String[]::new)) + (purchaseResult.getEntityList().size() > 3 ? "..." : ""));
+                throw new AppException("0160",msg, "Y");
+            }
+            
             customerDao.deleteByCustomerID(id);
             String msg = AppTools.appGetMessage("016");
             response.setStatus(SUCCESS);

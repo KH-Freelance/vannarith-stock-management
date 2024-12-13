@@ -47,6 +47,7 @@ import com.hfsolution.feature.stockmanagement.dto.report.ReportStockDto;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
+import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
@@ -63,6 +64,7 @@ import lombok.RequiredArgsConstructor;
 public class ReportServiceImp  implements ReportService{
     
     private final StockDao stockDao;
+    private final ProductDao productDao;
     private final StockHistoryDao stockHistoryDao;
     private final PurchaseDao purchaseDao;
     private final CustomerDao customerDao;
@@ -100,18 +102,27 @@ public class ReportServiceImp  implements ReportService{
                 double percentage = ((double) stock.getQty() / totalQty) * 100;
                 BigDecimal bd = new BigDecimal(percentage).setScale(2, RoundingMode.HALF_UP);
                 
-                product.setProductId(stock.getProduct().getId());
+                BaseEntityResponseDto<Product> productResult = productDao.findById(stock.getProductId());
+                
+                if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntityList()==null){
+                    String msg = AppTools.appGetMessage("024");
+                    throw new AppException("024",msg);
+                }
+
+
+
+                product.setProductId(productResult.getEntity().getId());
                 product.setStockId(stock.getId());
                 product.setTotalAsset(bd.doubleValue());
-                product.setProductName(stock.getProduct().getProductName());
-                product.setSalePrice(stock.getProduct().getPrice());
-                product.setImportPrice(stock.getProduct().getImportPrice());
-                product.setFactory(stock.getProduct().getFactory());
+                product.setProductName(productResult.getEntity().getProductName());
+                product.setSalePrice(productResult.getEntity().getPrice());
+                product.setImportPrice(productResult.getEntity().getImportPrice());
+                product.setFactory(productResult.getEntity().getFactory());
                 product.setStockOnHand(stock.getQty());
                 product.setStockSold(stockSaled);
-                product.setDiscount(stock.getProduct().getDiscount());
-                product.setCreatedDate(stock.getProduct().getCreatedDate());
-                product.setExpiryDate(stock.getProduct().getExpiryDate());
+                product.setDiscount(productResult.getEntity().getDiscount());
+                product.setCreatedDate(productResult.getEntity().getCreatedDate());
+                product.setExpiryDate(productResult.getEntity().getExpiryDate());
                 reportStockDtos.add(product);
             }
             response.setStatus(SUCCESS);
@@ -129,6 +140,7 @@ public class ReportServiceImp  implements ReportService{
     }
 
     @Override
+    @Transactional
     public Object reportCustomer(String startDate, String endDate) {
         httpServletRequest.setAttribute(ACTION,"REPORT CUSTOMER");
         SuccessResponse<Object> response = new SuccessResponse<>();
@@ -192,6 +204,7 @@ public class ReportServiceImp  implements ReportService{
     }
 
     @Override
+    @Transactional
     public Object reportPurchase(String startDate, String endDate) {
 
         httpServletRequest.setAttribute(ACTION,"REPORT CUSTOMER");
