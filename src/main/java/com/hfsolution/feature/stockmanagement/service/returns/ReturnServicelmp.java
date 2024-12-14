@@ -200,7 +200,7 @@ public class ReturnServicelmp implements ReturnService {
             Payment SourcePayment = new Payment();
             SourcePayment.setId(paymentDao.getPaymentId());
             SourcePayment.setPurchase(targetPurchase);
-            SourcePayment.setAmount(totalSourceItemAmt);
+            SourcePayment.setAmount(totalSourceItemAmt.negate());
             paymentDao.saveEntityAsync(SourcePayment);
 
             //TOTAL = OLD PAYMENT + NEW PAYMENT 
