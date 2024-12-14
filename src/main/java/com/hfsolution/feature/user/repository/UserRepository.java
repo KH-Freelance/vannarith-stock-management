@@ -20,6 +20,7 @@ public interface UserRepository extends JpaRepository<User, Long>, JpaSpecificat
   List<User> findByEmailLikeOrderByLastnameAsc(String email);
   List<User> findByFirstnameLike(String firstname);
   List<User> findByLastnameLike(String lastname);
+  List<User> findByRoleId(Long id);
   // List<User> findByRoleLike(Role role);
   // List<User> findByRoleLike(Role role);
 }

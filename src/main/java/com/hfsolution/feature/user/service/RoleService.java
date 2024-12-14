@@ -2,6 +2,8 @@ package com.hfsolution.feature.user.service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
+
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
@@ -10,10 +12,14 @@ import org.springframework.stereotype.Service;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.services.CustomSpecification;
+import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.user.entity.Permission;
 import com.hfsolution.feature.user.entity.Role;
+import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.repository.PermissionRepository;
 import com.hfsolution.feature.user.repository.RoleRepository;
+import com.hfsolution.feature.user.repository.UserRepository;
+
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +29,7 @@ import lombok.RequiredArgsConstructor;
 public class RoleService {
 
     private final RoleRepository repository;
+    private final UserRepository userRepository;
     private final PermissionRepository permissionRepository;
 
     @Transactional
@@ -54,6 +61,15 @@ public class RoleService {
         Optional<Role> opRole = repository.findById(id);
         if(!opRole.isPresent()){
             throw new AppException("040");
+        }
+        List<User> usersWithRole = userRepository.findByRoleId(id);
+        if (!usersWithRole.isEmpty()) {
+            String userNames = usersWithRole.stream()
+                    .map(user -> user.getFirstname() + " " + user.getLastname())
+                    .collect(Collectors.joining(", "));
+            
+            String msg = AppTools.appGetMessage("052").replace("[users]",userNames);
+            throw new AppException("052",msg,"Y");
         }
         opRole.get().getPermissions().clear();
         repository.delete(opRole.get());

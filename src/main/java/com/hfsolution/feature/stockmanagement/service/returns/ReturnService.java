@@ -16,6 +16,7 @@ public interface ReturnService {
 
     
     public Object search(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
+    public Object searchDetail(long id);
     public Object returnPurchase(ReturnRequest returnRequest);
     
 } 

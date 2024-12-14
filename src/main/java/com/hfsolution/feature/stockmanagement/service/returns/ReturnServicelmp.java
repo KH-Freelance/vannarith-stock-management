@@ -38,7 +38,6 @@ import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
 // import jakarta.transaction.Transactional;
-import jakarta.transaction.Transactional;
 
 import static com.hfsolution.app.constant.AppConstant.*;
 
@@ -50,11 +49,11 @@ public class ReturnServicelmp implements ReturnService {
     private final PurchaseItemDao purchaseItemDao;
     private final StockDao stockDao;
     private final HttpServletRequest httpServletRequest;
+    private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
     private final ReturnDao returnDao;
 
     @Override
-    @Transactional
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH RETURN");
@@ -90,13 +89,35 @@ public class ReturnServicelmp implements ReturnService {
     } 
 
     @Override
-    @Transactional
+    public Object searchDetail(long id) {
+        httpServletRequest.setAttribute(ACTION,"SEARCH RETURN PURCHASE DETAIL BY ID");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        try {
+            BaseEntityResponseDto<Return> returnResult = returnDao.findById(id);
+            if(!returnResult.getStatus().equals(SUCCESS) || returnResult.getEntity()==null){
+                String msg = AppTools.appGetMessage("050");
+                throw new AppException("050",msg);
+            }
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(returnResult.getEntity());
+            return response;
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+    @Override
     public Object returnPurchase(ReturnRequest returnRequest) {
 
-        httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");
+        httpServletRequest.setAttribute(ACTION,"RETURN PURCHASE");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
         try {
-
+            
             String sourcePurchaseCode = returnRequest.getSourcePurchase().getPurchaseCode();
             String targetPurchaseCode = returnRequest.getTargetPurchaseCode();
 
@@ -129,10 +150,11 @@ public class ReturnServicelmp implements ReturnService {
 
                 PurchaseItem sourceItem = sourcePurchase.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst().get();
+                .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
                 BigDecimal price = sourceItem.getPrice();
                 totalSourceItemAmt = totalSourceItemAmt.add(price);
                 totalQty = sourceItem.getQty()+totalQty;
+
             }
 
             //ADD INTO RETURN AND RETURN ITEM 
@@ -147,7 +169,7 @@ public class ReturnServicelmp implements ReturnService {
                 ReturnItem returnItem = new ReturnItem();
                 PurchaseItem sourceItem = sourcePurchase.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst().get();
+                .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
 
                 //UPDATE STOCK
                 BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(productId);
@@ -160,25 +182,28 @@ public class ReturnServicelmp implements ReturnService {
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
                 stockDao.saveEntityAsync(stock);
 
+                //CONTINUE ADD INTO RETURN AND RETURN ITEM 
                 returnItem.setAmount(sourceItem.getPrice());
                 returnItem.setQty(sourceItem.getQty());
                 returnItem.setProduct(sourceItem.getProduct());
                 returns.addReturnItem(returnItem);
-                
 
                 //UPDATE PURCHASE ITEM STATUS
                 sourceItem.setStatus("RETURN");
                 purchaseItemDao.saveEntityAsync(sourceItem);
+
+                
             }
 
-            //SAVE RETURN
-            returnDao.saveEntityAsync(returns);
 
-            //UPDATE PURCHASE SUBTRACT RETURN PRODUCT PRICE
-            // sourcePurchase.setTotal(sourcePurchase.getTotal().subtract(totalSourceItemAmt));
-            // purchaseDao.saveEntityAsync(sourcePurchase);
+            //MINUS SOURCE PAYMENT
+            Payment SourcePayment = new Payment();
+            SourcePayment.setId(paymentDao.getPaymentId());
+            SourcePayment.setPurchase(targetPurchase);
+            SourcePayment.setAmount(totalSourceItemAmt);
+            paymentDao.saveEntityAsync(SourcePayment);
 
-            //TOTAL OLD PAY WITH NEW PAY
+            //TOTAL = OLD PAYMENT + NEW PAYMENT 
             BigDecimal total = totalSourceItemAmt;
             for (Payment targetPurchasePayment : targetPurchase.getPayments()) {
                 total = total.add(targetPurchasePayment.getAmount());
@@ -187,7 +212,7 @@ public class ReturnServicelmp implements ReturnService {
             //IF TOTAL = TARGET PURCHSE AMOUNT
             if(targetPurchase.getTotal().compareTo(total) == 0){
                 targetPurchase.setPaymentStatus(PaymentStatus.PAID);
-                purchaseDao.saveEntity(targetPurchase);
+                purchaseDao.saveEntityAsync(targetPurchase);
             }
 
             // IF TOTAL > TARGET PURCHAE AMOUNT 
@@ -198,29 +223,20 @@ public class ReturnServicelmp implements ReturnService {
                 refundAmt = total.subtract(targetPurchase.getTotal());       
                 totalSourceItemAmt = totalSourceItemAmt.subtract(refundAmt); 
                 targetPurchase.setPaymentStatus(PaymentStatus.PAID);
-                purchaseDao.saveEntity(targetPurchase);
+                purchaseDao.saveEntityAsync(targetPurchase);
             }
 
-            //MAKE PAYMENT
-            Payment payment = new Payment();
-            payment.setId(paymentDao.getPaymentId());
-            payment.setPurchase(targetPurchase);
-            payment.setAmount(totalSourceItemAmt);
-            paymentDao.saveEntity(payment);
+            //SAVE RETURN
+            returns.setRefundAmount(refundAmt);
+            returnDao.saveEntityAsync(returns);
 
-            //# HOLD IT IN DISCUSS
-            //IF CUSTOMER CREDIT != 0 ADD CREDIT WITH REMAIN AMT
-            // Customer customer = targetPurchase.getCustomer();
-            // if(customer.getCredit().compareTo(BigDecimal.ZERO)!=0){
-            //     customer.setCredit(customer.getCredit().subtract(totalSourceItemAmt));
-            //     customerDao.saveEntity(customer);
-            
-            // //ELSE REFUND TO CUSTOMER BY REAL MONEY
-            // }else{
+            //MAKE TARGET PAYMENT
+            Payment targetPayment = new Payment();
+            targetPayment.setId(paymentDao.getPaymentId());
+            targetPayment.setPurchase(targetPurchase);
+            targetPayment.setAmount(totalSourceItemAmt);
+            paymentDao.saveEntity(targetPayment);
 
-            //     System.out.println("============== REFUND : "+refundAmt);
-            // }
-            
             response.setStatus(SUCCESS);
             response.setCode("051");
             response.setMsg(AppTools.appGetMessage("051")

@@ -4,9 +4,9 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 import java.math.BigDecimal;
-import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
+
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -23,7 +23,7 @@ import lombok.Data;
 
 @Data
 @Entity
-@Table(name = "Return")
+@Table(name = "return")
 public class Return {
 
     @Id
@@ -49,8 +49,7 @@ public class Return {
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal refundAmount;
 
-    @Column(name = "created_date", nullable = false, columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
+    @Column(name = "created_date", nullable = false)
     private Timestamp createdDate;
 
     public void addReturnItem(ReturnItem returnItem) {
