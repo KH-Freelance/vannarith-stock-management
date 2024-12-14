@@ -59,6 +59,44 @@ public class ProductHistoryDao extends BaseDBDao<ProductHistory, Long>{
 
   }
 
+  public BaseEntityResponseDto<ProductHistory> findByProductId(Long id){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+    try {
+     
+      ProductHistory productHistory = productHistoryRepository.findByProductId(id);
+      var appModel = new BaseEntityResponseDto<ProductHistory>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntity(productHistory);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
+  public BaseEntityResponseDto<ProductHistory> findByProductName(String name){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+    try {
+     
+      ProductHistory productHistory = productHistoryRepository.findByProductName(name);
+      var appModel = new BaseEntityResponseDto<ProductHistory>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntity(productHistory);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
   public BaseEntityResponseDto<ProductHistory> findByProductHistoryID(Long id){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

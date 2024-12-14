@@ -15,6 +15,7 @@ public interface ProductHistoryRepository extends IBaseRepository<ProductHistory
 
 
     ProductHistory findByProductName(String name);
+    ProductHistory findByProductId(Long id);
     List<Customer> findByCreatedDateBetween(Timestamp d1, Timestamp d2);
 
     

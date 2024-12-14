@@ -30,7 +30,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/purchase")
+@RequestMapping("/purchase/return")
 public class ReturnController {
 
     @Autowired

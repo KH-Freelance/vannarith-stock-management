@@ -21,10 +21,17 @@ public class PurchaseItem {
     @JsonIgnore
     private Purchase purchase;
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_id", nullable = false)
-    // @JsonIgnore
+    // @ManyToOne(fetch = FetchType.EAGER)
+    // @JoinColumn(name = "product_id", nullable = false)
+    // // @JsonIgnore
+    // private Product product;
+
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
     private Product product;
+
+    @Column(name = "product_id")
+    private Long productId;
 
     @Column(name = "status")
     private String status;

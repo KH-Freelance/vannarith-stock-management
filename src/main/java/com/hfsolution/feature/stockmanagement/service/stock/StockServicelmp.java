@@ -32,6 +32,7 @@ import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
+import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.StockCsv;
@@ -44,6 +45,7 @@ import com.hfsolution.feature.stockmanagement.dto.stock.StockHistoryDto;
 import com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto;
 import com.hfsolution.feature.stockmanagement.dto.user.User;
 import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
 import com.hfsolution.feature.user.repository.UserRepository;
@@ -64,6 +66,7 @@ public class StockServicelmp implements StockService {
     private final StockHistoryDao stockHistoryDao;
     private final UserRepository userRepository;
     private final ProductDao productDao;
+    private final ProductHistoryDao productHistoryDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final String CSV_FILENAME="stock";
@@ -256,7 +259,16 @@ public class StockServicelmp implements StockService {
                 StockDto stockDto = new StockDto();
                 BeanUtils.copyProperties(stock, stockDto);
 
-                stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
+                if (stock.getProduct() != null) {
+                    // Normal product case
+                    stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
+                } else {
+                    // Fallback to product history
+                    ProductHistory productHistory = productHistoryDao.findByProductId(stock.getProductId()).getEntity();
+                    if (productHistory != null) {
+                        stockDto.setProduct(new StockDto.Product(productHistory.getId(),productHistory.getProductName()));
+                    }
+                }
                 return stockDto;
             });
             response.setStatus(SUCCESS);

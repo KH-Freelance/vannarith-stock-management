@@ -31,6 +31,7 @@ import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
+import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
@@ -49,6 +50,7 @@ import com.hfsolution.feature.stockmanagement.dto.stock.UnpaidDto;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.PurchaseItem;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
@@ -79,6 +81,7 @@ public class PurchaseServicelmp implements PurchaseService {
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
     private final String CSV_FILENAME="purchase";
+    private final ProductHistoryDao productHistoryDao;
 
     @Override
     @Transactional
@@ -588,6 +591,18 @@ public class PurchaseServicelmp implements PurchaseService {
                 BeanUtils.copyProperties(purchase, purchaseDto);
                 purchaseDto.setCustomer(new PurchaseDto.Customer(purchase.getCustomer().getId(), purchase.getCustomer().getCustomerName()));
                 purchaseDto.setUser(new PurchaseDto.User(purchase.getUser().getId(), purchase.getUser().getFirstname(),purchase.getUser().getLastname()));
+                //Check produt for purchase item
+                purchase.getPurchaseItems().stream().forEach((data->{
+                    if(data.getProduct()==null){
+                        // Fallback to product history
+                        ProductHistory productHistory = productHistoryDao.findByProductId(data.getProductId()).getEntity();
+                        if (productHistory != null) {
+                            Product product = new Product();
+                            BeanUtils.copyProperties(productHistory, product);
+                            data.setProduct(product);
+                        }
+                    }
+                }));
                 BigDecimal remainingPayment = purchase.getTotal();
                 for (Payment payment : purchase.getPayments()) {
                     remainingPayment = remainingPayment.subtract(payment.getAmount());

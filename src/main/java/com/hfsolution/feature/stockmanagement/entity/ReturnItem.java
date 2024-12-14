@@ -14,6 +14,7 @@ import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.Table;
 import lombok.Data;
 
@@ -31,9 +32,16 @@ public class ReturnItem {
     @JoinColumn(name = "return_id", nullable = false)
     private Return returnEntity; 
 
-    @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "product_id", nullable = false)
-    private Product product; 
+    // @ManyToOne(fetch = FetchType.EAGER)
+    // @JoinColumn(name = "product_id", nullable = false)
+    // private Product product; 
+
+    @OneToOne(fetch = FetchType.LAZY, optional = true)
+    @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
+    private Product product;
+
+    @Column(name = "product_id")
+    private Long productId;
 
     @Column(name = "qty", nullable = false)
     private Long qty; 

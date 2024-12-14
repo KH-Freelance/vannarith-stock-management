@@ -5,6 +5,8 @@ import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+
+import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -20,13 +22,17 @@ import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
+import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseItemDao;
 import com.hfsolution.feature.stockmanagement.dao.ReturnDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
+import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseDto;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnRequest;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
+import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.PurchaseItem;
 import com.hfsolution.feature.stockmanagement.entity.Return;
@@ -52,6 +58,7 @@ public class ReturnServicelmp implements ReturnService {
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
     private final ReturnDao returnDao;
+    private final ProductHistoryDao productHistoryDao;
 
     @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
@@ -70,9 +77,27 @@ public class ReturnServicelmp implements ReturnService {
             BaseEntityResponseDto<Return> returnResult = returnDao.searchReturn(returns,pageable);
             if(!returnResult.getStatus().equals(SUCCESS) || returnResult.getPage()==null){
                 String msg = AppTools.appGetMessage("050");
-            
                 throw new AppException("050",msg);
             }
+            
+            // Page<Return> returnPage = returnResult.getPage().map(returnData ->{
+
+            //     //Check produt for purchase item
+            //     returnData.getReturnItems().stream().forEach((data->{
+            //         if(data.getProduct()==null){
+            //             // Fallback to product history
+            //             ProductHistory productHistory = productHistoryDao.findByProductId(data.getProductId()).getEntity();
+            //             if (productHistory != null) {
+            //                 Product product = new Product();
+            //                 BeanUtils.copyProperties(productHistory, product);
+            //                 data.setProduct(product);
+            //             }
+            //         }
+            //     }));
+               
+            //     return returnData;
+            // });
+
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
             response.setData(returnResult.getPage());
@@ -195,13 +220,12 @@ public class ReturnServicelmp implements ReturnService {
                 
             }
 
-
             //MINUS SOURCE PAYMENT
-            Payment SourcePayment = new Payment();
-            SourcePayment.setId(paymentDao.getPaymentId());
-            SourcePayment.setPurchase(targetPurchase);
-            SourcePayment.setAmount(totalSourceItemAmt.negate());
-            paymentDao.saveEntityAsync(SourcePayment);
+            Payment sourcePayment = new Payment();
+            sourcePayment.setId(paymentDao.getPaymentId());
+            sourcePayment.setPurchase(targetPurchase);
+            sourcePayment.setAmount(totalSourceItemAmt.negate());
+            paymentDao.saveEntity(sourcePayment);
 
             //TOTAL = OLD PAYMENT + NEW PAYMENT 
             BigDecimal total = totalSourceItemAmt;
@@ -228,7 +252,7 @@ public class ReturnServicelmp implements ReturnService {
 
             //SAVE RETURN
             returns.setRefundAmount(refundAmt);
-            returnDao.saveEntityAsync(returns);
+            returnDao.saveEntity(returns);
 
             //MAKE TARGET PAYMENT
             Payment targetPayment = new Payment();

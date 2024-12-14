@@ -21,6 +21,9 @@ public class ProductHistory {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "product_id")
+    private String productId;
+
     @Column(name = "product_name")
     private String productName;
 
