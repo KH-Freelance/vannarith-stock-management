@@ -252,11 +252,11 @@ public class UserService {
             throw new AppException("0050",msg, "Y");
         }
 
-        BaseEntityResponseDto<Stock>  stockResult =  stockDao.findStockByUserID(userId);
-        if(stockResult.getEntityList()!=null && stockResult.getEntityList().size() > 0){
-            String msg = AppTools.appGetMessage("0051").replace("[stockIds]", String.join(", ", stockResult.getEntityList().stream().limit(3).map(stock->stock.getId()).toArray(String[]::new)) + (stockResult.getEntityList().size() > 3 ? "..." : ""));
-            throw new AppException("0051",msg, "Y");
-        }
+        // BaseEntityResponseDto<Stock>  stockResult =  stockDao.findStockByUserID(userId);
+        // if(stockResult.getEntityList()!=null && stockResult.getEntityList().size() > 0){
+        //     String msg = AppTools.appGetMessage("0051").replace("[stockIds]", String.join(", ", stockResult.getEntityList().stream().limit(3).map(stock->stock.getId()).toArray(String[]::new)) + (stockResult.getEntityList().size() > 3 ? "..." : ""));
+        //     throw new AppException("0051",msg, "Y");
+        // }
 
         
 

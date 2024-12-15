@@ -83,25 +83,25 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   }
 
-  public BaseEntityResponseDto<Stock> findStockByUserID(Long id){
+  // public BaseEntityResponseDto<Stock> findStockByUserID(Long id){
 
-    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
-    long startTime = System.currentTimeMillis();
+  //   String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+  //   long startTime = System.currentTimeMillis();
 
-    try {
+  //   try {
 
-      List<Stock> entities = stockRepository.findByStockHistoriesUserId(id);
-      var appModel = new BaseEntityResponseDto<Stock>();
-      appModel.setStatus(SUCCESS);
-      appModel.setEntityList(entities);
-      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
-      return appModel;
+  //     List<Stock> entities = stockRepository.findByStockHistoriesUserId(id);
+  //     var appModel = new BaseEntityResponseDto<Stock>();
+  //     appModel.setStatus(SUCCESS);
+  //     appModel.setEntityList(entities);
+  //     appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+  //     return appModel;
 
-    } catch (Exception e) {
-      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
-    }
+  //   } catch (Exception e) {
+  //     throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+  //   }
 
-  }
+  // }
 
   public BaseEntityResponseDto<StockPercentageDto> findPercentage(List<Long> ids){
 

@@ -17,8 +17,7 @@ public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecifi
     // @Query("SELECT s FROM stock s INNER JOIN product p ON s.product_id = p.product_id WHERE p.product_name = :name")
     // Stock findByProductName(String name);
 
-    List<Stock> findByStockHistoriesUserId(Long userId);
-
+    // List<Stock> findByStockHistoriesUserId(Long userId);
 
     @Query("""
         SELECT new com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto(
@@ -32,6 +31,9 @@ public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecifi
             (SELECT SUM(qty) AS total_qty FROM Stock) AS total where id in :ids
         """)
     List<StockPercentageDto> findPercentage(List<Long> ids);
+
+
+    
     
 
     // @Query("SELECT s FROM Stock s WHERE s.product.id = :id")

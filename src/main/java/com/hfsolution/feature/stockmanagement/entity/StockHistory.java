@@ -27,9 +27,9 @@ public class StockHistory {
     @ManyToOne(fetch = FetchType.LAZY)
     private Stock stock;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "user_id", nullable = false)
-    private User user;
+    private String firstname;
+
+    private String lastname;
 
     @Column(name = "qty")
     private Long qty;

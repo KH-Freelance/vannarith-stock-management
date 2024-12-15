@@ -172,8 +172,6 @@ public class PurchaseServicelmp implements PurchaseService {
             purchaseResult.getEntityList().stream().forEach(purchase -> {
                 PurchaseCsv purchaseCsv = new PurchaseCsv();
                 purchaseCsv.setId(purchase.getId());
-                // purchaseCsv.setProductName(purchase.getProduct().getProductName());
-                // purchaseCsv.setProductId(purchase.getProduct().getId());
                 purchaseCsv.setCustomerName(purchase.getCustomer().getCustomerName());
                 purchaseCsv.setCustomerId(purchase.getCustomer().getId());
                 purchaseCsv.setEmployeeName(purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname());
@@ -183,7 +181,6 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchaseCsv.setPaymentStatus(purchase.getPaymentStatus());
                 purchaseCsv.setPaymentType(purchase.getPaymentType());
                 purchaseCsv.setLocation(purchase.getLocation());
-                // purchaseCsv.setDiscount(purchase.getDiscount());
                 purchaseCsv.setCreatedDate(purchase.getCreatedDate());
                 purchaseCsv.setUpdateDate(purchase.getUpdatedDate());
                 purchaseCsvs.add(purchaseCsv);
@@ -346,17 +343,17 @@ public class PurchaseServicelmp implements PurchaseService {
                     BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
                     BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice);
     
-                    
                     purchaseItem.setDiscount(discountPrice);
                     purchaseItem.setPrice(totalProdcutPrice);
-                    purchaseItem.setProduct(product);
+                    purchaseItem.setProductId(product.getId());
                     purchaseItem.setQty(productPurchase.getQty());
                     purchase.addPurchaseItem(purchaseItem);
                     
                     // Minus from Stock
                     StockHistory stockHistory = new StockHistory();
                     stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                    stockHistory.setUser(userRepository.findById(userId).get());
+                    stockHistory.setFirstname(user.getFirstname());
+                    stockHistory.setLastname(user.getLastname());
                     stockHistory.setRemark("Purchase");
                     stockHistory.setQty(productPurchase.getQty()*-1);
                     stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
@@ -595,7 +592,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchase.getPurchaseItems().stream().forEach((data->{
                     if(data.getProduct()==null){
                         // Fallback to product history
-                        ProductHistory productHistory = productHistoryDao.findByProductId(data.getProductId()).getEntity();
+                        ProductHistory productHistory = productHistoryDao.findById(data.getProductId()).getEntity();
                         if (productHistory != null) {
                             Product product = new Product();
                             BeanUtils.copyProperties(productHistory, product);

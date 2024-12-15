@@ -9,7 +9,9 @@ import java.math.RoundingMode;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.Arrays;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
@@ -92,11 +94,16 @@ public class StockServicelmp implements StockService {
             stock = new Stock();
             BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
 
+
+           
+
             // Need to be call async 
             Long userId = (Long)httpServletRequest.getAttribute(USERID);
+            com.hfsolution.feature.user.entity.User user = userRepository.findById(userId).get();
             StockHistory stockHistory = new StockHistory();
             stockHistory.setId(stockHistoryDao.getStockHistoryId());
-            stockHistory.setUser(userRepository.findById(userId).get());
+            stockHistory.setFirstname(user.getFirstname());
+            stockHistory.setLastname(user.getLastname());
             stockHistory.setRemark("New Creation Product");
             stockHistory.setQty(stockRequest.getQty());
             stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
@@ -178,20 +185,30 @@ public class StockServicelmp implements StockService {
     }
 
     @Override
+    @Transactional
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT STOCK");
         try {
             CSVHelper<StockCsv> csvService = new CSVHelper<>(StockCsv.class,httpServletResponse);
-            Specification<Stock> stocks = new CustomSpecification<>(q);
-            BaseEntityResponseDto<Stock> stockResult = stockDao.searchStock(stocks);
+            Specification<StockHistory> stocks = new CustomSpecification<>(q);
+            BaseEntityResponseDto<StockHistory> stockResult = stockHistoryDao.search(stocks);
             List<StockCsv> stockCsvs = new ArrayList<>();
-            stockResult.getEntityList().stream().forEach(stock->{
+
+            for (StockHistory stockHistory : stockResult.getEntityList()) {
                 StockCsv stockCsv = new StockCsv();
-                BeanUtils.copyProperties(stock, stockCsv);
-                // stockCsv.setProductId(stock.getProduct().getId());
-                // stockCsv.setProductName(stock.getProduct().getProductName());
+                stockCsv.setId(stockHistory.getStock().getId());
+                stockCsv.setQty(stockHistory.getStock().getQty());
+                stockCsv.setFirstname(stockHistory.getFirstname());
+                stockCsv.setLastname(stockHistory.getLastname());
+                stockCsv.setProductId(stockHistory.getStock().getProductId());
+                stockCsv.setCreatedDate(stockHistory.getStock().getCreatedDate());
+                stockCsv.setUpdatedDate(stockHistory.getStock().getUpdatedDate());
+                stockCsv.setStockHistoryId(stockHistory.getId());
+                stockCsv.setRemark(stockHistory.getRemark());
+                stockCsv.setStockHistoryQty(stockHistory.getQty());
+                stockCsv.setStockHistoryCreatedDate(stockHistory.getCreatedDate());
                 stockCsvs.add(stockCsv);
-            });
+            }
             csvService.export(stockCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
@@ -203,19 +220,43 @@ public class StockServicelmp implements StockService {
         }
     }
 
+
     @Override
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT STOCK");
         try {
             CSVHelper<StockCsv> csvService = new CSVHelper<>(StockCsv.class);
             List<StockCsv> stockCsvList = csvService.parseCsv(file);
+            Map<Long, Stock> stockMap = new HashMap<>();
+
+
             List<Stock> stockList = new ArrayList<>();
             stockCsvList.forEach(stockCsv->{
                 Stock stock = new Stock();
-                BeanUtils.copyProperties(stockCsv, stock);
-                stock.setProductId(productDao.findByProductID(stockCsv.getProductId()).getEntity().getId());
-                stockList.add(stock);
+                stock.setId(stockCsv.getId());
+                stock.setQty(stockCsv.getQty());
+                stock.setProductId(stockCsv.getProductId());
+                stock.setCreatedDate(stockCsv.getCreatedDate());
+                stock.setUpdatedDate(stockCsv.getUpdatedDate());
+
+                StockHistory stockHistory = new StockHistory();
+                stockHistory.setId(stockCsv.getStockHistoryId());
+                stockHistory.setQty(stockCsv.getStockHistoryQty());
+                stockHistory.setFirstname(stockCsv.getFirstname());
+                stockHistory.setLastname(stockCsv.getLastname());
+                stockHistory.setRemark(stockCsv.getRemark());
+                stockHistory.setCreatedDate(stockCsv.getStockHistoryCreatedDate());
+                
+                if (stockMap.containsKey(stock.getId())){
+                    stockMap.get(stock.getId()).addStockHistory(stockHistory);
+                }else{
+                    stock.addStockHistory(stockHistory);
+                    stockMap.put(stock.getId(), stock);
+                }
             });
+            for (Map.Entry<Long, Stock> entry : stockMap.entrySet()){
+                stockList.add(entry.getValue());
+            }
             stockDao.saveEntities(stockList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
@@ -264,7 +305,7 @@ public class StockServicelmp implements StockService {
                     stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
                 } else {
                     // Fallback to product history
-                    ProductHistory productHistory = productHistoryDao.findByProductId(stock.getProductId()).getEntity();
+                    ProductHistory productHistory = productHistoryDao.findById(stock.getProductId()).getEntity();
                     if (productHistory != null) {
                         stockDto.setProduct(new StockDto.Product(productHistory.getId(),productHistory.getProductName()));
                     }
@@ -283,7 +324,6 @@ public class StockServicelmp implements StockService {
         }catch(Exception e){
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
-       
     } 
     @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
@@ -346,8 +386,7 @@ public class StockServicelmp implements StockService {
                 StockHistoryDto stockHistoryDto = new StockHistoryDto();
                 BeanUtils.copyProperties(stockHistory, stockHistoryDto);
 
-                User userDto = new User();
-                BeanUtils.copyProperties(stockHistory.getUser(), userDto);
+                StockHistoryDto.User userDto = new StockHistoryDto.User(stockHistory.getFirstname(),stockHistory.getLastname());
                 stockHistoryDto.setUser(userDto);
 
                 StockDetailDto stockDto = new StockDetailDto();
@@ -398,9 +437,11 @@ public class StockServicelmp implements StockService {
 
                 // Need to be call async 
                 Long userId = (Long)httpServletRequest.getAttribute(USERID);
+                com.hfsolution.feature.user.entity.User user = userRepository.findById(userId).get();
                 StockHistory stockHistory = new StockHistory();
                 stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                stockHistory.setUser(userRepository.findById(userId).get());
+                stockHistory.setFirstname(user.getFirstname());
+                stockHistory.setLastname(user.getLastname());
                 stockHistory.setRemark(stockUpdateRequest.getRemark());
                 stockHistory.setQty(stockUpdateRequest.getQty());
                 stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
@@ -446,9 +487,11 @@ public class StockServicelmp implements StockService {
 
                 // Need to be call async 
                 Long userId = (Long)httpServletRequest.getAttribute(USERID);
+                com.hfsolution.feature.user.entity.User user = userRepository.findById(userId).get();
                 StockHistory stockHistory = new StockHistory();
                 stockHistory.setId(stockHistoryDao.getStockHistoryId());
-                stockHistory.setUser(userRepository.findById(userId).get());
+                stockHistory.setFirstname(user.getFirstname());
+                stockHistory.setLastname(user.getLastname());
                 stockHistory.setRemark(stockUpdateRequest.getRemark());
                 stockHistory.setQty(stockUpdateRequest.getQty()*-1);
                 stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
@@ -522,8 +565,7 @@ public class StockServicelmp implements StockService {
                 BeanUtils.copyProperties(stockHistory, stockHistoryDto);
 
                 //COPY User Property
-                User user = new User();
-                BeanUtils.copyProperties(stockHistory.getUser(), user);
+                StockHistoryDto.User user = new StockHistoryDto.User(stockHistory.getFirstname(),stockHistory.getLastname());
                 stockHistoryDto.setUser(user);
 
                 stockHistoryDtos.add(stockHistoryDto);
