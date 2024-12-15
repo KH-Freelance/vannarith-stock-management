@@ -119,11 +119,24 @@ public class PurchaseServicelmp implements PurchaseService {
                 BeanUtils.copyProperties(purchase.getUser(), userDto);
 
                 List<PurchaseItemDto> purchaseItemDtos = new ArrayList<>();
+              
+
                 for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
                     PurchaseItemDto purchaseItemDto = new PurchaseItemDto();
+                    Product product = productDao.findById(purchaseItem.getProductId()).getEntity();
+                    if(product == null){
+                        // Fallback to product history
+                        ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
+                        if (productHistory != null) {
+                            // Product product2 = new Product();
+                            product = new Product();
+                            BeanUtils.copyProperties(productHistory, product);
+                            // purchaseItem.setProduct(product2);
+                        }
+                    }
                     BeanUtils.copyProperties(purchaseItem, purchaseItemDto);
                     ProductDto productDto = new ProductDto();
-                    BeanUtils.copyProperties(purchaseItem.getProduct(), productDto);
+                    BeanUtils.copyProperties(product, productDto);
                     purchaseItemDto.setProduct(productDto);
                     purchaseItemDtos.add(purchaseItemDto);
                 }
@@ -165,27 +178,27 @@ public class PurchaseServicelmp implements PurchaseService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PURCHASE");
         try {
-            CSVHelper<PurchaseCsv> csvService = new CSVHelper<>(PurchaseCsv.class,httpServletResponse);
-            Specification<Purchase> purchases = new CustomSpecification<>(q);
-            BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases);
-            List<PurchaseCsv> purchaseCsvs = new ArrayList<>();
-            purchaseResult.getEntityList().stream().forEach(purchase -> {
-                PurchaseCsv purchaseCsv = new PurchaseCsv();
-                purchaseCsv.setId(purchase.getId());
-                purchaseCsv.setCustomerName(purchase.getCustomer().getCustomerName());
-                purchaseCsv.setCustomerId(purchase.getCustomer().getId());
-                purchaseCsv.setEmployeeName(purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname());
-                purchaseCsv.setEmployeeId(purchase.getUser().getId());
-                purchaseCsv.setQty(purchase.getQty());
-                purchaseCsv.setTotal(purchase.getTotal());
-                purchaseCsv.setPaymentStatus(purchase.getPaymentStatus());
-                purchaseCsv.setPaymentType(purchase.getPaymentType());
-                purchaseCsv.setLocation(purchase.getLocation());
-                purchaseCsv.setCreatedDate(purchase.getCreatedDate());
-                purchaseCsv.setUpdateDate(purchase.getUpdatedDate());
-                purchaseCsvs.add(purchaseCsv);
-            });
-            csvService.export(purchaseCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            // CSVHelper<PurchaseCsv> csvService = new CSVHelper<>(PurchaseCsv.class,httpServletResponse);
+            // Specification<Purchase> purchases = new CustomSpecification<>(q);
+            // BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases);
+            // List<PurchaseCsv> purchaseCsvs = new ArrayList<>();
+            // purchaseResult.getEntityList().stream().forEach(purchase -> {
+            //     PurchaseCsv purchaseCsv = new PurchaseCsv();
+            //     purchaseCsv.setId(purchase.getId());
+            //     purchaseCsv.setCustomerName(purchase.getCustomer().getCustomerName());
+            //     purchaseCsv.setCustomerId(purchase.getCustomer().getId());
+            //     purchaseCsv.setEmployeeName(purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname());
+            //     purchaseCsv.setEmployeeId(purchase.getUser().getId());
+            //     purchaseCsv.setQty(purchase.getQty());
+            //     purchaseCsv.setTotal(purchase.getTotal());
+            //     purchaseCsv.setPaymentStatus(purchase.getPaymentStatus());
+            //     purchaseCsv.setPaymentType(purchase.getPaymentType());
+            //     purchaseCsv.setLocation(purchase.getLocation());
+            //     purchaseCsv.setCreatedDate(purchase.getCreatedDate());
+            //     purchaseCsv.setUpdateDate(purchase.getUpdatedDate());
+            //     purchaseCsvs.add(purchaseCsv);
+            // });
+            // csvService.export(purchaseCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
 
         }catch (DatabaseException e) {
             throw e;   
@@ -200,44 +213,45 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PURCHASE");
         try {
-            CSVHelper<PurchaseCsv> csvService = new CSVHelper<>(PurchaseCsv.class);
-            List<PurchaseCsv> purchaseCSVList = csvService.parseCsv(file);
-            List<Purchase> purchaseList = new ArrayList<>();
-            purchaseCSVList.stream().forEach(purchaseCsv -> {
+            // CSVHelper<PurchaseCsv> csvService = new CSVHelper<>(PurchaseCsv.class);
+            // List<PurchaseCsv> purchaseCSVList = csvService.parseCsv(file);
+            // List<Purchase> purchaseList = new ArrayList<>();
+            // purchaseCSVList.stream().forEach(purchaseCsv -> {
 
-                BaseEntityResponseDto<Product> productResult = productDao.findById(purchaseCsv.getProductId());
-                if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("006");
-                    throw new AppException("006",msg);
-                }
+            //     BaseEntityResponseDto<Product> productResult = productDao.findById(purchaseCsv.getProductId());
+            //     if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
+            //         String msg = AppTools.appGetMessage("006");
+            //         throw new AppException("006",msg);
+            //     }
 
-                BaseEntityResponseDto<Customer> customerResult = customerDao.findById(purchaseCsv.getCustomerId());
-                if(!customerResult.getStatus().equals(SUCCESS) || customerResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("015");
-                    throw new AppException("015",msg);
-                }
+            //     BaseEntityResponseDto<Customer> customerResult = customerDao.findById(purchaseCsv.getCustomerId());
+            //     if(!customerResult.getStatus().equals(SUCCESS) || customerResult.getEntity()==null){
+            //         String msg = AppTools.appGetMessage("015");
+            //         throw new AppException("015",msg);
+            //     }
 
-                Purchase purchase = new Purchase();
-                //purchase.setProduct(productResult.getEntity());
-                purchase.setCustomer(customerResult.getEntity());
-                purchase.setUser(userRepository.findById(purchaseCsv.getEmployeeId()).orElseThrow(() -> new AppException("002", "User not found")));
-                purchase.setQty(purchaseCsv.getQty());
-                // purchase.setDiscount(purchaseCsv.getDiscount());
-                purchase.setTotal(purchaseCsv.getTotal());
-                purchase.setLocation(purchaseCsv.getLocation());
-                purchase.setPaymentType(purchaseCsv.getPaymentType());
-                purchase.setPaymentStatus(purchaseCsv.getPaymentStatus());
-                purchase.setCreatedDate(purchaseCsv.getCreatedDate());
-                purchase.setUpdatedDate(purchaseCsv.getUpdateDate());
-                purchase.setId(purchaseCsv.getId());
-                purchaseList.add(purchase);
-            });         
-            purchaseDao.saveEntities(purchaseList);
-            SuccessResponse<?> response = new SuccessResponse<>();
-            response.setStatus(SUCCESS);
-            response.setMsg(AppTools.appGetMessage("039"));
-            response.setCode("039");
-            return response;
+            //     Purchase purchase = new Purchase();
+            //     //purchase.setProduct(productResult.getEntity());
+            //     purchase.setCustomer(customerResult.getEntity());
+            //     purchase.setUser(userRepository.findById(purchaseCsv.getEmployeeId()).orElseThrow(() -> new AppException("002", "User not found")));
+            //     purchase.setQty(purchaseCsv.getQty());
+            //     // purchase.setDiscount(purchaseCsv.getDiscount());
+            //     purchase.setTotal(purchaseCsv.getTotal());
+            //     purchase.setLocation(purchaseCsv.getLocation());
+            //     purchase.setPaymentType(purchaseCsv.getPaymentType());
+            //     purchase.setPaymentStatus(purchaseCsv.getPaymentStatus());
+            //     purchase.setCreatedDate(purchaseCsv.getCreatedDate());
+            //     purchase.setUpdatedDate(purchaseCsv.getUpdateDate());
+            //     purchase.setId(purchaseCsv.getId());
+            //     purchaseList.add(purchase);
+            // });         
+            // purchaseDao.saveEntities(purchaseList);
+            // SuccessResponse<?> response = new SuccessResponse<>();
+            // response.setStatus(SUCCESS);
+            // response.setMsg(AppTools.appGetMessage("039"));
+            // response.setCode("039");
+            // return response;
+            return null;
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {

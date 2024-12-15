@@ -13,6 +13,7 @@ import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -33,6 +34,7 @@ import com.hfsolution.app.services.CustomSpecification;
 
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
+import com.hfsolution.app.util.CSVHelperV2;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
@@ -189,11 +191,10 @@ public class StockServicelmp implements StockService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT STOCK");
         try {
-            CSVHelper<StockCsv> csvService = new CSVHelper<>(StockCsv.class,httpServletResponse);
+            CSVHelperV2<?> csvService = new CSVHelperV2<>(httpServletResponse, StockCsv.class);
             Specification<StockHistory> stocks = new CustomSpecification<>(q);
             BaseEntityResponseDto<StockHistory> stockResult = stockHistoryDao.search(stocks);
             List<StockCsv> stockCsvs = new ArrayList<>();
-
             for (StockHistory stockHistory : stockResult.getEntityList()) {
                 StockCsv stockCsv = new StockCsv();
                 stockCsv.setId(stockHistory.getStock().getId());
@@ -209,7 +210,15 @@ public class StockServicelmp implements StockService {
                 stockCsv.setStockHistoryCreatedDate(stockHistory.getCreatedDate());
                 stockCsvs.add(stockCsv);
             }
-            csvService.export(stockCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+    
+            List<Object[]> combinedData = new ArrayList<>();
+            for (StockCsv stock : stockCsvs) {
+                combinedData.add(new Object[]{stock});
+            }
+
+            csvService.export(combinedData, "users_and_products.csv");
+            
+           
 
         }catch (DatabaseException e) {
             throw e;   
@@ -219,13 +228,98 @@ public class StockServicelmp implements StockService {
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
     }
+    // @Override
+    // @Transactional
+    // public void export(String q) {
+    //     httpServletRequest.setAttribute(ACTION, "EXPORT STOCK");
+    //     try {
+    //         CSVHelper<StockCsv> csvService = new CSVHelper<>(StockCsv.class,httpServletResponse);
+    //         Specification<StockHistory> stocks = new CustomSpecification<>(q);
+    //         BaseEntityResponseDto<StockHistory> stockResult = stockHistoryDao.search(stocks);
+    //         List<StockCsv> stockCsvs = new ArrayList<>();
+
+    //         for (StockHistory stockHistory : stockResult.getEntityList()) {
+    //             StockCsv stockCsv = new StockCsv();
+    //             stockCsv.setId(stockHistory.getStock().getId());
+    //             stockCsv.setQty(stockHistory.getStock().getQty());
+    //             stockCsv.setFirstname(stockHistory.getFirstname());
+    //             stockCsv.setLastname(stockHistory.getLastname());
+    //             stockCsv.setProductId(stockHistory.getStock().getProductId());
+    //             stockCsv.setCreatedDate(stockHistory.getStock().getCreatedDate());
+    //             stockCsv.setUpdatedDate(stockHistory.getStock().getUpdatedDate());
+    //             stockCsv.setStockHistoryId(stockHistory.getId());
+    //             stockCsv.setRemark(stockHistory.getRemark());
+    //             stockCsv.setStockHistoryQty(stockHistory.getQty());
+    //             stockCsv.setStockHistoryCreatedDate(stockHistory.getCreatedDate());
+    //             stockCsvs.add(stockCsv);
+    //         }
+    //         csvService.export(stockCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+
+    //     }catch (DatabaseException e) {
+    //         throw e;   
+    //     }catch (AppException e) {
+    //         throw new AppException("028",e.getMessage(),true); 
+    //     }catch(Exception e){
+    //         throw new AppException(FAIL_CODE,e.getMessage(),true);
+    //     }
+    // }
 
 
+    // @Override
+    // public Object importData(MultipartFile file) {
+    //     httpServletRequest.setAttribute(ACTION, "IMPORT STOCK");
+    //     try {
+    //         CSVHelperV2<?> csvService = new CSVHelperV2<>(httpServletResponse,StockCsv.class);
+    //         List<StockCsv> stockCsvList = csvService.parseCsv(file);
+    //         Map<Long, Stock> stockMap = new HashMap<>();
+
+
+    //         List<Stock> stockList = new ArrayList<>();
+    //         stockCsvList.forEach(stockCsv->{
+    //             Stock stock = new Stock();
+    //             stock.setId(stockCsv.getId());
+    //             stock.setQty(stockCsv.getQty());
+    //             stock.setProductId(stockCsv.getProductId());
+    //             stock.setCreatedDate(stockCsv.getCreatedDate());
+    //             stock.setUpdatedDate(stockCsv.getUpdatedDate());
+
+    //             StockHistory stockHistory = new StockHistory();
+    //             stockHistory.setId(stockCsv.getStockHistoryId());
+    //             stockHistory.setQty(stockCsv.getStockHistoryQty());
+    //             stockHistory.setFirstname(stockCsv.getFirstname());
+    //             stockHistory.setLastname(stockCsv.getLastname());
+    //             stockHistory.setRemark(stockCsv.getRemark());
+    //             stockHistory.setCreatedDate(stockCsv.getStockHistoryCreatedDate());
+                
+    //             if (stockMap.containsKey(stock.getId())){
+    //                 stockMap.get(stock.getId()).addStockHistory(stockHistory);
+    //             }else{
+    //                 stock.addStockHistory(stockHistory);
+    //                 stockMap.put(stock.getId(), stock);
+    //             }
+    //         });
+    //         stockList = stockMap.values().stream().collect(Collectors.toList());
+    //         stockDao.saveEntities(stockList);
+    //         SuccessResponse<?> response = new SuccessResponse<>();
+    //         response.setStatus(SUCCESS);
+    //         response.setMsg(AppTools.appGetMessage("031"));
+    //         response.setCode("031");
+    //         return response;
+    //     }catch (DatabaseException e) {
+    //         throw e;   
+    //     }catch (AppException e) {
+    //         throw new AppException("030",e.getMessage(),true); 
+    //     }catch(Exception e){
+    //         throw new AppException(FAIL_CODE,e.getMessage(),true);
+        
+    //     }
+    
+    // }
     @Override
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT STOCK");
         try {
-            CSVHelper<StockCsv> csvService = new CSVHelper<>(StockCsv.class);
+            CSVHelperV2<StockCsv> csvService = new CSVHelperV2<>(StockCsv.class);
             List<StockCsv> stockCsvList = csvService.parseCsv(file);
             Map<Long, Stock> stockMap = new HashMap<>();
 
@@ -254,9 +348,7 @@ public class StockServicelmp implements StockService {
                     stockMap.put(stock.getId(), stock);
                 }
             });
-            for (Map.Entry<Long, Stock> entry : stockMap.entrySet()){
-                stockList.add(entry.getValue());
-            }
+            stockList = stockMap.values().stream().collect(Collectors.toList());
             stockDao.saveEntities(stockList);
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);

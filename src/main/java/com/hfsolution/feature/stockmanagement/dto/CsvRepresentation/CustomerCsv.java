@@ -26,11 +26,8 @@ public class CustomerCsv {
     private BigDecimal discount;
 
     @CsvBindByPosition(position = 6)
-    private BigDecimal credit;
-
-    @CsvBindByPosition(position = 7)
     private Timestamp createdDate;
 
-    @CsvBindByPosition(position = 8)
+    @CsvBindByPosition(position = 7)
     private Timestamp updatedDate;
 }

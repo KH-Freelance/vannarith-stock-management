@@ -1,57 +1,59 @@
 package com.hfsolution.feature.stockmanagement.dto.CsvRepresentation;
+import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.hfsolution.app.util.BigDecimalSerializer;
+import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
+import com.hfsolution.feature.user.entity.User;
 import com.opencsv.bean.CsvBindByPosition;
+
+import jakarta.persistence.CascadeType;
+import jakarta.persistence.Column;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
+import jakarta.persistence.FetchType;
+import jakarta.persistence.Id;
+import jakarta.persistence.JoinColumn;
+import jakarta.persistence.ManyToOne;
+import jakarta.persistence.OneToMany;
 import lombok.Data;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.util.ArrayList;
+import java.util.List;
 
 @Data
 public class PurchaseCsv {
 
-    @CsvBindByPosition(position = 0)
     private Long id;
 
-    @CsvBindByPosition(position = 1)
-    private Long productId;
+    // private List<PurchaseItem> purchaseItems = new ArrayList<>();
 
-    @CsvBindByPosition(position = 2)
-    private String productName;
 
-    @CsvBindByPosition(position = 3)
-    private Long customerId;
+    // private Customer customer;
 
-    @CsvBindByPosition(position = 4)
-    private String customerName;
+    // private User user; 
 
-    @CsvBindByPosition(position = 5)
-    private Long employeeId;
+    private List<Payment> payments = new ArrayList<>();
 
-    @CsvBindByPosition(position = 6)
-    private String employeeName;
-
-    @CsvBindByPosition(position = 7)
     private Long qty;
 
-    @CsvBindByPosition(position = 8)
     private BigDecimal total;
 
-    @CsvBindByPosition(position = 9)
-    private PaymentType paymentType;
+    private PaymentType paymentType = PaymentType.CASH;
 
-    @CsvBindByPosition(position = 10)
-    private PaymentStatus paymentStatus;
+    private PaymentStatus paymentStatus = PaymentStatus.PAID;
 
-    @CsvBindByPosition(position = 11)
     private String location;
 
-    @CsvBindByPosition(position = 12)
-    private BigDecimal discount;
+    private String purchaseCode;
 
-    @CsvBindByPosition(position = 13)
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 
-    @CsvBindByPosition(position = 14)
-    private Timestamp updateDate;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
+    private Timestamp updatedDate;
+
 
 }
