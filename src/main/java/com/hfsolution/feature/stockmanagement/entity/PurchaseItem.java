@@ -16,7 +16,7 @@ public class PurchaseItem {
     @Column(name = "id")
     private Long id;
 
-    @ManyToOne(fetch = FetchType.EAGER)
+    @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "purchase_id", nullable = false)
     @JsonIgnore
     private Purchase purchase;
@@ -26,8 +26,12 @@ public class PurchaseItem {
     // // @JsonIgnore
     // private Product product;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
+    // @OneToOne(fetch = FetchType.LAZY, optional = true)
+    // @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
+    // private Product product;
+
+    @OneToOne(fetch = FetchType.EAGER,optional  = true)
+    @JoinColumn(name = "product_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Product product;
 
     @Column(name = "product_id")

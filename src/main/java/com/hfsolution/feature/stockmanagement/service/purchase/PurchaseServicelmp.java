@@ -84,7 +84,7 @@ public class PurchaseServicelmp implements PurchaseService {
     private final ProductHistoryDao productHistoryDao;
 
     @Override
-    @Transactional
+    //@Transactional
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
@@ -107,7 +107,6 @@ public class PurchaseServicelmp implements PurchaseService {
             }
 
             Page<PurchaseDetailDto> PurchaseDetaitDtoPage = purchaseResult.getPage().map(purchase ->{
-               
 
                 PurchaseDetailDto purchaseDto = new PurchaseDetailDto();
                 BeanUtils.copyProperties(purchase, purchaseDto);
@@ -123,15 +122,14 @@ public class PurchaseServicelmp implements PurchaseService {
 
                 for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
                     PurchaseItemDto purchaseItemDto = new PurchaseItemDto();
-                    Product product = productDao.findById(purchaseItem.getProductId()).getEntity();
-                    if(product == null){
+                    Product product = purchaseItem.getProduct();
+                    if(product==null){
                         // Fallback to product history
                         ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
                         if (productHistory != null) {
-                            // Product product2 = new Product();
                             product = new Product();
                             BeanUtils.copyProperties(productHistory, product);
-                            // purchaseItem.setProduct(product2);
+                            purchaseItem.setProduct(product);
                         }
                     }
                     BeanUtils.copyProperties(purchaseItem, purchaseItemDto);
@@ -576,7 +574,7 @@ public class PurchaseServicelmp implements PurchaseService {
 
 
     @Override
-    @Transactional
+    //@Transactional
     public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
         SuccessResponse<Object> response = new SuccessResponse<>();
@@ -662,10 +660,19 @@ public class PurchaseServicelmp implements PurchaseService {
 
             List<PurchaseItemDto> purchaseItemDtos = new ArrayList<>();
             for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
+                Product product = purchaseItem.getProduct();
+                if(product==null){
+                    // Fallback to product history
+                    ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
+                    if (productHistory != null) {
+                        product = new Product();
+                        BeanUtils.copyProperties(productHistory, product);
+                    }
+                }
                 PurchaseItemDto purchaseItemDto = new PurchaseItemDto();
                 BeanUtils.copyProperties(purchaseItem, purchaseItemDto);
                 ProductDto productDto = new ProductDto();
-                BeanUtils.copyProperties(purchaseItem.getProduct(), productDto);
+                BeanUtils.copyProperties(product, productDto);
                 purchaseItemDto.setProduct(productDto);
                 purchaseItemDtos.add(purchaseItemDto);
             }

@@ -56,3 +56,15 @@ cache:
     ttl: 10000
 # logging:
 #   config: classpath:log4j2.xml
+rest:
+  telegram:
+    url: https://api.telegram.org/bot{token}/sendMessage
+    chat-id: 11112222
+
+feign:
+  client:
+    config:
+      default:
+        connectTimeout: 5000
+        readTimeout: 5000
+        loggerLevel: basic

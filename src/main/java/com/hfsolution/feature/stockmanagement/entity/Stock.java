@@ -29,12 +29,14 @@ public class Stock {
     @Column(name = "id")
     private Long id;
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
-    private Product product;
 
     @Column(name = "product_id")
     private Long productId;
+
+    @OneToOne(fetch = FetchType.EAGER,optional  =true)
+    @JoinColumn(name = "product_id", referencedColumnName = "id", updatable = false, insertable = false)
+    private Product product;
+
 
     @Column(name = "qty")
     private Long qty;
@@ -64,6 +66,10 @@ public class Stock {
         }
         this.stockHistories.add(stockHistory);
         stockHistory.setStock(this);
+    }
+
+    public boolean hasProduct() {
+        return this.product != null;
     }
 
   

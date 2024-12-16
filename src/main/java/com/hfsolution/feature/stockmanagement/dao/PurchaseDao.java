@@ -107,6 +107,8 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
   // }
 
+  
+  // @Transactional(readOnly = true)
   public BaseEntityResponseDto<Purchase> searchPurchase(Specification<Purchase> purchase, Pageable pageable){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

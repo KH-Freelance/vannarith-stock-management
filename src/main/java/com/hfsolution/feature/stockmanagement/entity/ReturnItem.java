@@ -36,9 +36,14 @@ public class ReturnItem {
     // @JoinColumn(name = "product_id", nullable = false)
     // private Product product; 
 
-    @OneToOne(fetch = FetchType.LAZY, optional = true)
-    @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
+    // @OneToOne(fetch = FetchType.LAZY, optional = true)
+    // @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
+    // private Product product;
+
+    @OneToOne(fetch = FetchType.EAGER,optional  =true)
+    @JoinColumn(name = "product_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Product product;
+
 
     @Column(name = "product_id")
     private Long productId;

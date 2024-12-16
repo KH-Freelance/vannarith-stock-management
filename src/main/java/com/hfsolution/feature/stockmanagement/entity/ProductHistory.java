@@ -71,4 +71,6 @@ public class ProductHistory {
             this.updatedDate = new Timestamp(System.currentTimeMillis());
         }
     }
+
+   
 }

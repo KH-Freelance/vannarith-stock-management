@@ -21,6 +21,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -367,7 +368,7 @@ public class StockServicelmp implements StockService {
     }
 
     @Override
-    @Transactional
+    //@Transactional
     public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
@@ -390,18 +391,20 @@ public class StockServicelmp implements StockService {
             calculatePercentageOfQty(stockResult.getPage());
             Page<StockDto> stockDtoPage = stockResult.getPage().map(stock ->{
                 StockDto stockDto = new StockDto();
-                BeanUtils.copyProperties(stock, stockDto);
-
-                if (stock.getProduct() != null) {
+                if (stock.getProduct()!=null) {
                     // Normal product case
                     stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
                 } else {
                     // Fallback to product history
                     ProductHistory productHistory = productHistoryDao.findById(stock.getProductId()).getEntity();
                     if (productHistory != null) {
+                        Product product = new Product();
+                        BeanUtils.copyProperties(productHistory, product);
+                        stock.setProduct(product);
                         stockDto.setProduct(new StockDto.Product(productHistory.getId(),productHistory.getProductName()));
                     }
                 }
+                BeanUtils.copyProperties(stock, stockDto);
                 return stockDto;
             });
             response.setStatus(SUCCESS);
@@ -666,9 +669,19 @@ public class StockServicelmp implements StockService {
             calculatePercentageOfQty(stockResult.getEntity());
             Double stockPercentage = stockResult.getEntity().getPercentage();
 
+            Product product = stockResult.getEntity().getProduct();
+            if(product==null){
+                // Fallback to product history
+                ProductHistory productHistory = productHistoryDao.findById(stockResult.getEntity().getProductId()).getEntity();
+                if (productHistory != null) {
+                    product = new Product();
+                    BeanUtils.copyProperties(productHistory, product);
+                }
+            }
+
             //COPY Product Property
             ProductDto productDto = new ProductDto();
-            BeanUtils.copyProperties(stockResult.getEntity().getProduct()  , productDto);
+            BeanUtils.copyProperties(product, productDto);
             stockDetailDto.setStockHistories(stockHistoryDtos);
             stockDetailDto.setProduct(productDto);
             stockDetailDto.setPercentage(stockPercentage);

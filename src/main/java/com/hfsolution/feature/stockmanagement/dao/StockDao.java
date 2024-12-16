@@ -122,6 +122,7 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   }
 
+  
   public BaseEntityResponseDto<Stock> searchStock(Specification<Stock> stocks, Pageable pageable){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
