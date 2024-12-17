@@ -18,4 +18,5 @@ public interface CustomerRepository extends IBaseRepository<Customer,Long>, JpaS
     Long getNextCustomerId();
 
 
+
 } 

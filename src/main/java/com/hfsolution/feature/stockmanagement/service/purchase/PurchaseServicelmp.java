@@ -3,6 +3,8 @@ package com.hfsolution.feature.stockmanagement.service.purchase;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
+
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
@@ -28,6 +30,7 @@ import com.hfsolution.app.services.CustomSpecification;
 
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
+import com.hfsolution.feature.auth.services.AuthenticationService;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
@@ -57,8 +60,12 @@ import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
+import com.hfsolution.feature.stockmanagement.util.purchase.ExcelUtil;
+import com.hfsolution.feature.stockmanagement.util.user.UserExcelDto;
+import com.hfsolution.feature.user.dto.RegisterRequest;
+import com.hfsolution.feature.user.entity.Role;
 import com.hfsolution.feature.user.entity.User;
-import com.hfsolution.feature.user.enums.Role;
+import com.hfsolution.feature.user.repository.RoleRepository;
 import com.hfsolution.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -77,6 +84,7 @@ public class PurchaseServicelmp implements PurchaseService {
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final UserRepository userRepository;
+    private final RoleRepository roleRepository;
     private final ProductDao productDao;
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
@@ -176,27 +184,15 @@ public class PurchaseServicelmp implements PurchaseService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PURCHASE");
         try {
-            // CSVHelper<PurchaseCsv> csvService = new CSVHelper<>(PurchaseCsv.class,httpServletResponse);
-            // Specification<Purchase> purchases = new CustomSpecification<>(q);
-            // BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases);
-            // List<PurchaseCsv> purchaseCsvs = new ArrayList<>();
-            // purchaseResult.getEntityList().stream().forEach(purchase -> {
-            //     PurchaseCsv purchaseCsv = new PurchaseCsv();
-            //     purchaseCsv.setId(purchase.getId());
-            //     purchaseCsv.setCustomerName(purchase.getCustomer().getCustomerName());
-            //     purchaseCsv.setCustomerId(purchase.getCustomer().getId());
-            //     purchaseCsv.setEmployeeName(purchase.getUser().getFirstname()+" "+purchase.getUser().getLastname());
-            //     purchaseCsv.setEmployeeId(purchase.getUser().getId());
-            //     purchaseCsv.setQty(purchase.getQty());
-            //     purchaseCsv.setTotal(purchase.getTotal());
-            //     purchaseCsv.setPaymentStatus(purchase.getPaymentStatus());
-            //     purchaseCsv.setPaymentType(purchase.getPaymentType());
-            //     purchaseCsv.setLocation(purchase.getLocation());
-            //     purchaseCsv.setCreatedDate(purchase.getCreatedDate());
-            //     purchaseCsv.setUpdateDate(purchase.getUpdatedDate());
-            //     purchaseCsvs.add(purchaseCsv);
-            // });
-            // csvService.export(purchaseCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+
+            Specification<Purchase> purchases = new CustomSpecification<>(q);
+            BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.searchPurchase(purchases);
+             httpServletResponse.setContentType("application/octet-stream");
+            String headerKey = "Content-Disposition";
+            String headerValue = "attachment; filename=purchases.xlsx";
+            httpServletResponse.setHeader(headerKey, headerValue);
+            ExcelUtil product = new ExcelUtil(purchaseResult.getEntityList());
+            product.exportDataToExcel(httpServletResponse);
 
         }catch (DatabaseException e) {
             throw e;   
@@ -211,45 +207,65 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PURCHASE");
         try {
-            // CSVHelper<PurchaseCsv> csvService = new CSVHelper<>(PurchaseCsv.class);
-            // List<PurchaseCsv> purchaseCSVList = csvService.parseCsv(file);
-            // List<Purchase> purchaseList = new ArrayList<>();
-            // purchaseCSVList.stream().forEach(purchaseCsv -> {
 
-            //     BaseEntityResponseDto<Product> productResult = productDao.findById(purchaseCsv.getProductId());
-            //     if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
-            //         String msg = AppTools.appGetMessage("006");
-            //         throw new AppException("006",msg);
-            //     }
+             if(ExcelUtil.isValidExcelFile(file)){
+                try {
 
-            //     BaseEntityResponseDto<Customer> customerResult = customerDao.findById(purchaseCsv.getCustomerId());
-            //     if(!customerResult.getStatus().equals(SUCCESS) || customerResult.getEntity()==null){
-            //         String msg = AppTools.appGetMessage("015");
-            //         throw new AppException("015",msg);
-            //     }
+                    List<Customer> customers =  com.hfsolution.feature.stockmanagement.util.customer.ExcelUtil.getCustomersDataFromExcel(file.getInputStream());
 
-            //     Purchase purchase = new Purchase();
-            //     //purchase.setProduct(productResult.getEntity());
-            //     purchase.setCustomer(customerResult.getEntity());
-            //     purchase.setUser(userRepository.findById(purchaseCsv.getEmployeeId()).orElseThrow(() -> new AppException("002", "User not found")));
-            //     purchase.setQty(purchaseCsv.getQty());
-            //     // purchase.setDiscount(purchaseCsv.getDiscount());
-            //     purchase.setTotal(purchaseCsv.getTotal());
-            //     purchase.setLocation(purchaseCsv.getLocation());
-            //     purchase.setPaymentType(purchaseCsv.getPaymentType());
-            //     purchase.setPaymentStatus(purchaseCsv.getPaymentStatus());
-            //     purchase.setCreatedDate(purchaseCsv.getCreatedDate());
-            //     purchase.setUpdatedDate(purchaseCsv.getUpdateDate());
-            //     purchase.setId(purchaseCsv.getId());
-            //     purchaseList.add(purchase);
-            // });         
-            // purchaseDao.saveEntities(purchaseList);
-            // SuccessResponse<?> response = new SuccessResponse<>();
-            // response.setStatus(SUCCESS);
-            // response.setMsg(AppTools.appGetMessage("039"));
-            // response.setCode("039");
-            // return response;
-            return null;
+                    // Map<Long, User> userMp = new HashMap<>();
+                    // userRepository.findAllById(userExcelDtos.stream().map(user->user.getId()).toList()).forEach(user->{
+                    //     userMp.put(user.getId(), user);
+                    // });
+                    // List<User> users = new ArrayList<>();
+                    // for (UserExcelDto userExcelDto : userExcelDtos) {
+                    //    if(!userMp.containsKey(userExcelDto.getId())){
+                    //         User user = new User();
+                    //         BeanUtils.copyProperties(userExcelDto, user);
+                    //         Role role = roleRepository.findByName(userExcelDto.getRoleName()).get();
+                    //         users.add(user);
+                            
+                    //    }
+                    // }
+                    // if(users != null && !users.isEmpty()){
+                    //     userRepository.saveAll(users);
+                    // }
+
+
+                    List<UserExcelDto> userExcelDtos =  com.hfsolution.feature.stockmanagement.util.user.ExcelUtil.getCustomersDataFromExcel(file.getInputStream());
+                    Map<Long, User> userMp = new HashMap<>();
+                    userRepository.findAllById(userExcelDtos.stream().map(user->user.getId()).toList()).forEach(user->{
+                        userMp.put(user.getId(), user);
+                    });
+                    List<User> users = new ArrayList<>();
+                    for (UserExcelDto userExcelDto : userExcelDtos) {
+                       if(!userMp.containsKey(userExcelDto.getId())){
+                            User user = new User();
+                            BeanUtils.copyProperties(userExcelDto, user);
+                            Role role = roleRepository.findByName(userExcelDto.getRoleName()).get();
+                            users.add(user);
+                            
+                       }
+                    }
+                    if(users != null && !users.isEmpty()){
+                        userRepository.saveAll(users);
+                    }
+
+                    
+                    List<Purchase> purchases = ExcelUtil.getPurchaseDataFromExcel(file.getInputStream());
+                    purchaseDao.saveEntities(purchases);
+                } catch (IOException e) {
+                    throw new AppException(FAIL_CODE,"The file is not a valid excel file",true);
+                }
+            }
+          
+            
+            SuccessResponse<?> response = new SuccessResponse<>();
+            response.setStatus(SUCCESS);
+            response.setMsg(AppTools.appGetMessage("039"));
+            response.setCode("039");
+            return response;
+            // return null;
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {

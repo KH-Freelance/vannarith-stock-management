@@ -34,14 +34,17 @@ import com.hfsolution.app.services.CustomSpecification;
 
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
+import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.ProductCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
+import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
+import com.hfsolution.feature.stockmanagement.util.product.ExcelUtil;
 
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -54,6 +57,7 @@ public class ProductServicelmp implements ProductService {
     
     private final CloudinaryProperties cloudinaryProperties;
     private final ProductDao productDao;
+    private final CustomerDao customerDao;
     private final ProductHistoryDao productHistoryDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
@@ -285,16 +289,17 @@ public class ProductServicelmp implements ProductService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PRODUCT");
         try {
-            CSVHelper<ProductCsv> csvService = new CSVHelper<>(ProductCsv.class,httpServletResponse);
             Specification<Product> products = new CustomSpecification<>(q);
             BaseEntityResponseDto<Product> productResult = productDao.search(products);
-            List<ProductCsv> productCsvList = new ArrayList<>();
-            productResult.getEntityList().stream().forEach(product->{
-                ProductCsv productCsv = new ProductCsv();
-                BeanUtils.copyProperties(product, productCsv);
-                productCsvList.add(productCsv);
-            });
-            csvService.export(productCsvList, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
+            httpServletResponse.setContentType("application/octet-stream");
+            String headerKey = "Content-Disposition";
+            String headerValue = "attachment; filename=Product.xlsx";
+            httpServletResponse.setHeader(headerKey, headerValue);
+            ExcelUtil product = new ExcelUtil(productResult.getEntityList());
+            product.exportDataToExcel(httpServletResponse);
+
+
+
 
         }catch (DatabaseException e) {
             throw e;   
@@ -309,15 +314,15 @@ public class ProductServicelmp implements ProductService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PRODUCT");
         try {
-            CSVHelper<ProductCsv> csvService = new CSVHelper<>(ProductCsv.class);
-            List<ProductCsv> productCsvList = csvService.parseCsv(file);
-            List<Product> products = new ArrayList<>();
-            productCsvList.stream().forEach(productCsv->{
-                Product product = new Product();
-                BeanUtils.copyProperties(productCsv, product);
-                products.add(product);
-            });
-            productDao.saveEntities(products);
+
+            if(ExcelUtil.isValidExcelFile(file)){
+                try {
+                    List<Product> products = ExcelUtil.getProductsDataFromExcel(file.getInputStream());
+                    productDao.saveEntities(products);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("The file is not a valid excel file");
+                }
+            }
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
             response.setMsg(AppTools.appGetMessage("014"));

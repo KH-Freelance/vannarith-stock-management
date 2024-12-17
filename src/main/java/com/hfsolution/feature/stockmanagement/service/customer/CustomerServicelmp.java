@@ -4,6 +4,7 @@ import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
@@ -41,6 +42,7 @@ import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
+import com.hfsolution.feature.stockmanagement.util.customer.ExcelUtil;
 
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
@@ -127,17 +129,15 @@ public class CustomerServicelmp implements CustomerService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT CUSTOMER");
         try {
-            CSVHelper<CustomerCsv> csvService = new CSVHelper<>(CustomerCsv.class,httpServletResponse);
             Specification<Customer> customers = new CustomSpecification<>(q);
             BaseEntityResponseDto<Customer> customerResult = customerDao.search(customers);
-            List<CustomerCsv> customerCsvs = new ArrayList<>();
-            customerResult.getEntityList().stream().forEach(customer->{
-                CustomerCsv customerCsv = new CustomerCsv();
-                BeanUtils.copyProperties(customer, customerCsv);
-                customerCsvs.add(customerCsv);
-            });
-            csvService.export(customerCsvs, CSV_FILENAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd-HH-mm-ss")+".csv");
-
+            httpServletResponse.setContentType("application/octet-stream");
+            // httpServletResponse.setContentType("text/csv");
+            String headerKey = "Content-Disposition";
+            String headerValue = "attachment; filename=Customers.xlsx";
+            httpServletResponse.setHeader(headerKey, headerValue);
+            ExcelUtil customer = new ExcelUtil(customerResult.getEntityList());
+            customer.exportDataToExcel(httpServletResponse);
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
@@ -151,15 +151,14 @@ public class CustomerServicelmp implements CustomerService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT CUSTOMER");
         try {
-            CSVHelper<CustomerCsv> csvService = new CSVHelper<>(CustomerCsv.class);
-            List<CustomerCsv> customerCsvList = csvService.parseCsv(file);
-            List<Customer> customers = new ArrayList<>();
-            customerCsvList.stream().forEach(customerCsv->{
-                Customer customer= new Customer();
-                BeanUtils.copyProperties(customerCsv, customer);
-                customers.add(customer);
-            });
-            customerDao.saveEntities(customers);
+            if(ExcelUtil.isValidExcelFile(file)){
+                try {
+                    List<Customer> customers = ExcelUtil.getCustomersDataFromExcel(file.getInputStream());
+                    customerDao.saveEntities(customers);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("The file is not a valid excel file");
+                }
+            }
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
             response.setMsg(AppTools.appGetMessage("023"));

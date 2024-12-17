@@ -4,6 +4,7 @@ import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
@@ -53,6 +54,7 @@ import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
+import com.hfsolution.feature.stockmanagement.util.stock.ExcelUtil;
 import com.hfsolution.feature.user.repository.UserRepository;
 
 import lombok.RequiredArgsConstructor;
@@ -192,35 +194,15 @@ public class StockServicelmp implements StockService {
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT STOCK");
         try {
-            CSVHelperV2<?> csvService = new CSVHelperV2<>(httpServletResponse, StockCsv.class);
-            Specification<StockHistory> stocks = new CustomSpecification<>(q);
-            BaseEntityResponseDto<StockHistory> stockResult = stockHistoryDao.search(stocks);
-            List<StockCsv> stockCsvs = new ArrayList<>();
-            for (StockHistory stockHistory : stockResult.getEntityList()) {
-                StockCsv stockCsv = new StockCsv();
-                stockCsv.setId(stockHistory.getStock().getId());
-                stockCsv.setQty(stockHistory.getStock().getQty());
-                stockCsv.setFirstname(stockHistory.getFirstname());
-                stockCsv.setLastname(stockHistory.getLastname());
-                stockCsv.setProductId(stockHistory.getStock().getProductId());
-                stockCsv.setCreatedDate(stockHistory.getStock().getCreatedDate());
-                stockCsv.setUpdatedDate(stockHistory.getStock().getUpdatedDate());
-                stockCsv.setStockHistoryId(stockHistory.getId());
-                stockCsv.setRemark(stockHistory.getRemark());
-                stockCsv.setStockHistoryQty(stockHistory.getQty());
-                stockCsv.setStockHistoryCreatedDate(stockHistory.getCreatedDate());
-                stockCsvs.add(stockCsv);
-            }
-    
-            List<Object[]> combinedData = new ArrayList<>();
-            for (StockCsv stock : stockCsvs) {
-                combinedData.add(new Object[]{stock});
-            }
-
-            csvService.export(combinedData, "users_and_products.csv");
-            
+            Specification<Stock> stocks = new CustomSpecification<>(q);
+            BaseEntityResponseDto<Stock> stockResult = stockDao.searchStock(stocks);
+            httpServletResponse.setContentType("application/octet-stream");
+            String headerKey = "Content-Disposition";
+            String headerValue = "attachment; filename=Stocks.xlsx";
+            httpServletResponse.setHeader(headerKey, headerValue);
+            ExcelUtil stock = new ExcelUtil(stockResult.getEntityList());
+            stock.exportDataToExcel(httpServletResponse);
            
-
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
@@ -320,37 +302,14 @@ public class StockServicelmp implements StockService {
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT STOCK");
         try {
-            CSVHelperV2<StockCsv> csvService = new CSVHelperV2<>(StockCsv.class);
-            List<StockCsv> stockCsvList = csvService.parseCsv(file);
-            Map<Long, Stock> stockMap = new HashMap<>();
-
-
-            List<Stock> stockList = new ArrayList<>();
-            stockCsvList.forEach(stockCsv->{
-                Stock stock = new Stock();
-                stock.setId(stockCsv.getId());
-                stock.setQty(stockCsv.getQty());
-                stock.setProductId(stockCsv.getProductId());
-                stock.setCreatedDate(stockCsv.getCreatedDate());
-                stock.setUpdatedDate(stockCsv.getUpdatedDate());
-
-                StockHistory stockHistory = new StockHistory();
-                stockHistory.setId(stockCsv.getStockHistoryId());
-                stockHistory.setQty(stockCsv.getStockHistoryQty());
-                stockHistory.setFirstname(stockCsv.getFirstname());
-                stockHistory.setLastname(stockCsv.getLastname());
-                stockHistory.setRemark(stockCsv.getRemark());
-                stockHistory.setCreatedDate(stockCsv.getStockHistoryCreatedDate());
-                
-                if (stockMap.containsKey(stock.getId())){
-                    stockMap.get(stock.getId()).addStockHistory(stockHistory);
-                }else{
-                    stock.addStockHistory(stockHistory);
-                    stockMap.put(stock.getId(), stock);
+             if(ExcelUtil.isValidExcelFile(file)){
+                try {
+                    List<Stock> stocks = ExcelUtil.getStockDataFromExcel(file.getInputStream());
+                    stockDao.saveEntities(stocks);
+                } catch (IOException e) {
+                    throw new IllegalArgumentException("The file is not a valid excel file");
                 }
-            });
-            stockList = stockMap.values().stream().collect(Collectors.toList());
-            stockDao.saveEntities(stockList);
+            }
             SuccessResponse<?> response = new SuccessResponse<>();
             response.setStatus(SUCCESS);
             response.setMsg(AppTools.appGetMessage("031"));

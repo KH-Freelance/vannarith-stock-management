@@ -54,7 +54,7 @@ public class User implements UserDetails {
   private String password;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "role_id", nullable = false)
+  @JoinColumn(name = "role_id", nullable = true)
   @CsvBindByPosition(position = 5)
   private Role role;
 

@@ -87,6 +87,16 @@ public class Purchase {
         purchaseItem.setPurchase(null);
     }
 
+    public void addPayment(Payment payment) {
+        payments.add(payment);
+        payment.setPurchase(this);
+    }
+
+    // public void removePayment(Payment payment) {
+    //     payments.remove(payment);
+    //     payment.setPurchase(null);
+    // }
+
     @PrePersist
     public void preInsert() {
 
