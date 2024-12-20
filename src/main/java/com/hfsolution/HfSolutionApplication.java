@@ -8,10 +8,13 @@ import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
+import org.springframework.scheduling.annotation.EnableScheduling;
+
 import com.hfsolution.feature.auth.services.AuthenticationService;
 
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
 @EnableFeignClients
+@EnableScheduling
 public class HfSolutionApplication {
 
 	public static void main(String[] args) {

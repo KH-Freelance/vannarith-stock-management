@@ -1,6 +1,10 @@
 server:
   port: 8080
 spring:
+  task:
+    scheduling:
+      pool:
+        size: 10
   threads:
     virtual:
       enabled: true
@@ -58,8 +62,8 @@ cache:
 #   config: classpath:log4j2.xml
 rest:
   telegram:
-    url: https://api.telegram.org/bot{token}/sendMessage
-    chat-id: 11112222
+    url: https://api.telegram.org/bot7524240463:AAFokw3C3D5lQ6dYV806XMuDTZd1pA0X_Ys
+    chat-id: -4553450364
 
 feign:
   client:

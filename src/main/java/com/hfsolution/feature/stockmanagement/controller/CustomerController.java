@@ -2,6 +2,8 @@ package com.hfsolution.feature.stockmanagement.controller;
 
 import java.util.HashMap;
 import java.util.Map;
+import java.util.concurrent.ExecutionException;
+
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.http.ResponseEntity;
@@ -21,6 +23,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.SuccessResponse;
+import com.hfsolution.app.external.telegram.TelegramRestClientConsumer;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.customer.CustomerService;
@@ -36,6 +39,8 @@ public class CustomerController {
     @Autowired
     private CustomerService customerService;
 
+    @Autowired
+    TelegramRestClientConsumer telegramRestClientConsumer;
     @GetMapping("/search")
     @Operation(summary = "List customers")
     public Object getUsersInfo( 
@@ -60,6 +65,14 @@ public class CustomerController {
     @PostMapping(value = "/import", consumes = {"multipart/form-data"})
     private Object  importData(@RequestPart("file")MultipartFile file){
         return customerService.importData(file);
+    }
+
+
+    @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
+    public Object  test(@RequestPart("file")MultipartFile file) throws InterruptedException, ExecutionException{
+        telegramRestClientConsumer.sendFileToTelegram(file, "-4553450364");
+
+        return "Success";
     }
 
     @PostMapping("/add")
