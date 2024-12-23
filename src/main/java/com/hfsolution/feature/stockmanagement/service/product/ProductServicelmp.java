@@ -88,7 +88,7 @@ public class ProductServicelmp implements ProductService {
             product.setImageUrl(cloudinaryProperties.getDefaultImage());
             product.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             product.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-            product.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
+            //product.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
 
             productDao.saveEntity(product);
             response.setStatus(SUCCESS);
@@ -132,7 +132,7 @@ public class ProductServicelmp implements ProductService {
             product.setFactory(productRequest.getFactory());
             product.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             product.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-            product.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
+            //product.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(productRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
             
             productDao.saveEntity(product);
             response.setStatus(SUCCESS);
@@ -206,9 +206,9 @@ public class ProductServicelmp implements ProductService {
             Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
             Optional.ofNullable(productUpdateRequest.getImportPrice()).ifPresent(existingProduct::setImportPrice);
             Optional.ofNullable(productUpdateRequest.getFactory()).ifPresent(existingProduct::setFactory);
-            Optional.ofNullable(productUpdateRequest.getExpiryDate())
-            .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
-            .ifPresent(existingProduct::setExpiryDate);
+            // Optional.ofNullable(productUpdateRequest.getExpiryDate())
+            // .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
+            // .ifPresent(existingProduct::setExpiryDate);
             existingProduct.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             productDao.saveEntity(existingProduct);
 
@@ -264,9 +264,9 @@ public class ProductServicelmp implements ProductService {
             Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
             Optional.ofNullable(productUpdateRequest.getImportPrice()).ifPresent(existingProduct::setImportPrice);
             Optional.ofNullable(productUpdateRequest.getFactory()).ifPresent(existingProduct::setFactory);
-            Optional.ofNullable(productUpdateRequest.getExpiryDate())
-            .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
-            .ifPresent(existingProduct::setExpiryDate);
+            // Optional.ofNullable(productUpdateRequest.getExpiryDate())
+            // .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
+            // .ifPresent(existingProduct::setExpiryDate);
             existingProduct.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             productDao.saveEntity(existingProduct);
 

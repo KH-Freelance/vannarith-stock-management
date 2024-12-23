@@ -63,14 +63,34 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   }
 
-  public BaseEntityResponseDto<Stock> findStockByProductID(Long id){
+  // public BaseEntityResponseDto<Stock> findStockByProductID(Long id){
+
+  //   String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+  //   long startTime = System.currentTimeMillis();
+
+  //   try {
+
+  //     Stock entity = stockRepository.findByProductId(id);
+  //     var appModel = new BaseEntityResponseDto<Stock>();
+  //     appModel.setStatus(SUCCESS);
+  //     appModel.setEntity(entity);
+  //     appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+  //     return appModel;
+
+  //   } catch (Exception e) {
+  //     throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+  //   }
+
+  // }
+
+  public BaseEntityResponseDto<Stock> findStockByProductIDAndBatchId(Long id,String batchId){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
 
-      Stock entity = stockRepository.findByProductId(id);
+      Stock entity = stockRepository.findByProductIdAndBatchId(id,batchId);
       var appModel = new BaseEntityResponseDto<Stock>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);
@@ -82,6 +102,7 @@ public class StockDao extends BaseDBDao<Stock,Long>{
     }
 
   }
+
 
   // public BaseEntityResponseDto<Stock> findStockByUserID(Long id){
 

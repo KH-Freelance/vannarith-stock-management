@@ -199,7 +199,7 @@ public class ExcelService {
             createCell(row, columnCount++, UpdatedDate.getDiscount(), style);
             createCell(row, columnCount++, UpdatedDate.getCreatedDate(), style);
             createCell(row, columnCount++, UpdatedDate.getUpdatedDate(), style);
-            createCell(row, columnCount++, UpdatedDate.getExpiryDate(), style);
+            //createCell(row, columnCount++, UpdatedDate.getExpiryDate(), style);
         }
     }
 

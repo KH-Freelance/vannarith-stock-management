@@ -17,7 +17,7 @@ public class PurchaseUpdateRequest {
     @Positive(message = "Qty must be greater than 0")
     private Long qty;
     private String location;
-    @Pattern(regexp = "^(CASH|ONE_WEEK|TWO_WEEK|THREE_WEEK|ONE_MONTH|TWO_MONTH|THREE_MONTH|FIVE_MONTH|SIX_MONTH)$", 
+    @Pattern(regexp = "^(CASH|BANK|ONE_WEEK|TWO_WEEK|THREE_WEEK|ONE_MONTH|TWO_MONTH|THREE_MONTH|FIVE_MONTH|SIX_MONTH)$", 
              message = "Payment type not match , please check and try again !")
     private String paymentType;
     

@@ -282,7 +282,7 @@ public class PurchaseServicelmp implements PurchaseService {
     @Transactional
     public Object addPurchase(PurchaseRequest purchaseRequest) {
 
-        httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");
+        httpServletRequest.setAttribute(ACTION,"IMPORT PURCHASE");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
         try {
 
@@ -305,7 +305,7 @@ public class PurchaseServicelmp implements PurchaseService {
 
             //VERIFY PRODUCT & STOCK
             Map<Long, Product> productMap = new HashMap<>();
-            Map<Long, Stock> stockMap = new HashMap<>();
+            Map<String, Stock> stockMap = new HashMap<>();
             purchaseRequest.getProductPurchases().stream().forEach((data->{
 
                 //CHECK PRODUCT
@@ -318,19 +318,19 @@ public class PurchaseServicelmp implements PurchaseService {
                 productMap.put(data.getProductId(), product);
 
                 //CHECK STOCK & QTY
-                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(data.getProductId());
+                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(data.getProductId(),data.getBatchId());
                 if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("046").replace("[product]",product.getProductName());;
+                    String msg = AppTools.appGetMessage("046").replace("[product]",data.getBatchId()+":"+product.getProductName());
                     throw new AppException("046",msg,"Y");
                 }
                 Stock stock = stockResult.getEntity();
-                stockMap.put(data.getProductId(), stock);
+                stockMap.put(data.getBatchId()+":"+data.getProductId(), stock);
                 if(stock.getQty() == null || stock.getQty() <= 0){
-                    String msg = AppTools.appGetMessage("047").replace("[product]",product.getProductName());;
+                    String msg = AppTools.appGetMessage("047").replace("[product]",data.getBatchId()+":"+product.getProductName());;
                     throw new AppException("047",msg,"Y");
                 }
                 if(stock.getQty() < data.getQty()){
-                    String msg = AppTools.appGetMessage("047").replace("[product]",product.getProductName());;
+                    String msg = AppTools.appGetMessage("047").replace("[product]",data.getBatchId()+":"+product.getProductName());;
                     throw new AppException("047",msg,"Y");
                 }
                 
@@ -360,7 +360,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 for (ProductPurchase productPurchase : purchaseRequest.getProductPurchases()){
                     PurchaseItem purchaseItem = new PurchaseItem();
                     Product product = productMap.get(productPurchase.getProductId());
-                    Stock stock = stockMap.get(productPurchase.getProductId());
+                    Stock stock = stockMap.get(productPurchase.getBatchId()+":"+productPurchase.getProductId());
     
                    
                      //CALCULATE
@@ -395,7 +395,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 }
 
                 // Check PaymentType return 0 = PAID, -1 = CREDIT
-                if(purchaseRequest.getPaymentType().compareTo(PaymentType.CASH)==0){
+                if(purchaseRequest.getPaymentType().compareTo(PaymentType.CASH)==0 || purchaseRequest.getPaymentType().compareTo(PaymentType.BANK)==0){
                     // Status PAID
                     purchase.setPaymentStatus(PaymentStatus.PAID);
 

@@ -55,11 +55,11 @@ public class Product {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
 
-    @Column(name = "expiry_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-        @ExcelProperty(converter = TimestampConverter.class)
+    // @Column(name = "expiry_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    // @ExcelProperty(converter = TimestampConverter.class)
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
-    private Timestamp expiryDate;
+    // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
+    // private Timestamp expiryDate;
 
     @Column(name = "image_url")
     private String imageUrl;

@@ -41,6 +41,8 @@ public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecifi
 
     Stock findByProductId(Long id);
 
+    Stock findByProductIdAndBatchId(Long id,String batchId);
+
     @Modifying
     @Transactional
     void deleteByProductId(Long id);

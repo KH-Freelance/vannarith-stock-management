@@ -6,8 +6,10 @@ import java.util.List;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotEmpty;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
@@ -27,6 +29,8 @@ public class PurchaseRequest {
 
     @Data
     public static class ProductPurchase {
+        @NotBlank(message = "Batch Id is required.")
+        private String batchId;
         @Positive(message = "Product ID must be greater than 0")
         private Long productId;
         @Positive(message = "Qty must be greater than 0")

@@ -122,7 +122,7 @@ public class ReportServiceImp  implements ReportService{
                 product.setStockSold(stockSaled);
                 product.setDiscount(productResult.getEntity().getDiscount());
                 product.setCreatedDate(productResult.getEntity().getCreatedDate());
-                product.setExpiryDate(productResult.getEntity().getExpiryDate());
+                //product.setExpiryDate(productResult.getEntity().getExpiryDate());
                 reportStockDtos.add(product);
             }
             response.setStatus(SUCCESS);

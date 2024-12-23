@@ -12,9 +12,12 @@ import lombok.Setter;
 public class StockDto {
 
     private Long id;
+    private String batchId;
     private Product product;
     private Long qty;
     private Double percentage;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
+    private Timestamp expiryDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")

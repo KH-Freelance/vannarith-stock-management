@@ -1,6 +1,7 @@
 package com.hfsolution.feature.stockmanagement.enums;
 
 public enum PaymentType {
+    BANK,
     CASH,
     ONE_WEEK,
     TWO_WEEK,

@@ -8,6 +8,9 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.sql.Timestamp;
+import java.time.LocalDate;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -88,7 +91,7 @@ public class StockServicelmp implements StockService {
             Stock stock ;
 
             //check product id
-            BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(stockRequest.getProductId());
+            BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(stockRequest.getProductId(),stockRequest.getBatchId());
             if(stockResult.getEntity()!=null){
                 String msg = AppTools.appGetMessage("0240");
                 throw new AppException("0240",msg);
@@ -99,8 +102,6 @@ public class StockServicelmp implements StockService {
             stock = new Stock();
             BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
 
-
-           
 
             // Need to be call async 
             Long userId = (Long)httpServletRequest.getAttribute(USERID);
@@ -114,8 +115,10 @@ public class StockServicelmp implements StockService {
             stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
 
             stock.setId(stockDao.getStockId());
+            stock.setBatchId(stockRequest.getBatchId());
             stock.setProductId(product.getEntity().getId());
             stock.setQty(stockRequest.getQty());
+            stock.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(stockRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
             stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stock.addStockHistory(stockHistory);
@@ -172,6 +175,9 @@ public class StockServicelmp implements StockService {
             Stock stock = stockResult.getEntity();
             // Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setPro);
             Optional.ofNullable(stockUpdateRequest.getQty()).ifPresent(stock::setQty);
+            Optional.ofNullable(stockUpdateRequest.getExpiryDate())
+            .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
+            .ifPresent(stock::setExpiryDate);
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stockDao.saveEntity(stock);
             response.setStatus(SUCCESS);

@@ -38,10 +38,12 @@ public class Stock {
     @Column(name = "product_id")
     private Long productId;
 
+    @Column(name = "batch_id")
+    private String batchId;
+
     @OneToOne(fetch = FetchType.EAGER,optional  =true)
     @JoinColumn(name = "product_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Product product;
-
 
     @Column(name = "qty")
     private Long qty;
@@ -65,6 +67,12 @@ public class Stock {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
+
+    @Column(name = "expiry_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @ExcelProperty(converter = TimestampConverter.class)
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
+    private Timestamp expiryDate;
 
     public void removeStockHistory(StockHistory stockHistory) {
         this.stockHistories.remove(stockHistory);

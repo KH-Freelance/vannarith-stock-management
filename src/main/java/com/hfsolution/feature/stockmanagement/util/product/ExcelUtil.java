@@ -103,7 +103,7 @@ public class ExcelUtil {
             createCell(row, columnCount++, UpdatedDate.getDiscount(), style);
             createCell(row, columnCount++, UpdatedDate.getCreatedDate(), style);
             createCell(row, columnCount++, UpdatedDate.getUpdatedDate(), style);
-            createCell(row, columnCount++, UpdatedDate.getExpiryDate(), style);
+            //createCell(row, columnCount++, UpdatedDate.getExpiryDate(), style);
         }
     }
 
@@ -148,7 +148,7 @@ public class ExcelUtil {
                        case 5 -> prodcut.setDiscount(new BigDecimal(cell.getNumericCellValue()));
                        case 6 -> prodcut.setCreatedDate(Timestamp.valueOf(cell.getStringCellValue()));
                        case 7 -> prodcut.setUpdatedDate(Timestamp.valueOf(cell.getStringCellValue()));
-                       case 8 -> prodcut.setExpiryDate(Timestamp.valueOf(cell.getStringCellValue()));
+                       //case 8 -> prodcut.setExpiryDate(Timestamp.valueOf(cell.getStringCellValue()));
                        default -> {
                        }
                    }

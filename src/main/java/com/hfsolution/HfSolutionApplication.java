@@ -11,6 +11,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
 
 import com.hfsolution.feature.auth.services.AuthenticationService;
+import com.hfsolution.feature.user.dto.RegisterRequest;
 
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
 @EnableFeignClients
@@ -26,6 +27,15 @@ public class HfSolutionApplication {
 			AuthenticationService service
 	) {
 		return args -> {
+
+			// var hak = RegisterRequest.builder()
+            //         .firstname("hak3")
+            //         .lastname("hak3")
+            //         .email("hak3@mail.com")
+            //         .password("hak3")
+            //         .roleId(1)
+            //         .build();
+            // System.out.println("Hakzin token: " + service.register(hak).getAccessToken());
 
 			// var hak = RegisterRequest.builder()
 			// 		.firstname("b")
