@@ -299,6 +299,7 @@ public class ExcelService {
     }
 
     public void writeCustomerData(List<Customer> customerList){
+       try {
         sheet   = workbook.createSheet(CUSTOMER_SHEET);
         Row rowHeader = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();
@@ -327,6 +328,11 @@ public class ExcelService {
             createCell(row, columnCount++, customer.getCreatedDate(), style);
             createCell(row, columnCount++, customer.getUpdatedDate(), style);
         }
+       } catch (Exception e) {
+        // TODO: handle exception
+        e.printStackTrace();
+       }
+
     }
 
     public void writeStockHistoryData(List<Stock> stockList){

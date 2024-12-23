@@ -2,7 +2,11 @@ package com.hfsolution.feature.stockmanagement.entity;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hfsolution.app.util.TimestampConverter;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
@@ -40,14 +44,20 @@ public class Product {
     private BigDecimal discount;
 
     @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @ExcelProperty(converter = TimestampConverter.class)
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @ExcelProperty(converter = TimestampConverter.class)
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
 
     @Column(name = "expiry_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+        @ExcelProperty(converter = TimestampConverter.class)
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
     private Timestamp expiryDate;
 

@@ -1,7 +1,10 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
+
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.hfsolution.app.util.TimestampConverter;
 import com.hfsolution.feature.user.entity.User;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -38,6 +41,8 @@ public class StockHistory {
     private String remark;
 
     @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+        @ExcelProperty(converter = TimestampConverter.class)
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 

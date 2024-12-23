@@ -2,10 +2,12 @@ package com.hfsolution.feature.stockmanagement.entity;
 
 import java.sql.Timestamp;
 
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
+import com.hfsolution.app.util.TimestampConverter;
 import com.hfsolution.feature.user.entity.User;
 import com.opencsv.bean.CsvBindByPosition;
 import com.opencsv.bean.CsvIgnore;
@@ -53,10 +55,12 @@ public class Payment {
     private BigDecimal amount;
 
     @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @ExcelProperty(converter = TimestampConverter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @ExcelProperty(converter = TimestampConverter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
 

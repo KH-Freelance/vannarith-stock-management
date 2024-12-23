@@ -3,9 +3,13 @@ package com.hfsolution.feature.stockmanagement.entity;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
+
+import com.alibaba.excel.annotation.ExcelIgnore;
+import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
+import com.hfsolution.app.util.TimestampConverter;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.hfsolution.feature.user.entity.User;
@@ -34,6 +38,7 @@ public class Purchase {
     private Long id;
 
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.EAGER , orphanRemoval = true)
+    @ExcelIgnore
     private List<PurchaseItem> purchaseItems = new ArrayList<>();
 
     @ManyToOne(fetch = FetchType.EAGER)
@@ -45,6 +50,7 @@ public class Purchase {
     private User user; 
 
     @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @ExcelIgnore
     private List<Payment> payments = new ArrayList<>();
 
     @Column(name = "qty")
@@ -69,10 +75,14 @@ public class Purchase {
     private String purchaseCode;
 
     @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+        @ExcelProperty(converter = TimestampConverter.class)
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 
     @Column(name = "updated_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @ExcelProperty(converter = TimestampConverter.class)
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
 

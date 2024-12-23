@@ -14,5 +14,5 @@ import org.springframework.web.multipart.MultipartFile;
 public interface  RecoveryService {
     public Object backup()throws URISyntaxException,IOException;
     public ResponseEntity<Resource>  getExcelData()throws URISyntaxException,IOException;
-    public Object recovery(MultipartFile file);
+    public Object recovery(MultipartFile file) throws IOException;
 }
