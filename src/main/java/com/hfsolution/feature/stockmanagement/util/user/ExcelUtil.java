@@ -85,7 +85,7 @@ public class ExcelUtil {
         createCell(row, 5, "Role", style);
     }
 
-   private void writeUserData(){
+    private void writeUserData(){
         int rowCount = 2;
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();

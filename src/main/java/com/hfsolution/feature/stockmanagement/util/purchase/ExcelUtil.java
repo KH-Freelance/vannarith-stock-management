@@ -22,17 +22,13 @@ import org.apache.poi.xssf.usermodel.XSSFFont;
 import org.apache.poi.xssf.usermodel.XSSFSheet;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.web.multipart.MultipartFile;
-
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.PurchaseItem;
-import com.hfsolution.feature.stockmanagement.entity.Stock;
-import com.hfsolution.feature.stockmanagement.entity.StockHistory;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.hfsolution.feature.user.entity.User;
-
 import jakarta.servlet.ServletOutputStream;
 import jakarta.servlet.http.HttpServletResponse;
 
@@ -53,6 +49,7 @@ public class ExcelUtil {
     }
 
     private void createCell(Row row, int columnCount, Object value, CellStyle style){
+        
         sheet.autoSizeColumn(columnCount);
         Cell cell = row.createCell(columnCount);
         if (value instanceof Integer){
@@ -76,6 +73,7 @@ public class ExcelUtil {
     }
 
     private void createPurchaseHeaderRow(){
+        
         sheet   = workbook.createSheet(SHEET_PURCHASE);
         Row row = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();
@@ -105,6 +103,7 @@ public class ExcelUtil {
         createCell(row, 10, "UpdatedDate", style);
     }
     private void createPurchaseItemHeaderRow(){
+        
         sheet   = workbook.createSheet(SHEET_PURCHASE_ITEM);
         Row row = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();
@@ -132,6 +131,7 @@ public class ExcelUtil {
 
 
     private void createPaymentHeaderRow(){
+        
         sheet   = workbook.createSheet(SHEET_PAYMENT);
         Row row = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();
@@ -156,6 +156,7 @@ public class ExcelUtil {
     }
 
     private void writePurchaseData(){
+        
         int rowCount = 2;
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
@@ -179,6 +180,7 @@ public class ExcelUtil {
         }
     }
     private void writePaymentData(){
+        
         int rowCount = 2;
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
@@ -198,6 +200,7 @@ public class ExcelUtil {
         }
     }
     private void writePurchaseItemsData(){
+        
         int rowCount = 2;
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
@@ -237,6 +240,7 @@ public class ExcelUtil {
     }
 
     private void createCustomerHeaderRow(){
+        
         sheet   = workbook.createSheet("customers");
         Row row = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();
@@ -265,6 +269,7 @@ public class ExcelUtil {
     }
 
     private void writeCustomerData(){
+        
         int rowCount = 2;
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();
@@ -292,6 +297,7 @@ public class ExcelUtil {
     }
 
     private void createUserHeaderRow(){
+        
         sheet   = workbook.createSheet("users");
         Row row = sheet.createRow(0);
         CellStyle style = workbook.createCellStyle();
@@ -317,6 +323,7 @@ public class ExcelUtil {
     }
 
     private void writeUserData(){
+        
         int rowCount = 2;
         CellStyle style = workbook.createCellStyle();
         XSSFFont font = workbook.createFont();

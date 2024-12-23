@@ -72,7 +72,7 @@ public class UserService {
     
 
     public void changePassword(ChangePasswordRequest request, Principal connectedUser) {
-
+  
         var user = (User) ((UsernamePasswordAuthenticationToken) connectedUser).getPrincipal();
 
         // check if the current password is correct
@@ -144,6 +144,8 @@ public class UserService {
             throw new AppException("002");
             // throw new IllegalStateException("User not Found");
         }
+
+
         
         // update the password
         opUser.get().setPassword(passwordEncoder.encode(request.getNewPassword()));
