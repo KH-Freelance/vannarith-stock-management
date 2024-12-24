@@ -54,8 +54,8 @@ public class Payment {
     @Column(name = "amount")
     private BigDecimal amount;
 
-    @Column(name = "type")
-    private String type;
+    @Column(name = "payment_method")
+    private String paymentMethod;
 
     @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @ExcelProperty(converter = TimestampConverter.class)
