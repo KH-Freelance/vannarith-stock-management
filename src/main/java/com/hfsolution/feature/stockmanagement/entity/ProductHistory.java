@@ -70,6 +70,9 @@ public class ProductHistory {
         if (this.updatedDate == null) {
             this.updatedDate = new Timestamp(System.currentTimeMillis());
         }
+        if (this.deletedDate == null) {
+            this.deletedDate = new Timestamp(System.currentTimeMillis());
+        }
     }
 
    

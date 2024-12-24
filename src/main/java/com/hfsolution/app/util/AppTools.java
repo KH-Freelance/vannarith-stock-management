@@ -1,14 +1,22 @@
 package com.hfsolution.app.util;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
+import java.time.format.DateTimeParseException;
+import java.time.format.ResolverStyle;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Locale;
+
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.Row;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
@@ -110,6 +118,64 @@ public class AppTools {
         Timestamp timestamp = new Timestamp(parsedDate.getTime());
         // Print the result
         return timestamp;
+    }
+
+    public static Object convertValue(String value){
+        if (value == null || value.trim().isEmpty()) {
+            return ""; // Handle null or empty values
+        }
+
+        // Check for boolean
+        if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+            return Boolean.valueOf(value);
+        }
+
+        // Check for integer
+        if (value.matches("^-?\\d+$")) { // Support for negative numbers
+            try {
+                return Integer.valueOf(value);
+            } catch (NumberFormatException e) {
+                // Fall back to Long if value exceeds Integer range
+                return Long.valueOf(value);
+            }
+        }
+
+        // Check for decimal number
+        if (value.matches("^-?\\d+\\.\\d+$")) { // Support for negative decimals
+            return new BigDecimal(value);
+        }
+
+         // Check for ISO datetime (yyyy-MM-dd HH:mm:ss)
+         try {
+            return Timestamp.valueOf(value); // Expecting 'yyyy-MM-dd HH:mm:ss' format
+        } catch (IllegalArgumentException e) {
+            // Not a timestamp
+        }
+
+        // Check for ISO date (yyyy-MM-dd)
+        try {
+            DateTimeFormatter dateFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd").withResolverStyle(ResolverStyle.STRICT);
+            return LocalDate.parse(value, dateFormatter);
+        } catch (DateTimeParseException e) {
+            // Not an ISO date
+        }
+
+       
+
+        // Check for general date-time formats using SimpleDateFormat (customizable)
+        String[] dateFormats = { "yyyy-MM-dd", "yyyy-MM-dd HH:mm:ss", "MM/dd/yyyy", "dd-MM-yyyy" };
+        for (String format : dateFormats) {
+            try {
+                SimpleDateFormat sdf = new SimpleDateFormat(format);
+                sdf.setLenient(false); // Strict date parsing
+                return sdf.parse(value);
+            } catch (ParseException e) {
+                // Not matching this format
+            }
+        }
+
+        // Default to string if no other type matches
+        return value;
     }
 
 }
