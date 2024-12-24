@@ -414,6 +414,7 @@ public class PurchaseServicelmp implements PurchaseService {
                     payment.setId(paymentDao.getPaymentId());
                     payment.setPurchase(pur.getEntity());
                     payment.setAmount(totalPrice);
+                    payment.setType(String.valueOf(purchaseRequest.getPaymentType()));
                     paymentDao.saveEntity(payment);
                 }
 
@@ -495,6 +496,7 @@ public class PurchaseServicelmp implements PurchaseService {
             payment.setId(paymentDao.getPaymentId());
             payment.setPurchase(purchase);
             payment.setAmount(payRequest.getAmount());
+            payRequest.setPaymentType(payRequest.getPaymentType());
             paymentDao.saveEntity(payment);
 
             // Update Purchase Status to PAID

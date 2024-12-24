@@ -54,6 +54,9 @@ public class Payment {
     @Column(name = "amount")
     private BigDecimal amount;
 
+    @Column(name = "type")
+    private String type;
+
     @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @ExcelProperty(converter = TimestampConverter.class)
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
