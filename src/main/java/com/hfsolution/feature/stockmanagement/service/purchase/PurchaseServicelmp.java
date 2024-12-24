@@ -395,7 +395,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 }
 
                 // Check PaymentType return 0 = PAID, -1 = CREDIT
-                if(purchaseRequest.getPaymentType().compareTo(PaymentType.CASH)==0 || purchaseRequest.getPaymentType().compareTo(PaymentType.BANK)==0){
+                if(purchaseRequest.getPaymentType().compareTo(PaymentType.CASH)==0){
                     // Status PAID
                     purchase.setPaymentStatus(PaymentStatus.PAID);
 
@@ -414,7 +414,7 @@ public class PurchaseServicelmp implements PurchaseService {
                     payment.setId(paymentDao.getPaymentId());
                     payment.setPurchase(pur.getEntity());
                     payment.setAmount(totalPrice);
-                    payment.setType(String.valueOf(purchaseRequest.getPaymentType()));
+                    payment.setType(purchaseRequest.getPayBy());
                     paymentDao.saveEntity(payment);
                 }
 
@@ -496,7 +496,7 @@ public class PurchaseServicelmp implements PurchaseService {
             payment.setId(paymentDao.getPaymentId());
             payment.setPurchase(purchase);
             payment.setAmount(payRequest.getAmount());
-            payRequest.setPaymentType(payRequest.getPaymentType());
+            payRequest.setType(payRequest.getType());
             paymentDao.saveEntity(payment);
 
             // Update Purchase Status to PAID

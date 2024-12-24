@@ -26,6 +26,11 @@ public class PurchaseRequest {
     private String location;
     @NotNull(message = "Payment type cannot be null")
     private PaymentType paymentType;
+    @Pattern(regexp = "^(ON_HAND|BANK)$", 
+             message = "Pay By not match , please check and try again !")
+    private String payBy;
+
+    
 
     @Data
     public static class ProductPurchase {

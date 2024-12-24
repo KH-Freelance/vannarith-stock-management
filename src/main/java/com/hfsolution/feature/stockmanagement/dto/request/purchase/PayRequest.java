@@ -15,6 +15,6 @@ public class PayRequest {
     private BigDecimal amount;
     @NotBlank(message = "Payment Type is required.")
     @Pattern(regexp = "^(ON_HAND|BANK)$", 
-             message = "Payment Type not match , please check and try again !")
-    private String paymentType;
+             message = "Type not match , please check and try again !")
+    private String type;
 }
