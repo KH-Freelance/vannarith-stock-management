@@ -10,6 +10,7 @@ public interface ReportService {
     public Object reportStock(String startDate, String endDate);
     public ResponseEntity<Void> excelReportStock(String startDate, String endDate);
     public ResponseEntity<Void> excelReportCustomer(String startDate, String endDate);
+    public ResponseEntity<Void> excelReportSale(String startDate, String endDate,String productName, String customerName);
     public Object reportCustomer(String startDate, String endDate);
     public Object reportPurchase(String startDate, String endDate);
     public Object reportSale(String startDate, String endDate,String productName, String customerName);

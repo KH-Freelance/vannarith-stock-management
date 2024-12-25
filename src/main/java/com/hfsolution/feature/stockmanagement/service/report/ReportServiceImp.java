@@ -146,9 +146,9 @@ public class ReportServiceImp  implements ReportService{
             httpServletResponse.setCharacterEncoding("UTF-8");
             String fileName = URLEncoder.encode("sale-report", "UTF-8").replaceAll("\\+", "%20");
             httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
-            SuccessResponse<List<ReportCustomerDto>> result = (SuccessResponse<List<ReportCustomerDto>>) this.reportSale(startDate, endDate,productName,customerName);
-            EasyExcel.write(httpServletResponse.getOutputStream(), ReportCustomerDto.class)
-            .sheet("sale-report").doWrite(result.getData());
+            SuccessResponse<List<ReportSaleDto>> result = (SuccessResponse<List<ReportSaleDto>>) this.reportSale(startDate, endDate,productName,customerName);
+            EasyExcel.write(httpServletResponse.getOutputStream(), ReportSaleDto.class)
+            .sheet("sale-report").doWrite(result.getData().stream().map(report->report.getContent()).toList());
             return ResponseEntity.status(HttpStatus.OK).build();
         }catch (DatabaseException e) {
             throw e;   
