@@ -1,5 +1,6 @@
 package com.hfsolution.feature.stockmanagement.repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -34,7 +35,7 @@ public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecifi
 
 
     
-    
+    List<Stock> findAllByCreatedDateBetween(Timestamp startDate,Timestamp endDate);
 
     // @Query("SELECT s FROM Stock s WHERE s.product.id = :id")
     // Stock findByProductId(Long id);

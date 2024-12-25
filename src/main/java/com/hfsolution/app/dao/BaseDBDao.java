@@ -180,6 +180,27 @@ public abstract class BaseDBDao<T, ID> implements IBaseDBDao<T, ID> {
       throw new DatabaseException(FAIL_CODE, e.getMessage());
     }
   }
+  @Override
+  @Async("jpaExecutor")
+  public CompletableFuture<BaseEntityResponseDto<T>> getAllEntityByIdAsync(List<ID> ids) {
+    // String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    
+
+    try {
+      
+      switchDataSource(EDataSourceType.SECONDARY);
+      List<T> entities = repository.getAllEntityById(ids);
+      var entityDto = new BaseEntityResponseDto<T>();
+      entityDto.setStatus(SUCCESS);
+      entityDto.setEntityList(entities);
+      
+      return CompletableFuture.completedFuture(entityDto);
+
+    } catch (Exception e) {
+      
+      throw new DatabaseException(FAIL_CODE, e.getMessage());
+    }
+  }
 
   @Override
   public BaseEntityResponseDto<T> update(T entity) {

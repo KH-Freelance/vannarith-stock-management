@@ -6,24 +6,37 @@ import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 
 import java.math.BigDecimal;
 import java.math.RoundingMode;
+import java.net.URLEncoder;
 import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.HashMap;
 import java.util.LinkedHashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
+import java.util.concurrent.ExecutionException;
 import java.util.stream.Collectors;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
+import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.write.metadata.style.WriteCellStyle;
+import com.alibaba.excel.write.metadata.style.WriteFont;
+import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SuccessResponse;
@@ -33,6 +46,7 @@ import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
+import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
@@ -43,22 +57,27 @@ import com.hfsolution.feature.stockmanagement.dto.report.PurchaseItem;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportCustomerDto;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportPurchase;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportPurchaseDto;
+import com.hfsolution.feature.stockmanagement.dto.report.ReportSaleDto;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportStockDto;
+import com.hfsolution.feature.stockmanagement.dto.report.SaleDto;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
+import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
+import com.hfsolution.feature.stockmanagement.enums.ReportSaleType;
 
 import static com.hfsolution.app.constant.AppConstant.*;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
-
+import org.springframework.http.HttpHeaders;
 @Service
 @RequiredArgsConstructor
 public class ReportServiceImp  implements ReportService{
@@ -68,7 +87,55 @@ public class ReportServiceImp  implements ReportService{
     private final StockHistoryDao stockHistoryDao;
     private final PurchaseDao purchaseDao;
     private final CustomerDao customerDao;
+    private final ProductHistoryDao productHistoryDao;
+
     private final HttpServletRequest httpServletRequest;
+    private final HttpServletResponse httpServletResponse;
+    
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    public ResponseEntity<Void> excelReportStock(String startDate, String endDate) {
+        httpServletRequest.setAttribute(ACTION,"REPORT STOCK EXCEL");
+        try {
+            httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            httpServletResponse.setCharacterEncoding("UTF-8");
+            String fileName = URLEncoder.encode("stock-report", "UTF-8").replaceAll("\\+", "%20");
+            httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
+            SuccessResponse<List<ReportStockDto>> result = (SuccessResponse<List<ReportStockDto>>) this.reportStock(startDate, endDate);
+            EasyExcel.write(httpServletResponse.getOutputStream(), ReportStockDto.class)
+            .sheet("stock-report").doWrite(result.getData());
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+    @SuppressWarnings("unchecked")
+    @Override
+    public ResponseEntity<Void> excelReportCustomer(String startDate, String endDate) {
+        httpServletRequest.setAttribute(ACTION,"REPORT CUSTOMER EXCEL");
+        try {
+            httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            httpServletResponse.setCharacterEncoding("UTF-8");
+            String fileName = URLEncoder.encode("customer-report", "UTF-8").replaceAll("\\+", "%20");
+            httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
+            SuccessResponse<List<ReportCustomerDto>> result = (SuccessResponse<List<ReportCustomerDto>>) this.reportCustomer(startDate, endDate);
+            EasyExcel.write(httpServletResponse.getOutputStream(), ReportCustomerDto.class)
+            .sheet("customer-report").doWrite(result.getData());
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
 
     @Override
     @Transactional
@@ -77,53 +144,46 @@ public class ReportServiceImp  implements ReportService{
         SuccessResponse<Object> response = new SuccessResponse<>();
         try {
 
-            BaseEntityResponseDto<Stock> stockResult = stockDao.findAll();
+            System.out.println(Timestamp.valueOf(startDate));
+            System.out.println(Timestamp.valueOf(endDate));
+            BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByDateRange(Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
             if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntityList()==null){
                 String msg = AppTools.appGetMessage("024");
                 throw new AppException("024",msg);
             }
+
+            CompletableFuture<BaseEntityResponseDto<Product>> productFuture =  productDao.getAllEntityByIdAsync(stockResult.getEntityList().stream().map(stock->stock.getProductId()).toList());
             List<ReportStockDto> reportStockDtos = new ArrayList<>();
             Long totalQty = stockDao.getTotal();
+            Map<Long, Product> productMap =  new HashMap<>();
+            productFuture.get().getEntityList().forEach(product -> productMap.put(product.getId(), product));
             for (Stock stock : stockResult.getEntityList()) {
-                long stockSaled = 0;
-                Timestamp start = Timestamp.valueOf(startDate);
-                Timestamp end = Timestamp.valueOf(endDate);
-
+               
                 
-                for (StockHistory stockHistory : stockHistoryDao.findAllByStockId(stock.getId()).getEntityList()) {
-                    if(stockHistory.getCreatedDate().after(start) && stockHistory.getCreatedDate().before(end)){
-                        if(stockHistory.getQty() < 0){
-                            stockSaled +=(stockHistory.getQty()*-1);
-                        }
-                    }
-                }
-                
-                ReportStockDto product = new ReportStockDto();   
+                ReportStockDto reportStock = new ReportStockDto();   
                 double percentage = ((double) stock.getQty() / totalQty) * 100;
                 BigDecimal bd = new BigDecimal(percentage).setScale(2, RoundingMode.HALF_UP);
-                
-                BaseEntityResponseDto<Product> productResult = productDao.findById(stock.getProductId());
-                
+                                
                 if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntityList()==null){
                     String msg = AppTools.appGetMessage("024");
                     throw new AppException("024",msg);
                 }
 
 
-
-                product.setProductId(productResult.getEntity().getId());
-                product.setStockId(stock.getId());
-                product.setTotalAsset(bd.doubleValue());
-                product.setProductName(productResult.getEntity().getProductName());
-                product.setSalePrice(productResult.getEntity().getPrice());
-                product.setImportPrice(productResult.getEntity().getImportPrice());
-                product.setFactory(productResult.getEntity().getFactory());
-                product.setStockOnHand(stock.getQty());
-                product.setStockSold(stockSaled);
-                product.setDiscount(productResult.getEntity().getDiscount());
-                product.setCreatedDate(productResult.getEntity().getCreatedDate());
-                //product.setExpiryDate(productResult.getEntity().getExpiryDate());
-                reportStockDtos.add(product);
+                Product product = productMap.get(stock.getProductId());
+                reportStock.setProductId(product.getId());
+                reportStock.setStockId(stock.getId());
+                reportStock.setBatchId(stock.getBatchId());
+                reportStock.setTotalAsset(bd.doubleValue());
+                reportStock.setProductName(product.getProductName());
+                reportStock.setSalePrice(product.getPrice());
+                reportStock.setImportPrice(product.getImportPrice());
+                reportStock.setFactory(product.getFactory());
+                reportStock.setStockOnHand(stock.getQty());
+                reportStock.setDiscount(product.getDiscount());
+                reportStock.setCreatedDate(stock.getCreatedDate());
+                reportStock.setExpiryDate(stock.getExpiryDate());
+                reportStockDtos.add(reportStock);
             }
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
@@ -207,7 +267,7 @@ public class ReportServiceImp  implements ReportService{
     @Transactional
     public Object reportPurchase(String startDate, String endDate) {
 
-        httpServletRequest.setAttribute(ACTION,"REPORT CUSTOMER");
+        httpServletRequest.setAttribute(ACTION,"REPORT PURCHASE");
         SuccessResponse<Object> response = new SuccessResponse<>();
         try {
             ReportPurchase reportPurchase = new ReportPurchase();
@@ -282,6 +342,108 @@ public class ReportServiceImp  implements ReportService{
             throw new AppException(FAIL_CODE,e.getMessage(),true);
         }
     }
+
+    @Override
+    @Transactional
+    public Object reportSale(String startDate, String endDate,String productName, String customerName) {
+        httpServletRequest.setAttribute(ACTION,"REPORT SALE");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        try {
+            List<Purchase> purchaseResult = new ArrayList<>();
+            List<SaleDto> saleDtos = new ArrayList<>();
+            
+            if(productName == null && customerName == null){
+                purchaseResult =  purchaseDao.findPurchaseByCreatedDateBetween(startDate,endDate).getEntityList();
+            }else if(productName != null){
+                purchaseResult =  purchaseDao.findPurchaseByProductNameAndCreatedDateBetween(productName,startDate,endDate).getEntityList();
+            }else{
+                purchaseResult =  purchaseDao.findPurchaseByCustomerNameAndCreatedDateBetween(customerName,startDate,endDate).getEntityList();
+
+            }
+            Long totalQty =  0L;
+            BigDecimal totalAmount =  BigDecimal.ZERO;
+            for (Purchase purchase : purchaseResult) {
+                for (com.hfsolution.feature.stockmanagement.entity.PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
+                    SaleDto saleDto = new SaleDto();
+                  
+                    Product product = purchaseItem.getProduct();
+                    if(purchaseItem.getProduct()==null){
+                        // Fallback to product history
+                        ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
+                        if (productHistory != null) {
+                            product = new Product();
+                            BeanUtils.copyProperties(productHistory, product);
+                        }
+                    }
+                    saleDto.setType("INVOICE");
+                    saleDto.setProductName(product.getProductName());
+                    saleDto.setProductDesc(product.getProductDesc());
+                    saleDto.setSalePrice(product.getPrice());
+                    saleDto.setTotalAmount(purchaseItem.getPrice().multiply(BigDecimal.valueOf(purchaseItem.getQty())));
+                    saleDto.setPurchaseCode(purchase.getPurchaseCode());
+                    saleDto.setCustomerName(purchase.getCustomer().getCustomerName());
+                    saleDto.setCustomerPhone(purchase.getCustomer().getPhone());
+                    saleDto.setQty(purchaseItem.getQty());  
+                    saleDto.setLocation(purchase.getLocation());
+                    saleDto.setCreatedDate(purchase.getCreatedDate());
+
+                    totalQty += saleDto.getQty();
+                    totalAmount = totalAmount.add(saleDto.getTotalAmount());
+
+                    saleDtos.add(saleDto);
+                }
+            }
+
+
+            // SET Total Record
+            SaleDto saleDto = new SaleDto();
+            saleDto.setType("Total");
+            saleDto.setProductName("");
+            saleDto.setProductDesc("");
+            saleDto.setSalePrice(BigDecimal.ZERO);
+            saleDto.setLocation("");
+            saleDto.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+            saleDto.setPurchaseCode("");
+            saleDto.setCustomerName("");
+            saleDto.setCustomerPhone("");
+            saleDto.setTotalAmount(totalAmount);
+            saleDto.setQty(totalQty);
+            saleDtos.add(saleDto);
+
+            
+            
+            ReportSaleDto reportSaleDto = new ReportSaleDto();
+            reportSaleDto.setContent(saleDtos);
+            reportSaleDto.setColumns(Arrays.asList(
+            "Type",
+            "Date",
+            "Num",
+            "Customer",
+            "Product",
+            "Phone",
+            "Batch",
+            "Address",
+            "Qty",
+            "Sales Price",
+            "Amount"));
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(reportSaleDto);
+            return response;
+            
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
+    
+
+
+    
 
     // @Override
     // public Object reportPurchase(String startDate, String endDate) {

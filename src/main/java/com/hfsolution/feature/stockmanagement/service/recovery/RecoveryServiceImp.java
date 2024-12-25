@@ -60,8 +60,6 @@ public class RecoveryServiceImp implements RecoveryService{
     private DataSource dataSource;
     private final String FILE_STORAGE_PATH = "/uploaded_files/";
     private final String FILE_NAME= "backup-";
-    @Value("${backup.restore.temp.dir:/tmp}") // Specify temp directory for storing the file
-    private String tempDir;
 
     @Override
     @Transactional

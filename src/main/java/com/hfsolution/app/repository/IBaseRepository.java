@@ -19,6 +19,11 @@ public interface IBaseRepository<T, ID> extends JpaRepository<T, ID> {
 		return entity;
 	}
 
+	public default List<T> getAllEntityById(List<ID> ids) {
+		List<T> entities = this.findAllById(ids);
+		return entities;
+	}
+
 	public default T updateEntity(T entity) {
 		T updatedEntity = this.save(entity);
 		return updatedEntity;

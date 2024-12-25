@@ -31,6 +31,7 @@ public class ScheduledRecovery {
 
     @Autowired
     private  JdbcTemplate jdbcTemplate;
+    private final String FILE_STORAGE_PATH = "/uploaded_files/";
 
 
     // private final String TOKEN="7524240463:AAFokw3C3D5lQ6dYV806XMuDTZd1pA0X_Ys";
@@ -70,6 +71,17 @@ public class ScheduledRecovery {
         // MultipartFile multipartFile = new CustomMultipartFile(file, "application/octet-stream");
         // telegramRestClientConsumer.sendFileToTelegram(multipartFile, CHAT_ID);
     
+    }
+
+    @Scheduled(cron = "0 0 2 * * ?") // Runs daily at 2:00 AM
+    public void cleanUpTempFiles() {
+        File tempDir = new File(System.getProperty("user.dir")+FILE_STORAGE_PATH);
+        for (File file : tempDir.listFiles()) {
+            if (file.isFile() && file.getName().endsWith(".xlsx") && 
+                file.lastModified() < System.currentTimeMillis() - 3600000) {
+                file.delete();
+            }
+        }
     }
     
 }

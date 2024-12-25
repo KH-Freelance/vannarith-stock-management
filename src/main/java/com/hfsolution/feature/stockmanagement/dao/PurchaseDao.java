@@ -290,6 +290,44 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
     }
 
   }
+  public BaseEntityResponseDto<Purchase> findPurchaseByCustomerNameAndCreatedDateBetween(String customerName, String startDate, String endDate){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Purchase> entity = purchaseRepository.findAllByCustomerCustomerNameAndCreatedDateBetween(customerName, Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+  public BaseEntityResponseDto<Purchase> findPurchaseByProductNameAndCreatedDateBetween(String customerName, String startDate, String endDate){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Purchase> entity = purchaseRepository.findAllByCustomerCustomerNameAndCreatedDateBetween(customerName, Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
 
   public BaseEntityResponseDto<Purchase> findPurchaseByCreatedDateBetween(String startDate, String endDate){
 

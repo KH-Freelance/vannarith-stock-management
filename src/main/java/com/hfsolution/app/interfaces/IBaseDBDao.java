@@ -20,6 +20,7 @@ public interface IBaseDBDao <T, ID> {
 
 	BaseEntityResponseDto<T> findById(ID id);
   CompletableFuture<BaseEntityResponseDto<T>> getEntityByIdAsync(ID id);
+  CompletableFuture<BaseEntityResponseDto<T>> getAllEntityByIdAsync(List<ID> ids);
 
 	BaseEntityResponseDto<T> update(T entity);
   CompletableFuture<BaseEntityResponseDto<T>> updateAsync(T entity);

@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import com.hfsolution.feature.stockmanagement.enums.ReportSaleType;
 import com.hfsolution.feature.stockmanagement.service.report.ReportService;
 
 import io.swagger.v3.oas.annotations.Operation;
@@ -28,6 +29,16 @@ public class ReportController {
         return reportService.reportStock(startDate, endDate);
     }
 
+    @GetMapping("/excel-stock")
+    public Object excelReportStock( 
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String startDate,
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String endDate
+        ) {
+        return reportService.excelReportStock(startDate, endDate);
+    }
+
     @GetMapping("/customer")
     public Object reportCustomer( 
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
@@ -38,6 +49,16 @@ public class ReportController {
         return reportService.reportCustomer(startDate, endDate);
     }
 
+    @GetMapping("/excel-customer")
+    public Object excelReportCustomer( 
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String startDate,
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String endDate
+        ) {
+        return reportService.excelReportCustomer(startDate, endDate);
+    }
+
     @GetMapping("/purchase")
     public Object reportPurchase( 
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
@@ -46,5 +67,16 @@ public class ReportController {
         String endDate
         ) {
         return reportService.reportPurchase(startDate, endDate);
+    }
+    @GetMapping("/sale")
+    public Object reportSale( 
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String startDate,
+        @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
+        String endDate,
+        String customerName,
+        String productName
+        ) {
+        return reportService.reportSale(startDate, endDate,productName,customerName);
     }
 }

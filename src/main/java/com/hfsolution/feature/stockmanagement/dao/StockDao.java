@@ -3,6 +3,7 @@ package com.hfsolution.feature.stockmanagement.dao;
 
 import static com.hfsolution.app.constant.AppResponseStatus.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import static com.hfsolution.app.constant.AppResponseCode.*;
@@ -94,6 +95,25 @@ public class StockDao extends BaseDBDao<Stock,Long>{
       var appModel = new BaseEntityResponseDto<Stock>();
       appModel.setStatus(SUCCESS);
       appModel.setEntity(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+  public BaseEntityResponseDto<Stock> findStockByDateRange(Timestamp startDate,Timestamp endDate){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Stock> entities = stockRepository.findAllByCreatedDateBetween(startDate,endDate);
+      var appModel = new BaseEntityResponseDto<Stock>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entities);
       appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
       return appModel;
 
