@@ -137,6 +137,28 @@ public class ReportServiceImp  implements ReportService{
         }
     }
 
+    @SuppressWarnings("unchecked")
+    @Override
+    public ResponseEntity<Void> excelReportSale(String startDate, String endDate,String productName, String customerName) {
+        httpServletRequest.setAttribute(ACTION,"REPORT SALE EXCEL");
+        try {
+            httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            httpServletResponse.setCharacterEncoding("UTF-8");
+            String fileName = URLEncoder.encode("sale-report", "UTF-8").replaceAll("\\+", "%20");
+            httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
+            SuccessResponse<List<ReportCustomerDto>> result = (SuccessResponse<List<ReportCustomerDto>>) this.reportSale(startDate, endDate,productName,customerName);
+            EasyExcel.write(httpServletResponse.getOutputStream(), ReportCustomerDto.class)
+            .sheet("sale-report").doWrite(result.getData());
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),true);
+        }
+    }
+
     @Override
     @Transactional
     public Object reportStock(String startDate, String endDate) {
@@ -358,7 +380,6 @@ public class ReportServiceImp  implements ReportService{
                 purchaseResult =  purchaseDao.findPurchaseByProductNameAndCreatedDateBetween(productName,startDate,endDate).getEntityList();
             }else{
                 purchaseResult =  purchaseDao.findPurchaseByCustomerNameAndCreatedDateBetween(customerName,startDate,endDate).getEntityList();
-
             }
             Long totalQty =  0L;
             BigDecimal totalAmount =  BigDecimal.ZERO;
@@ -409,8 +430,6 @@ public class ReportServiceImp  implements ReportService{
             saleDto.setTotalAmount(totalAmount);
             saleDto.setQty(totalQty);
             saleDtos.add(saleDto);
-
-            
             
             ReportSaleDto reportSaleDto = new ReportSaleDto();
             reportSaleDto.setContent(saleDtos);
