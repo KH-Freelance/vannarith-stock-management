@@ -12,6 +12,7 @@ import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -24,36 +25,15 @@ import com.hfsolution.feature.stockmanagement.service.ExportService;
 import com.hfsolution.feature.stockmanagement.service.recovery.RecoveryService;
 
 @RestController
-@RequestMapping("/postgres")
+@RequestMapping("/data")
 public class RecoveryController {
 
     @Autowired
     private RecoveryService recoveryService;
 
-    @Autowired
-    private ExportService exportService;
-
-    // @PostMapping(value = "/backup")
-    // private Object backup() throws URISyntaxException, IOException{
-    //     recoveryService.backupV2();
-    //     SuccessResponse<Object> response = new SuccessResponse<>();
-    //     response.setStatus(SUCCESS);
-    //     response.setMsg("Backup in progress");
-    //     response.setCode(SUCCESS_CODE);
-    //     return response;
-    // }
-    // @PostMapping(value = "/recovery")
-    // private Object recovery(@RequestPart("file") MultipartFile file) throws URISyntaxException, IOException{
-    //     recoveryService.recoveryV2(file);
-    //     SuccessResponse<Object> response = new SuccessResponse<>();
-    //     response.setStatus(SUCCESS);
-    //     response.setMsg("Restore in progress");
-    //     response.setCode(SUCCESS_CODE);
-    //     return response;
-    // }
-    @PostMapping(value = "/backup")
-    private Object backup() throws URISyntaxException, IOException{
-        return recoveryService.backup();
+    @PostMapping(value = "/backup/{filename}")
+    private Object backup(@PathVariable String filename) throws URISyntaxException, IOException{
+        return recoveryService.backup(filename);
     }
 
     @PostMapping(value = "/recovery")
@@ -61,9 +41,9 @@ public class RecoveryController {
         return recoveryService.recovery(file);
     }
 
-    @GetMapping(value = "/get-excel-data")
-    private ResponseEntity<Resource> getExcelData() throws URISyntaxException, IOException{
-        return recoveryService.getExcelData();
+    @GetMapping(value = "/download/{filename}")
+    private ResponseEntity<Resource> getExcelData(@PathVariable String filename) throws URISyntaxException, IOException{
+        return recoveryService.getExcelData(filename);
     }
     
 }

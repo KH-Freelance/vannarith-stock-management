@@ -137,6 +137,10 @@ public class RecoveryServiceImp implements RecoveryService{
                     throw new IllegalStateException("Header row is missing. Cannot process data rows.");
                 }
 
+                if (context.readSheetHolder().getSheetName().equalsIgnoreCase("customer")) {
+
+                    System.out.println("sss");
+                }
                 List<Object> rowData = new ArrayList<>(data.values().stream().map(dt -> AppTools.convertValue(dt)).toList());
 
                 // // Accumulate rows for the current sheet
@@ -290,7 +294,7 @@ public class RecoveryServiceImp implements RecoveryService{
 
     @Override
     @Transactional
-    public Object backup() throws IOException {
+    public Object backup(String filename) throws IOException {
         try {
             // Step 1: Get all table names
             List<String> tableNames = jdbcTemplate.queryForList(
@@ -304,7 +308,7 @@ public class RecoveryServiceImp implements RecoveryService{
             }
 
             // Step 2: Prepare the output Excel file
-            File outputFile = new File(System.getProperty("user.dir")+FILE_STORAGE_PATH + FILE_NAME + AppTools.getCurrentDateWithFormatString("YYYY-MM-dd") + ".xlsx");
+            File outputFile = new File(System.getProperty("user.dir")+FILE_STORAGE_PATH + filename + ".xlsx");
             try (ExcelWriter excelWriter = EasyExcel.write(outputFile)
                     .registerConverter(new TimestampConverter())
                     .autoCloseStream(true)
@@ -359,14 +363,14 @@ public class RecoveryServiceImp implements RecoveryService{
     }
 
     @Override
-    public ResponseEntity<Resource>  getExcelData() throws URISyntaxException, IOException {
+    public ResponseEntity<Resource>  getExcelData(String filename) throws URISyntaxException, IOException {
        try {
             Path savePath = Paths.get( System.getProperty("user.dir")+FILE_STORAGE_PATH);
             if (!Files.exists(savePath)) {
                 Files.createDirectories(savePath); // Ensure the directory is created if it doesn't exist.
             }
 
-            Path filePath = savePath.resolve(FILE_NAME+AppTools.getCurrentDateWithFormatString("YYYY-MM-dd")+".xlsx");
+            Path filePath = savePath.resolve(filename+".xlsx");
 
            
             Resource resource = new UrlResource(filePath.toUri());
