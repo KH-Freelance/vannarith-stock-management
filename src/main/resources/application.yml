@@ -62,8 +62,10 @@ cache:
 #   config: classpath:log4j2.xml
 rest:
   telegram:
-    url: https://api.telegram.org/bot7524240463:AAFokw3C3D5lQ6dYV806XMuDTZd1pA0X_Ys
-    chat-id: -4553450364
+    url: https://api.telegram.org/bot7758004942:AAHxjD_dEeRFuB-lgMSUoMzc2uBZ6Uivstg
+    monitor:
+      chat-id: -4687885873
+    
 
 feign:
   client:

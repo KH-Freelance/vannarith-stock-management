@@ -44,6 +44,7 @@ import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
+import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
@@ -98,6 +99,8 @@ public class ReportServiceImp  implements ReportService{
     @Override
     public ResponseEntity<Void> excelReportStock(String startDate, String endDate) {
         httpServletRequest.setAttribute(ACTION,"REPORT STOCK EXCEL");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             httpServletResponse.setCharacterEncoding("UTF-8");
@@ -112,13 +115,15 @@ public class ReportServiceImp  implements ReportService{
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
     @SuppressWarnings("unchecked")
     @Override
     public ResponseEntity<Void> excelReportCustomer(String startDate, String endDate) {
         httpServletRequest.setAttribute(ACTION,"REPORT CUSTOMER EXCEL");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             httpServletResponse.setCharacterEncoding("UTF-8");
@@ -133,7 +138,7 @@ public class ReportServiceImp  implements ReportService{
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -141,6 +146,8 @@ public class ReportServiceImp  implements ReportService{
     @Override
     public ResponseEntity<Void> excelReportSale(String startDate, String endDate,String productName, String customerName) {
         httpServletRequest.setAttribute(ACTION,"REPORT SALE EXCEL");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
             httpServletResponse.setCharacterEncoding("UTF-8");
@@ -155,7 +162,7 @@ public class ReportServiceImp  implements ReportService{
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -164,6 +171,8 @@ public class ReportServiceImp  implements ReportService{
     public Object reportStock(String startDate, String endDate) {
         httpServletRequest.setAttribute(ACTION,"REPORT STOCK");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             System.out.println(Timestamp.valueOf(startDate));
@@ -216,7 +225,7 @@ public class ReportServiceImp  implements ReportService{
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
        
     }
@@ -225,6 +234,8 @@ public class ReportServiceImp  implements ReportService{
     @Transactional
     public Object reportCustomer(String startDate, String endDate) {
         httpServletRequest.setAttribute(ACTION,"REPORT CUSTOMER");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         SuccessResponse<Object> response = new SuccessResponse<>();
         try {
             BaseEntityResponseDto<Customer> customerResult = customerDao.findAll();
@@ -281,7 +292,7 @@ public class ReportServiceImp  implements ReportService{
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -291,6 +302,8 @@ public class ReportServiceImp  implements ReportService{
 
         httpServletRequest.setAttribute(ACTION,"REPORT PURCHASE");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             ReportPurchase reportPurchase = new ReportPurchase();
             List<String> columes = new ArrayList<>();
@@ -361,7 +374,7 @@ public class ReportServiceImp  implements ReportService{
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -370,6 +383,8 @@ public class ReportServiceImp  implements ReportService{
     public Object reportSale(String startDate, String endDate,String productName, String customerName) {
         httpServletRequest.setAttribute(ACTION,"REPORT SALE");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             List<Purchase> purchaseResult = new ArrayList<>();
             List<SaleDto> saleDtos = new ArrayList<>();
@@ -455,7 +470,7 @@ public class ReportServiceImp  implements ReportService{
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -547,7 +562,7 @@ public class ReportServiceImp  implements ReportService{
     //     }catch (AppException e) {
     //         throw e;   
     //     }catch(Exception e){
-    //         throw new AppException(FAIL_CODE,e.getMessage(),true);
+    //         throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
     //     }
 
     // }

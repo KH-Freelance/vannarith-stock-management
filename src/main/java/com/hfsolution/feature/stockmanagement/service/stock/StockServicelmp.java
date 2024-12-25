@@ -40,6 +40,7 @@ import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.app.util.CSVHelperV2;
+import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
@@ -86,6 +87,8 @@ public class StockServicelmp implements StockService {
 
         httpServletRequest.setAttribute(ACTION,"IMPORT STOCK");
         SuccessResponse<Stock> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             Stock stock ;
@@ -135,7 +138,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -144,6 +147,8 @@ public class StockServicelmp implements StockService {
 
         httpServletRequest.setAttribute(ACTION,"DELETE STOCK BY ID");
         SuccessResponse<Stock> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
     
             stockDao.deleteStockByID(id);
@@ -158,7 +163,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
 
     }
@@ -168,6 +173,8 @@ public class StockServicelmp implements StockService {
     public Object updateStock(Long id, StockUpdateRequest stockUpdateRequest) {
 
         httpServletRequest.setAttribute(ACTION,"UPDATE STOCK BY ID");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         SuccessResponse<Stock> response = new SuccessResponse<>();
         try {
 
@@ -190,7 +197,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
 
     }
@@ -199,6 +206,8 @@ public class StockServicelmp implements StockService {
     @Transactional
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT STOCK");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             Specification<Stock> stocks = new CustomSpecification<>(q);
             BaseEntityResponseDto<Stock> stockResult = stockDao.searchStock(stocks);
@@ -212,9 +221,9 @@ public class StockServicelmp implements StockService {
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
-            throw new AppException("028",e.getMessage(),true); 
+            throw new AppException("028",e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true); 
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
     // @Override
@@ -247,9 +256,9 @@ public class StockServicelmp implements StockService {
     //     }catch (DatabaseException e) {
     //         throw e;   
     //     }catch (AppException e) {
-    //         throw new AppException("028",e.getMessage(),true); 
+    //         throw new AppException("028",e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true); 
     //     }catch(Exception e){
-    //         throw new AppException(FAIL_CODE,e.getMessage(),true);
+    //         throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
     //     }
     // }
 
@@ -297,9 +306,9 @@ public class StockServicelmp implements StockService {
     //     }catch (DatabaseException e) {
     //         throw e;   
     //     }catch (AppException e) {
-    //         throw new AppException("030",e.getMessage(),true); 
+    //         throw new AppException("030",e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true); 
     //     }catch(Exception e){
-    //         throw new AppException(FAIL_CODE,e.getMessage(),true);
+    //         throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         
     //     }
     
@@ -307,6 +316,8 @@ public class StockServicelmp implements StockService {
     @Override
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT STOCK");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
              if(ExcelUtil.isValidExcelFile(file)){
                 try {
@@ -324,9 +335,9 @@ public class StockServicelmp implements StockService {
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
-            throw new AppException("030",e.getMessage(),true); 
+            throw new AppException("030",e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true); 
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         
         }
     
@@ -338,6 +349,8 @@ public class StockServicelmp implements StockService {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             Specification<Stock> stocks = new CustomSpecification<>(q);
@@ -382,7 +395,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     } 
     @Override
@@ -390,6 +403,8 @@ public class StockServicelmp implements StockService {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
         SuccessResponse<Page<Stock>> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             Specification<Stock> stocks = new CustomSpecification<>(q);
@@ -416,7 +431,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
        
     } 
@@ -427,6 +442,8 @@ public class StockServicelmp implements StockService {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK HISTORY");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             // q.concat(q+",stock.id="+stockId);
             Specification<StockHistory> stockHistories = new CustomSpecification<>(q);
@@ -472,7 +489,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
        
     } 
@@ -483,6 +500,8 @@ public class StockServicelmp implements StockService {
 
         httpServletRequest.setAttribute(ACTION,"ADD QUANTITY TO STOCK");
         SuccessResponse<Stock> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             BaseEntityResponseDto<Stock> stockResult = stockDao.findById(id);
@@ -518,7 +537,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -527,6 +546,8 @@ public class StockServicelmp implements StockService {
     public Object removeQuantity(Long id, StockUpdateRequest stockUpdateRequest) {
         httpServletRequest.setAttribute(ACTION,"REMOVE QUANTITY TO STOCK");
         SuccessResponse<Stock> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             BaseEntityResponseDto<Stock> stockResult = stockDao.findById(id);
@@ -568,7 +589,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -605,6 +626,8 @@ public class StockServicelmp implements StockService {
     public Object searchDetail(long id) {
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK DETAIL BY ID");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             BaseEntityResponseDto<Stock> stockResult = stockDao.findById(id);
             if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
@@ -659,7 +682,7 @@ public class StockServicelmp implements StockService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
     

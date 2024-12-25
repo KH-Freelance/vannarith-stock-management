@@ -29,6 +29,7 @@ import com.hfsolution.app.services.CustomSpecification;
 
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
+import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.CustomerCsv;
@@ -68,6 +69,8 @@ public class CustomerServicelmp implements CustomerService {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH CUSTOMER");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             Specification<Customer> customers = new CustomSpecification<>(q);
@@ -120,7 +123,7 @@ public class CustomerServicelmp implements CustomerService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
        
     } 
@@ -128,6 +131,8 @@ public class CustomerServicelmp implements CustomerService {
     @Override
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT CUSTOMER");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             Specification<Customer> customers = new CustomSpecification<>(q);
             BaseEntityResponseDto<Customer> customerResult = customerDao.search(customers);
@@ -141,15 +146,17 @@ public class CustomerServicelmp implements CustomerService {
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
-            throw new AppException("015",e.getMessage(),true); 
+            throw new AppException("015",e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true); 
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
     @Override
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT CUSTOMER");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             if(ExcelUtil.isValidExcelFile(file)){
                 try {
@@ -167,9 +174,9 @@ public class CustomerServicelmp implements CustomerService {
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
-            throw new AppException("022",e.getMessage(),true);
+            throw new AppException("022",e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         
         }
     
@@ -182,6 +189,8 @@ public class CustomerServicelmp implements CustomerService {
 
         httpServletRequest.setAttribute(ACTION,"ADD CUSTOMER");
         SuccessResponse<Customer> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             BaseEntityResponseDto<Customer> CustomerResult = customerDao.findByCustomerName(CustomerRequest.getCustomerName());
@@ -211,7 +220,7 @@ public class CustomerServicelmp implements CustomerService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -220,6 +229,8 @@ public class CustomerServicelmp implements CustomerService {
 
         httpServletRequest.setAttribute(ACTION,"DELETE CUSTOMER BY ID");
         SuccessResponse<Customer> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
     
             BaseEntityResponseDto<Purchase>  purchaseResult =  purchaseDao.findPurchaseByCustomerId(id);
@@ -240,7 +251,7 @@ public class CustomerServicelmp implements CustomerService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
 
     }
@@ -251,6 +262,8 @@ public class CustomerServicelmp implements CustomerService {
 
         httpServletRequest.setAttribute(ACTION,"UPDATE CUSTOMER BY ID");
         SuccessResponse<Customer> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             BaseEntityResponseDto<Customer> CustomerResult = customerDao.findById(id);
@@ -273,7 +286,7 @@ public class CustomerServicelmp implements CustomerService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
 
     }

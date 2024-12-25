@@ -30,6 +30,7 @@ import com.hfsolution.app.services.CustomSpecification;
 
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
+import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.auth.services.AuthenticationService;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
@@ -97,6 +98,8 @@ public class PurchaseServicelmp implements PurchaseService {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             Map<String, Class<? extends Enum>> enumFields = new HashMap<>();
             enumFields.put("paymentType", PaymentType.class); 
@@ -174,7 +177,7 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
        
     } 
@@ -183,6 +186,8 @@ public class PurchaseServicelmp implements PurchaseService {
     @Override
     public void export(String q) {
         httpServletRequest.setAttribute(ACTION, "EXPORT PURCHASE");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             Specification<Purchase> purchases = new CustomSpecification<>(q);
@@ -197,15 +202,17 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
-            throw new AppException("036",e.getMessage(),true);  
+            throw new AppException("036",e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);  
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
     @Override
     public Object importData(MultipartFile file) {
         httpServletRequest.setAttribute(ACTION, "IMPORT PURCHASE");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
              if(ExcelUtil.isValidExcelFile(file)){
@@ -255,7 +262,7 @@ public class PurchaseServicelmp implements PurchaseService {
                     List<Purchase> purchases = ExcelUtil.getPurchaseDataFromExcel(file.getInputStream());
                     purchaseDao.saveEntities(purchases);
                 } catch (IOException e) {
-                    throw new AppException(FAIL_CODE,"The file is not a valid excel file",true);
+                    throw new AppException(FAIL_CODE,"The file is not a valid excel file",InfoGenerator.generateInfo(currentMethodName, startTime),true);
                 }
             }
           
@@ -269,9 +276,9 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
-            throw new AppException("038",e.getMessage(),true);  
+            throw new AppException("038",e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);  
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     
     }
@@ -284,6 +291,8 @@ public class PurchaseServicelmp implements PurchaseService {
 
         httpServletRequest.setAttribute(ACTION,"IMPORT PURCHASE");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             //GET USER 
@@ -369,7 +378,7 @@ public class PurchaseServicelmp implements PurchaseService {
                                         .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
                                         .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
                     BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
-                    BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice);
+                    BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice).abs();
     
                     purchaseItem.setDiscount(discountPrice);
                     purchaseItem.setPrice(totalProdcutPrice);
@@ -431,7 +440,7 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (AppException e) {
             throw e;
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -440,6 +449,8 @@ public class PurchaseServicelmp implements PurchaseService {
 
         httpServletRequest.setAttribute(ACTION,"DELETE PURCHASE BY ID");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             purchaseDao.deletePurchaseByID(id);
             String msg = AppTools.appGetMessage("033");
@@ -453,7 +464,7 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
 
     }
@@ -464,6 +475,8 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object pay(Long id, PayRequest payRequest) {
         httpServletRequest.setAttribute(ACTION,"PAYMENT");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
 
             // Check existing Purchase 
@@ -528,7 +541,7 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -538,6 +551,8 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object getUnpaidByCustomerId(long customerId) {
         httpServletRequest.setAttribute(ACTION,"PAYMENT");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findAllByCustomerIdAndPaymentStatus(customerId, PaymentStatus.CREDIT);
             UnpaidDto unpaidDto = new UnpaidDto();
@@ -586,7 +601,7 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -596,6 +611,8 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             Map<String, Class<? extends Enum>> enumFields = new HashMap<>();
             enumFields.put("paymentType", PaymentType.class); 
@@ -648,7 +665,7 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -658,6 +675,8 @@ public class PurchaseServicelmp implements PurchaseService {
     public Object searchDetail(long id) {
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE DETAIL BY ID");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findById(id);
             if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getEntity()==null){
@@ -717,7 +736,7 @@ public class PurchaseServicelmp implements PurchaseService {
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 

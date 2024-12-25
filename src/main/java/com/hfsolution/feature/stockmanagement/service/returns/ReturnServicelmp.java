@@ -197,16 +197,15 @@ public class ReturnServicelmp implements ReturnService {
                 .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
 
                 //UPDATE STOCK
-                // BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductID(productId);
+                // BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(productId,returnRequest.get);
                 // if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
                 //     String msg = AppTools.appGetMessage("046").replace("[product]",sourceItem.getProduct().getProductName());
                 //     throw new AppException("046",msg,"Y");
                 // }
                 // Stock stock = stockResult.getEntity();
-                Stock stock = new Stock();
-                stock.setQty(stock.getQty()+sourceItem.getQty());
-                stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
-                stockDao.saveEntityAsync(stock);
+                // stock.setQty(stock.getQty()+sourceItem.getQty());
+                // stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+                // stockDao.saveEntityAsync(stock);
 
                 //CONTINUE ADD INTO RETURN AND RETURN ITEM 
                 returnItem.setAmount(sourceItem.getPrice());

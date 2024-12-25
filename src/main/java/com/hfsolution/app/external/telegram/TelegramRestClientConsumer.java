@@ -73,12 +73,10 @@ public class TelegramRestClientConsumer {
 
         try {
 
-     
-
             if (errorMsg.isBlank() || errorMsg.isEmpty()) throw new Exception("errorMsg can not empty");
 
             StringBuilder textMsg = new StringBuilder();
-            String telegramId = env.getProperty("rest.telegram.chat-id");
+            String telegramId = env.getProperty("rest.telegram.monitor.chat-id");
 
             if (!title.isEmpty()) {
                 textMsg.append(title);

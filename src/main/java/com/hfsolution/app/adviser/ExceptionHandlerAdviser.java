@@ -20,12 +20,17 @@ import com.hfsolution.app.dto.ExceptionResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.exception.JwtException;
+import com.hfsolution.app.external.telegram.TelegramRestClientConsumer;
 import com.hfsolution.app.util.AppTools;
 import io.jsonwebtoken.ExpiredJwtException;
 import io.jsonwebtoken.security.SignatureException;
+import lombok.RequiredArgsConstructor;
 
 @RestControllerAdvice
+@RequiredArgsConstructor
 public class ExceptionHandlerAdviser extends ResponseEntityExceptionHandler {
+
+    private final TelegramRestClientConsumer telegramRestClientConsumer;
 
     @ExceptionHandler(value = {
             SignatureException.class,
@@ -52,7 +57,7 @@ public class ExceptionHandlerAdviser extends ResponseEntityExceptionHandler {
                 msg = AppTools.appGetMessage(code);
             }
             if (appException.isNotify()) {
-                // Send telegram alert
+                telegramRestClientConsumer.sendAsync("APPLICATION ERROR",appException.getInfo(),devMsg);
             }
             exceptionResponse.setCode(code);
             exceptionResponse.setMsg(msg);
@@ -66,6 +71,7 @@ public class ExceptionHandlerAdviser extends ResponseEntityExceptionHandler {
             exceptionResponse.setCode(code);
             exceptionResponse.setMsg(msg);
             exceptionResponse.setDevMsg(devMsg);
+            telegramRestClientConsumer.sendAsync("DATABASE ERROR",dbException.getInfo(),devMsg);
             status = HttpStatus.OK;
         } else if (ex instanceof BadCredentialsException) {
             exceptionResponse.setCode(UNAUTH);
