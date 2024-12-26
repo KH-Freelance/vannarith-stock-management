@@ -11,6 +11,7 @@ import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.HashMap;
@@ -122,6 +123,9 @@ public class StockServicelmp implements StockService {
             stock.setProductId(product.getEntity().getId());
             stock.setQty(stockRequest.getQty());
             stock.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(stockRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
+            stock.setFactory(stockRequest.getFactory());
+            LocalDateTime factoryDate = LocalDateTime.parse(stockRequest.getFactoryDate(),DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a"));
+            stock.setFactoryDate(Timestamp.valueOf(factoryDate));
             stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stock.addStockHistory(stockHistory);
@@ -185,6 +189,13 @@ public class StockServicelmp implements StockService {
             Optional.ofNullable(stockUpdateRequest.getExpiryDate())
             .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
             .ifPresent(stock::setExpiryDate);
+            Optional.ofNullable(stockUpdateRequest.getFactory()).ifPresent(stock::setFactory);
+            Optional.ofNullable(stockUpdateRequest.getFactoryDate())
+            .map(factoryDate -> {
+                LocalDateTime factoryDateTime = LocalDateTime.parse(factoryDate, DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a"));
+                return Timestamp.valueOf(factoryDateTime);
+            })
+            .ifPresent(stock::setFactoryDate);
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stockDao.saveEntity(stock);
             response.setStatus(SUCCESS);

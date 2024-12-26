@@ -11,11 +11,19 @@ public class StockUpdateRequest {
 
     @Positive(message = "Qty must be greater than 0")
     private Long qty;
+    @NotBlank(message = "Expiry Date  is required.")
     @Pattern(
         regexp = "^\\d{4}-\\d{2}-\\d{2}$",
         message = "Expiry date must be in the format yyyy-MM-dd."
     )
     private String expiryDate;
+    @NotBlank(message = "Factory Date  is required.")
+    @Pattern(
+        regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{1,2}:\\d{2}:\\d{2} (AM|PM)$",
+        message = "Factory date must be in the format yyyy-MM-dd hh:mm:ss AM/PM."
+    )
+    private String factoryDate;
+    private String factory;
     private String remark;
     
 }

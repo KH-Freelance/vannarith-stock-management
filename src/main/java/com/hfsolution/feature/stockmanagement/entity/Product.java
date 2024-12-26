@@ -34,8 +34,8 @@ public class Product {
     @Column(name = "price")
     private BigDecimal price;
 
-    @Column(name = "factory") 
-    private String factory;
+    // @Column(name = "factory") 
+    // private String factory;
 
     @Column(name = "import_price")
     private BigDecimal importPrice;
@@ -45,6 +45,7 @@ public class Product {
 
     @Column(name = "created_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @ExcelProperty(converter = TimestampConverter.class)
+    
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;

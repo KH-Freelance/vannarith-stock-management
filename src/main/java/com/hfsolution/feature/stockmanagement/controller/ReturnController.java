@@ -43,8 +43,13 @@ public class ReturnController {
         return returnService.searchDetail(id);
     }  
 
-    @PostMapping("/return")
-    private Object purchase(@Valid @RequestBody ReturnRequest returnRequest){
+    @PostMapping("/purchase")
+    private Object returnInvoice(@Valid @RequestBody ReturnRequest returnRequest){
+        return returnService.returnPurchase(returnRequest);
+    }
+
+    @PostMapping("/cash")
+    private Object returnCash(@Valid @RequestBody ReturnRequest returnRequest){
         return returnService.returnPurchase(returnRequest);
     }
     

@@ -306,7 +306,7 @@ public class ReportServiceImp  implements ReportService{
                 reportStock.setProductName(product.getProductName());
                 reportStock.setSalePrice(product.getPrice());
                 reportStock.setAvgCost(product.getImportPrice());
-                reportStock.setFactory(product.getFactory());
+                //reportStock.setFactory(product.getFactory());
                 reportStock.setInn(product.getProductDesc());
                 reportStock.setStockOnHand(stock.getQty());
                 reportStock.setDiscount(product.getDiscount());

@@ -17,7 +17,7 @@ public class ProductRequest {
     private String productName;
     private String productDesc;
     // @NotBlank(message = "Factory name is required.")
-    private String factory;
+    //private String factory;
     @Positive(message = "Import Price must be greater than 0")
     private BigDecimal importPrice; 
     private MultipartFile file;

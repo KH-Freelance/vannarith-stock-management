@@ -49,6 +49,15 @@ public class Stock {
     @Column(name = "qty")
     private Long qty;
 
+    @Column(name = "factory") 
+    private String factory;
+
+    @Column(name = "factory_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
+    @ExcelProperty(converter = TimestampConverter.class)
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
+    private Timestamp factoryDate;
+
     @OneToMany(mappedBy = "stock", cascade = CascadeType.ALL, orphanRemoval = true,fetch = FetchType.LAZY)
     @ExcelIgnore
     private List<StockHistory> stockHistories = new ArrayList<>();
