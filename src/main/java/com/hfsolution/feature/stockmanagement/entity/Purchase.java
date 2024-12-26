@@ -49,7 +49,7 @@ public class Purchase {
     @JoinColumn(name = "user_id", nullable = false)
     private User user; 
 
-    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.EAGER, orphanRemoval = true)
+    @OneToMany(mappedBy = "purchase", cascade = CascadeType.ALL, fetch = FetchType.LAZY, orphanRemoval = true)
     @ExcelIgnore
     private List<Payment> payments = new ArrayList<>();
 

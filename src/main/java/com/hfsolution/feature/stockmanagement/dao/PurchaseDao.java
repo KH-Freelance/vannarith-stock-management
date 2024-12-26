@@ -297,7 +297,7 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
     try {
 
-      List<Purchase> entity = purchaseRepository.findAllByCustomerCustomerNameAndCreatedDateBetween(customerName, Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
+      List<Purchase> entity = purchaseRepository.findAllByCustomerCustomerNameContainingAndCreatedDateBetween(customerName, Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
       var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       appModel.setEntityList(entity);
@@ -316,7 +316,7 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
     try {
 
-      List<Purchase> entity = purchaseRepository.findAllByCustomerCustomerNameAndCreatedDateBetween(customerName, Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
+      List<Purchase> entity = purchaseRepository.findAllByPurchaseItemsProductProductNameContainingAndCreatedDateBetween(customerName, Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
       var appModel = new BaseEntityResponseDto<Purchase>();
       appModel.setStatus(SUCCESS);
       appModel.setEntityList(entity);

@@ -34,7 +34,7 @@ public class Product {
     @Column(name = "price")
     private BigDecimal price;
 
-    @Column(name = "factory")
+    @Column(name = "factory") 
     private String factory;
 
     @Column(name = "import_price")

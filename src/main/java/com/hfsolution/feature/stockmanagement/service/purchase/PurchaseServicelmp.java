@@ -93,7 +93,7 @@ public class PurchaseServicelmp implements PurchaseService {
     private final ProductHistoryDao productHistoryDao;
 
     @Override
-    //@Transactional
+    @Transactional
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
@@ -607,7 +607,7 @@ public class PurchaseServicelmp implements PurchaseService {
 
 
     @Override
-    //@Transactional
+    @Transactional
     public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
         httpServletRequest.setAttribute(ACTION,"SEARCH PURCHASE");
         SuccessResponse<Object> response = new SuccessResponse<>();

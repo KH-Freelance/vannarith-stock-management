@@ -402,6 +402,8 @@ public class ReportServiceImp  implements ReportService{
             BigDecimal totalAmount =  BigDecimal.ZERO;
             for (Purchase purchase : purchaseResult) {
                 for (com.hfsolution.feature.stockmanagement.entity.PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
+                    //Filter Out PurcahseItem status = RETURN
+                    if (purchaseItem.getStatus().equalsIgnoreCase("RETURN")) continue;
                     SaleDto saleDto = new SaleDto();
                   
                     Product product = purchaseItem.getProduct();
