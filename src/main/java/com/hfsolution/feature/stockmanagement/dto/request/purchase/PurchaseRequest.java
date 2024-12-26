@@ -34,10 +34,8 @@ public class PurchaseRequest {
 
     @Data
     public static class ProductPurchase {
-        @NotBlank(message = "Batch Id is required.")
-        private String batchId;
-        @Positive(message = "Product ID must be greater than 0")
-        private Long productId;
+        @Positive(message = "Stock ID must be greater than 0")
+        private Long stockId;
         @Positive(message = "Qty must be greater than 0")
         private Long qty;
     }

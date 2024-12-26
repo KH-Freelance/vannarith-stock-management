@@ -23,12 +23,12 @@ public class ProductRequest {
     private MultipartFile file;
     @Positive(message = "Price must be greater than 0")
     private BigDecimal price; 
-    @NotBlank(message = "Expiry date is required.")
-    @Pattern(
-        regexp = "^\\d{4}-\\d{2}-\\d{2}$",
-        message = "Expiry date must be in the format yyyy-MM-dd."
-    )
-    private String expiryDate;
+    // @NotBlank(message = "Expiry date is required.")
+    // @Pattern(
+    //     regexp = "^\\d{4}-\\d{2}-\\d{2}$",
+    //     message = "Expiry date must be in the format yyyy-MM-dd."
+    // )
+    // private String expiryDate;
     // @Pattern(
     // regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$",
     // message = "Expiry datetime must be in the format yyyy-MM-dd HH:mm."

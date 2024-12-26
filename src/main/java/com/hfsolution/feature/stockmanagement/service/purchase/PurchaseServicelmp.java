@@ -13,6 +13,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.Optional;
 
+import org.apache.commons.math3.analysis.function.Log;
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -312,34 +313,61 @@ public class PurchaseServicelmp implements PurchaseService {
             }
             Customer customer = customerResult.getEntity();
 
+            // //VERIFY PRODUCT & STOCK
+            // Map<Long, Product> productMap = new HashMap<>();
+            // Map<String, Stock> stockMap = new HashMap<>();
+            // purchaseRequest.getProductPurchases().stream().forEach((data->{
+
+            //     //CHECK PRODUCT
+            //     BaseEntityResponseDto<Product> productResult = productDao.findById(data.getProductId());
+            //     if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
+            //         String msg = AppTools.appGetMessage("006");
+            //         throw new AppException("006",msg);
+            //     }
+            //     Product product = productResult.getEntity();
+            //     productMap.put(data.getProductId(), product);
+
+            //     //CHECK STOCK & QTY
+            //     BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(data.getProductId(),data.getBatchId());
+            //     if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
+            //         String msg = AppTools.appGetMessage("046").replace("[product]",data.getBatchId()+":"+product.getProductName());
+            //         throw new AppException("046",msg,"Y");
+            //     }
+            //     Stock stock = stockResult.getEntity();
+            //     stockMap.put(data.getBatchId()+":"+data.getProductId(), stock);
+            //     if(stock.getQty() == null || stock.getQty() <= 0){
+            //         String msg = AppTools.appGetMessage("047").replace("[product]",data.getBatchId()+":"+product.getProductName());;
+            //         throw new AppException("047",msg,"Y");
+            //     }
+            //     if(stock.getQty() < data.getQty()){
+            //         String msg = AppTools.appGetMessage("047").replace("[product]",data.getBatchId()+":"+product.getProductName());;
+            //         throw new AppException("047",msg,"Y");
+            //     }
+                
+
+            // }));
+
             //VERIFY PRODUCT & STOCK
             Map<Long, Product> productMap = new HashMap<>();
-            Map<String, Stock> stockMap = new HashMap<>();
+            Map<Long, Stock> stockMap = new HashMap<>();
             purchaseRequest.getProductPurchases().stream().forEach((data->{
 
-                //CHECK PRODUCT
-                BaseEntityResponseDto<Product> productResult = productDao.findById(data.getProductId());
-                if(!productResult.getStatus().equals(SUCCESS) || productResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("006");
-                    throw new AppException("006",msg);
-                }
-                Product product = productResult.getEntity();
-                productMap.put(data.getProductId(), product);
-
                 //CHECK STOCK & QTY
-                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(data.getProductId(),data.getBatchId());
+                BaseEntityResponseDto<Stock> stockResult = stockDao.findById(data.getStockId());
                 if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("046").replace("[product]",data.getBatchId()+":"+product.getProductName());
+                    String msg = AppTools.appGetMessage("046").replace("[stock]",String.valueOf(data.getStockId()));
                     throw new AppException("046",msg,"Y");
                 }
                 Stock stock = stockResult.getEntity();
-                stockMap.put(data.getBatchId()+":"+data.getProductId(), stock);
+                Product product = stock.getProduct();
+                productMap.put(stock.getProductId(),product);
+                stockMap.put(data.getStockId(), stock);
                 if(stock.getQty() == null || stock.getQty() <= 0){
-                    String msg = AppTools.appGetMessage("047").replace("[product]",data.getBatchId()+":"+product.getProductName());;
+                    String msg = AppTools.appGetMessage("047").replace("[product]",stock.getBatchId()+":"+product.getProductName());;
                     throw new AppException("047",msg,"Y");
                 }
                 if(stock.getQty() < data.getQty()){
-                    String msg = AppTools.appGetMessage("047").replace("[product]",data.getBatchId()+":"+product.getProductName());;
+                    String msg = AppTools.appGetMessage("047").replace("[product]",stock.getBatchId()+":"+product.getProductName());;
                     throw new AppException("047",msg,"Y");
                 }
                 
@@ -368,8 +396,9 @@ public class PurchaseServicelmp implements PurchaseService {
                 
                 for (ProductPurchase productPurchase : purchaseRequest.getProductPurchases()){
                     PurchaseItem purchaseItem = new PurchaseItem();
-                    Product product = productMap.get(productPurchase.getProductId());
-                    Stock stock = stockMap.get(productPurchase.getBatchId()+":"+productPurchase.getProductId());
+
+                    Stock stock = stockMap.get(productPurchase.getStockId());
+                    Product product = productMap.get(stock.getProductId());
     
                    
                      //CALCULATE

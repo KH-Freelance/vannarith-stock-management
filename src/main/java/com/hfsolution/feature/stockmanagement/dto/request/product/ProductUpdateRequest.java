@@ -15,9 +15,9 @@ public class ProductUpdateRequest {
     private String factory;
     private BigDecimal importPrice;
     private MultipartFile file;
-    @Pattern(
-        regexp = "^\\d{4}-\\d{2}-\\d{2}$",
-        message = "Expiry date must be in the format yyyy-MM-dd."
-    )
-    private String expiryDate;
+    // @Pattern(
+    //     regexp = "^\\d{4}-\\d{2}-\\d{2}$",
+    //     message = "Expiry date must be in the format yyyy-MM-dd."
+    // )
+    // private String expiryDate;
 }
