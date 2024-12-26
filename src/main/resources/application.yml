@@ -10,8 +10,8 @@ spring:
       enabled: true
   servlet:
     multipart:
-      max-file-size: 20MB
-      max-request-size: 20MB
+      max-file-size: 10000000MB
+      max-request-size: 10000000MB
   jpa:
     jdbc:
       time_zone: Asia/Phnom_Penh

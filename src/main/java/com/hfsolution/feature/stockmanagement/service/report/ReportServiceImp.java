@@ -206,9 +206,11 @@ public class ReportServiceImp  implements ReportService{
                 reportStock.setStockId(stock.getId());
                 reportStock.setBatchId(stock.getBatchId());
                 reportStock.setTotalAsset(bd.doubleValue());
+                reportStock.setAssetValue(product.getImportPrice().multiply(BigDecimal.valueOf(stock.getQty())));
+                reportStock.setRetailValue(product.getPrice().multiply(BigDecimal.valueOf(stock.getQty())));
                 reportStock.setProductName(product.getProductName());
                 reportStock.setSalePrice(product.getPrice());
-                reportStock.setImportPrice(product.getImportPrice());
+                reportStock.setAvgCost(product.getImportPrice());
                 reportStock.setFactory(product.getFactory());
                 reportStock.setStockOnHand(stock.getQty());
                 reportStock.setDiscount(product.getDiscount());
@@ -438,7 +440,7 @@ public class ReportServiceImp  implements ReportService{
             saleDto.setProductDesc("");
             saleDto.setSalePrice(BigDecimal.ZERO);
             saleDto.setLocation("");
-            saleDto.setCreatedDate(new Timestamp(System.currentTimeMillis()));
+            saleDto.setCreatedDate(null);
             saleDto.setPurchaseCode("");
             saleDto.setCustomerName("");
             saleDto.setCustomerPhone("");
@@ -451,15 +453,15 @@ public class ReportServiceImp  implements ReportService{
             reportSaleDto.setColumns(Arrays.asList(
             "Type",
             "Date",
-            "Num",
+            "Purchase Code",
             "Customer",
             "Product",
+            "INN",
             "Phone",
-            "Batch",
-            "Address",
+            "Location",
             "Qty",
             "Sales Price",
-            "Amount"));
+            "Total Amount"));
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
             response.setData(reportSaleDto);
@@ -474,96 +476,4 @@ public class ReportServiceImp  implements ReportService{
         }
     }
 
-    
-
-
-    
-
-    // @Override
-    // public Object reportPurchase(String startDate, String endDate) {
-    //     httpServletRequest.setAttribute(ACTION,"REPORT PURCHASE");
-    //     SuccessResponse<Object> response = new SuccessResponse<>();
-    //     try {
-
-    //         ReportPurchaseDto reportPurchaseDto = new ReportPurchaseDto();
-    //         List<PurchaseDto> purchaseDtos = new ArrayList<>();
-    //         long totalProductSoldCount = 0;
-    //         BigDecimal totalCostSold = BigDecimal.ZERO;
-            
-            
-    //         BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findPurchaseByCreatedDateBetween(startDate,endDate);
-    //         for (Purchase purchase : purchaseResult.getEntityList()) {
-    //             PurchaseDto purchaseDto = new PurchaseDto();
-    //             purchaseDto.setId(purchase.getId());
-    //             purchaseDto.setQty(purchase.getQty());
-    //             purchaseDto.setTotal(purchase.getTotal());
-    //             purchaseDto.setPaymentStatus(purchase.getPaymentStatus());
-    //             purchaseDto.setPaymentType(purchase.getPaymentType());
-    //             purchaseDto.setCreatedDate(purchase.getCreatedDate());
-    //             purchaseDto.setLocation(purchase.getLocation());
-    //             purchaseDto.setPurchaseCode(purchase.getPurchaseCode());
-    //             purchaseDto.setUpdatedDate(purchase.getUpdatedDate());
-
-
-    //             // Set Customer
-    //             CustomerDto customerDto = new CustomerDto();
-    //             BeanUtils.copyProperties(purchase.getCustomer(), customerDto);
-
-    //             // Set PaymentSummary
-    //             List<PaymentSummary> transactionSummaries = new ArrayList<>();
-    //             for (Payment payment : purchase.getPayments()) {
-    //                 PaymentSummary paymentSummary = new PaymentSummary();
-    //                 paymentSummary.setId(payment.getId());
-    //                 paymentSummary.setAmount(payment.getAmount());
-    //                 paymentSummary.setCreatedDate(payment.getCreatedDate());
-    //                 paymentSummary.setUpdateDate(payment.getUpdateDate());
-
-    //                 // Set TotalCostSold
-    //                 totalCostSold = totalCostSold.add(payment.getAmount());
-
-    //                 transactionSummaries.add(paymentSummary);
-    //             }
-
-    //             // Set PurchaseItem
-    //             List<PurchaseItem> purchaseItems = new ArrayList<>();
-    //             for (com.hfsolution.feature.stockmanagement.entity.PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
-    //                 PurchaseItem purchaseItemDto = new PurchaseItem();
-    //                 purchaseItemDto.setId(purchaseItem.getId());
-    //                 purchaseItemDto.setProductDesc(purchaseItem.getProduct().getProductDesc());
-    //                 purchaseItemDto.setProductName(purchaseItem.getProduct().getProductName());
-    //                 purchaseItemDto.setFactory(purchaseItem.getProduct().getFactory());
-    //                 purchaseItemDto.setQty(purchaseItem.getQty());
-    //                 purchaseItemDto.setPrice(purchaseItem.getPrice());
-    //                 purchaseItemDto.setImportPrice(purchaseItem.getProduct().getImportPrice());
-    //                 purchaseItemDto.setDiscount(purchaseItem.getProduct().getDiscount());
-    //                 purchaseItemDto.setCreatedDate(purchaseItem.getProduct().getCreatedDate());
-    //                 purchaseItemDto.setExpiryDate(purchaseItem.getProduct().getExpiryDate());
-
-    //                 // Set TotalProductSoldCount
-    //                 totalProductSoldCount+=purchaseItem.getQty();
-
-    //                 purchaseItems.add(purchaseItemDto);
-    //             }
-    //             purchaseDto.setTransactionSummaries(transactionSummaries);
-    //             purchaseDto.setPurchaseItems(purchaseItems);
-    //             purchaseDto.setCustomer(customerDto);
-    //             purchaseDtos.add(purchaseDto);
-    //         }
-    //         reportPurchaseDto.setPurchaseOrders(purchaseDtos);
-    //         reportPurchaseDto.setTotalCostSold(totalCostSold);
-    //         reportPurchaseDto.setTotalProductSoldCount(totalProductSoldCount);
-
-    //         response.setStatus(SUCCESS);
-    //         response.setCode(SUCCESS_CODE);
-    //         response.setData(reportPurchaseDto);
-    //         return response;
-    //     }catch (DatabaseException e) {
-    //         throw e;   
-    //     }catch (AppException e) {
-    //         throw e;   
-    //     }catch(Exception e){
-    //         throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
-    //     }
-
-    // }
 }
