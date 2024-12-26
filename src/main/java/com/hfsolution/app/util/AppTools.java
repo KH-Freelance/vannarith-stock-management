@@ -14,14 +14,22 @@ import java.util.Date;
 import java.util.List;
 import java.util.Locale;
 
+import org.apache.poi.ss.usermodel.BorderStyle;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.CellStyle;
+import org.apache.poi.ss.usermodel.FillPatternType;
+import org.apache.poi.ss.usermodel.HorizontalAlignment;
+import org.apache.poi.ss.usermodel.IndexedColors;
 import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.VerticalAlignment;
 import org.springframework.context.support.ResourceBundleMessageSource;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 
+import com.alibaba.excel.write.metadata.style.WriteCellStyle;
+import com.alibaba.excel.write.metadata.style.WriteFont;
+import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 
 public class AppTools {
@@ -176,6 +184,40 @@ public class AppTools {
 
         // Default to string if no other type matches
         return value;
+    }
+
+    public static HorizontalCellStyleStrategy createCustomStyle() {
+         // Header Style
+        WriteCellStyle headerStyle = new WriteCellStyle();
+        headerStyle.setFillForegroundColor(IndexedColors.WHITE.getIndex());
+        headerStyle.setFillPatternType(FillPatternType.SOLID_FOREGROUND);
+        headerStyle.setBorderBottom(BorderStyle.MEDIUM);
+        headerStyle.setBorderLeft(BorderStyle.MEDIUM);
+        headerStyle.setBorderRight(BorderStyle.MEDIUM);
+        headerStyle.setBorderTop(BorderStyle.MEDIUM);
+        headerStyle.setHorizontalAlignment(HorizontalAlignment.CENTER); // Center text horizontally
+        headerStyle.setVerticalAlignment(VerticalAlignment.CENTER); // Center text vertically
+
+        WriteFont headerFont = new WriteFont();
+        headerFont.setBold(true);
+        headerFont.setFontHeightInPoints((short) 8);
+        headerStyle.setWriteFont(headerFont);
+
+        // Content Style
+        WriteCellStyle contentStyle = new WriteCellStyle();
+        contentStyle.setBorderBottom(BorderStyle.THIN);
+        contentStyle.setBorderLeft(BorderStyle.THIN);
+        contentStyle.setBorderRight(BorderStyle.THIN);
+        // contentStyle.setBorderTop(BorderStyle.THIN);
+        contentStyle.setHorizontalAlignment(HorizontalAlignment.CENTER); // Center text horizontally
+        contentStyle.setVerticalAlignment(VerticalAlignment.CENTER); // Center text vertically
+
+        WriteFont contentFont = new WriteFont();
+        contentFont.setFontHeightInPoints((short) 10);
+        contentFont.setBold(false);
+        contentStyle.setWriteFont(contentFont);
+
+        return new HorizontalCellStyleStrategy(headerStyle, contentStyle);
     }
 
 }

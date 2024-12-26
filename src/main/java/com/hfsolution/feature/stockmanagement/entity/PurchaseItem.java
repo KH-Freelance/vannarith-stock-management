@@ -30,7 +30,7 @@ public class PurchaseItem {
     // @JoinColumn(name = "product_id", nullable = false, updatable = false, insertable = false)
     // private Product product;
 
-    @OneToOne(fetch = FetchType.EAGER,optional  = true)
+    @OneToOne(fetch = FetchType.EAGER,optional  = true,cascade = CascadeType.PERSIST)
     @JoinColumn(name = "product_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Product product;
 

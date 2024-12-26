@@ -108,6 +108,7 @@ public class ReportServiceImp  implements ReportService{
             httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
             SuccessResponse<List<ReportStockDto>> result = (SuccessResponse<List<ReportStockDto>>) this.reportStock(startDate, endDate);
             EasyExcel.write(httpServletResponse.getOutputStream(), ReportStockDto.class)
+            .registerWriteHandler(AppTools.createCustomStyle())
             .sheet("stock-report").doWrite(result.getData());
             return ResponseEntity.status(HttpStatus.OK).build();
         }catch (DatabaseException e) {
@@ -131,6 +132,7 @@ public class ReportServiceImp  implements ReportService{
             httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
             SuccessResponse<List<ReportCustomerDto>> result = (SuccessResponse<List<ReportCustomerDto>>) this.reportCustomer(startDate, endDate);
             EasyExcel.write(httpServletResponse.getOutputStream(), ReportCustomerDto.class)
+            .registerWriteHandler(AppTools.createCustomStyle())
             .sheet("customer-report").doWrite(result.getData());
             return ResponseEntity.status(HttpStatus.OK).build();
         }catch (DatabaseException e) {
@@ -155,6 +157,7 @@ public class ReportServiceImp  implements ReportService{
             httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
             SuccessResponse<ReportSaleDto> result = (SuccessResponse<ReportSaleDto>) this.reportSale(startDate, endDate,productName,customerName);
             EasyExcel.write(httpServletResponse.getOutputStream(), SaleDto.class)
+            .registerWriteHandler(AppTools.createCustomStyle())
             .sheet("sale-report").doWrite(result.getData().getContent());
             return ResponseEntity.status(HttpStatus.OK).build();
         }catch (DatabaseException e) {
@@ -174,9 +177,6 @@ public class ReportServiceImp  implements ReportService{
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long startTime = System.currentTimeMillis();
         try {
-
-            System.out.println(Timestamp.valueOf(startDate));
-            System.out.println(Timestamp.valueOf(endDate));
             BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByDateRange(Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
             if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntityList()==null){
                 String msg = AppTools.appGetMessage("024");
@@ -185,16 +185,14 @@ public class ReportServiceImp  implements ReportService{
 
             CompletableFuture<BaseEntityResponseDto<Product>> productFuture =  productDao.getAllEntityByIdAsync(stockResult.getEntityList().stream().map(stock->stock.getProductId()).toList());
             List<ReportStockDto> reportStockDtos = new ArrayList<>();
-            Long totalQty = stockDao.getTotal();
+            BigDecimal totalAsset = BigDecimal.ZERO;
+            BigDecimal totalRetail = BigDecimal.ZERO;
             Map<Long, Product> productMap =  new HashMap<>();
             productFuture.get().getEntityList().forEach(product -> productMap.put(product.getId(), product));
             for (Stock stock : stockResult.getEntityList()) {
                
                 
-                ReportStockDto reportStock = new ReportStockDto();   
-                double percentage = ((double) stock.getQty() / totalQty) * 100;
-                BigDecimal bd = new BigDecimal(percentage).setScale(2, RoundingMode.HALF_UP);
-                                
+                ReportStockDto reportStock = new ReportStockDto();                     
                 if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntityList()==null){
                     String msg = AppTools.appGetMessage("024");
                     throw new AppException("024",msg);
@@ -205,7 +203,6 @@ public class ReportServiceImp  implements ReportService{
                 reportStock.setProductId(product.getId());
                 reportStock.setStockId(stock.getId());
                 reportStock.setBatchId(stock.getBatchId());
-                reportStock.setTotalAsset(bd.doubleValue());
                 reportStock.setAssetValue(product.getImportPrice().multiply(BigDecimal.valueOf(stock.getQty())));
                 reportStock.setRetailValue(product.getPrice().multiply(BigDecimal.valueOf(stock.getQty())));
                 reportStock.setProductName(product.getProductName());
@@ -216,8 +213,23 @@ public class ReportServiceImp  implements ReportService{
                 reportStock.setDiscount(product.getDiscount());
                 reportStock.setCreatedDate(stock.getCreatedDate());
                 reportStock.setExpiryDate(stock.getExpiryDate());
+
+                totalAsset = totalAsset.add(reportStock.getAssetValue());
+                totalRetail = totalRetail.add(reportStock.getRetailValue());
+
                 reportStockDtos.add(reportStock);
             }
+
+            // Calculate % of Total Retail and Total Asset
+            for (ReportStockDto report : reportStockDtos) {
+                BigDecimal percentageOfTotalAsset = report.getAssetValue().divide(totalAsset,2, RoundingMode.HALF_EVEN).multiply(BigDecimal.valueOf(100));
+                BigDecimal percentageOfTotalReatail = report.getRetailValue().divide(totalRetail,2,RoundingMode.HALF_EVEN).multiply(BigDecimal.valueOf(100));
+                report.setTotalAsset(percentageOfTotalAsset);
+                report.setTotalRetail(percentageOfTotalReatail);
+            }
+            
+
+
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
             response.setData(reportStockDtos);

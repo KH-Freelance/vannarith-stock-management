@@ -43,7 +43,10 @@ public class ReportStockDto {
     private BigDecimal retailValue;
 
     @ExcelProperty("% of Total Asset")
-    private Double totalAsset;
+    private BigDecimal totalAsset;
+
+    @ExcelProperty("% of Total Retail")
+    private BigDecimal totalRetail;
 
     @ExcelIgnore
     private String factory;
