@@ -34,6 +34,8 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
 import com.alibaba.excel.EasyExcel;
+import com.alibaba.excel.ExcelWriter;
+import com.alibaba.excel.write.metadata.WriteSheet;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
@@ -51,6 +53,7 @@ import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
+import com.hfsolution.feature.stockmanagement.dto.report.CustomReportCustomerDto;
 import com.hfsolution.feature.stockmanagement.dto.report.CustomerDto;
 import com.hfsolution.feature.stockmanagement.dto.report.PaymentSummary;
 import com.hfsolution.feature.stockmanagement.dto.report.PurchaseDto;
@@ -97,6 +100,7 @@ public class ReportServiceImp  implements ReportService{
 
     @SuppressWarnings("unchecked")
     @Override
+    @Transactional
     public ResponseEntity<Void> excelReportStock(String startDate, String endDate) {
         httpServletRequest.setAttribute(ACTION,"REPORT STOCK EXCEL");
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -121,6 +125,7 @@ public class ReportServiceImp  implements ReportService{
     }
     @SuppressWarnings("unchecked")
     @Override
+    @Transactional
     public ResponseEntity<Void> excelReportCustomer(String startDate, String endDate) {
         httpServletRequest.setAttribute(ACTION,"REPORT CUSTOMER EXCEL");
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -131,9 +136,23 @@ public class ReportServiceImp  implements ReportService{
             String fileName = URLEncoder.encode("customer-report", "UTF-8").replaceAll("\\+", "%20");
             httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
             SuccessResponse<List<ReportCustomerDto>> result = (SuccessResponse<List<ReportCustomerDto>>) this.reportCustomer(startDate, endDate);
-            EasyExcel.write(httpServletResponse.getOutputStream(), ReportCustomerDto.class)
+
+            List<CustomReportCustomerDto> customReportCustomerDtos = new ArrayList<>();
+            result.getData().stream().forEach(customer->{
+                CustomReportCustomerDto customReportCustomerDto = new CustomReportCustomerDto();
+                customReportCustomerDto.setCustomerId(customer.getCustomerId());
+                customReportCustomerDto.setCustomerName(customer.getCustomerName());
+                customReportCustomerDto.setTotalCredit(customer.getTotalCredit());
+                customReportCustomerDto.setCreditDay1To30(customer.getCreditCategories().getCreditDay1To30());
+                customReportCustomerDto.setCreditDay31To60(customer.getCreditCategories().getCreditDay31To60());
+                customReportCustomerDto.setCreditDay61To90(customer.getCreditCategories().getCreditDay61To90());
+                customReportCustomerDto.setCreditMoreThan90(customer.getCreditCategories().getCreditMoreThan90());
+                customReportCustomerDtos.add(customReportCustomerDto);
+
+            });
+            EasyExcel.write(httpServletResponse.getOutputStream(), CustomReportCustomerDto.class)
             .registerWriteHandler(AppTools.createCustomStyle())
-            .sheet("customer-report").doWrite(result.getData());
+            .sheet("customer-report").doWrite(customReportCustomerDtos);
             return ResponseEntity.status(HttpStatus.OK).build();
         }catch (DatabaseException e) {
             throw e;   
@@ -146,6 +165,7 @@ public class ReportServiceImp  implements ReportService{
 
     @SuppressWarnings("unchecked")
     @Override
+    @Transactional
     public ResponseEntity<Void> excelReportSale(String startDate, String endDate,String productName, String customerName) {
         httpServletRequest.setAttribute(ACTION,"REPORT SALE EXCEL");
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -168,6 +188,84 @@ public class ReportServiceImp  implements ReportService{
             throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
+
+
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @Transactional
+    public ResponseEntity<Void> excelReportCombined(String startDate, String endDate, String customerName, String productName) {
+        httpServletRequest.setAttribute(ACTION, "COMBINED REPORT EXCEL");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
+        try {
+            httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            httpServletResponse.setCharacterEncoding("UTF-8");
+            String fileName = URLEncoder.encode("combined-report", "UTF-8").replaceAll("\\+", "%20");
+            httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
+
+            // Create Excel writer
+            ExcelWriter excelWriter = EasyExcel.write(httpServletResponse.getOutputStream())
+                    .registerWriteHandler(AppTools.createCustomStyle())
+                    .build();
+
+            // Run all report fetching tasks in parallel
+            CompletableFuture<SuccessResponse<List<ReportStockDto>>> stockFuture = CompletableFuture.supplyAsync(() ->
+                    (SuccessResponse<List<ReportStockDto>>) this.reportStock(startDate, endDate));
+
+            CompletableFuture<SuccessResponse<List<ReportCustomerDto>>> customerFuture = CompletableFuture.supplyAsync(() ->
+                    (SuccessResponse<List<ReportCustomerDto>>) this.reportCustomer(startDate, endDate));
+
+            CompletableFuture<SuccessResponse<ReportSaleDto>> saleFuture = CompletableFuture.supplyAsync(() ->
+                    (SuccessResponse<ReportSaleDto>) this.reportSale(startDate, endDate, productName, customerName));
+
+            // Wait for all futures to complete and process the results
+            CompletableFuture<Void> allOf = CompletableFuture.allOf(stockFuture, customerFuture, saleFuture);
+
+            allOf.join(); // Block until all futures are done
+
+            // Add Stock Report Sheet
+            SuccessResponse<List<ReportStockDto>> stockResult = stockFuture.get();
+            WriteSheet stockSheet = EasyExcel.writerSheet("stock-report").head(ReportStockDto.class).build();
+            excelWriter.write(stockResult.getData(), stockSheet);
+
+            // Add Customer Report Sheet
+            SuccessResponse<List<ReportCustomerDto>> customerResult = customerFuture.get();
+            List<CustomReportCustomerDto> customReportCustomerDtos = new ArrayList<>();
+            customerResult.getData().stream().forEach(customer -> {
+                CustomReportCustomerDto customReportCustomerDto = new CustomReportCustomerDto();
+                customReportCustomerDto.setCustomerId(customer.getCustomerId());
+                customReportCustomerDto.setCustomerName(customer.getCustomerName());
+                customReportCustomerDto.setTotalCredit(customer.getTotalCredit());
+                customReportCustomerDto.setCreditDay1To30(customer.getCreditCategories().getCreditDay1To30());
+                customReportCustomerDto.setCreditDay31To60(customer.getCreditCategories().getCreditDay31To60());
+                customReportCustomerDto.setCreditDay61To90(customer.getCreditCategories().getCreditDay61To90());
+                customReportCustomerDto.setCreditMoreThan90(customer.getCreditCategories().getCreditMoreThan90());
+                customReportCustomerDtos.add(customReportCustomerDto);
+            });
+            WriteSheet customerSheet = EasyExcel.writerSheet("customer-report").head(CustomReportCustomerDto.class).build();
+            excelWriter.write(customReportCustomerDtos, customerSheet);
+
+            // Add Sale Report Sheet
+            SuccessResponse<ReportSaleDto> saleResult = saleFuture.get();
+            WriteSheet saleSheet = EasyExcel.writerSheet("sale-report").head(SaleDto.class).build();
+            excelWriter.write(saleResult.getData().getContent(), saleSheet);
+
+            // Finish writing
+            excelWriter.finish();
+
+            return ResponseEntity.status(HttpStatus.OK).build();
+        } catch (DatabaseException e) {
+            throw e;
+        } catch (AppException e) {
+            throw e;
+        } catch (InterruptedException | ExecutionException e) {
+            throw new AppException(FAIL_CODE, e.getMessage(), InfoGenerator.generateInfo(currentMethodName, startTime), true);
+        } catch (Exception e) {
+            throw new AppException(FAIL_CODE, e.getMessage(), InfoGenerator.generateInfo(currentMethodName, startTime), true);
+        }
+    }
+
 
     @Override
     @Transactional
@@ -209,6 +307,7 @@ public class ReportServiceImp  implements ReportService{
                 reportStock.setSalePrice(product.getPrice());
                 reportStock.setAvgCost(product.getImportPrice());
                 reportStock.setFactory(product.getFactory());
+                reportStock.setInn(product.getProductDesc());
                 reportStock.setStockOnHand(stock.getQty());
                 reportStock.setDiscount(product.getDiscount());
                 reportStock.setCreatedDate(stock.getCreatedDate());
@@ -410,6 +509,7 @@ public class ReportServiceImp  implements ReportService{
             }else{
                 purchaseResult =  purchaseDao.findPurchaseByCustomerNameAndCreatedDateBetween(customerName,startDate,endDate).getEntityList();
             }
+            
             Long totalQty =  0L;
             BigDecimal totalAmount =  BigDecimal.ZERO;
             for (Purchase purchase : purchaseResult) {
@@ -427,6 +527,10 @@ public class ReportServiceImp  implements ReportService{
                             BeanUtils.copyProperties(productHistory, product);
                         }
                     }
+                    
+                    // Filter out Product That not contain Product Name that user want to search because one Purcahse have many product 
+                    if(productName != null && !product.getProductName().contains(productName)) continue;
+
                     saleDto.setType("INVOICE");
                     saleDto.setProductName(product.getProductName());
                     saleDto.setProductDesc(product.getProductDesc());

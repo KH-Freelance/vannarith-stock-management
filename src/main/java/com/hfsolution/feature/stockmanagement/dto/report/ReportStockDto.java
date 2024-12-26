@@ -32,6 +32,9 @@ public class ReportStockDto {
     
     @ExcelProperty("Product Name")
     private String productName;
+
+    @ExcelProperty("INN")
+    private String inn;
     
     @ExcelProperty("Sale Price")
     private BigDecimal salePrice;
