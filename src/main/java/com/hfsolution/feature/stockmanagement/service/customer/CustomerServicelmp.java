@@ -88,6 +88,8 @@ public class CustomerServicelmp implements CustomerService {
             }
 
             for (Customer customer : customerResult.getPage().getContent()) {
+
+                // Calculate Credit
                 BigDecimal credit = BigDecimal.ZERO;
                 for (Purchase purchase : customer.getPurchases()) {
                     if(purchase.getPaymentType().compareTo(PaymentType.CASH) == 0 || purchase.getPaymentStatus().compareTo(PaymentStatus.PAID) == 0) continue;
@@ -98,7 +100,6 @@ public class CustomerServicelmp implements CustomerService {
                     credit = credit.add(purchase.getTotal().subtract(totalAoumtPaid));
                     
                 }
-
                 customer.setCredit(credit);
             }
 

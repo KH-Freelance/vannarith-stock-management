@@ -2,17 +2,10 @@ package com.hfsolution.feature.stockmanagement.dto.report;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-import java.util.List;
-
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hfsolution.app.util.TimestampConverter;
-
-import jakarta.persistence.Column;
-import jakarta.persistence.Id;
-import jakarta.validation.constraints.Positive;
-import lombok.Data;
 import lombok.Getter;
 import lombok.Setter;
 

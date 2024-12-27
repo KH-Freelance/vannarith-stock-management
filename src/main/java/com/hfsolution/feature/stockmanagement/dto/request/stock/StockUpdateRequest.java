@@ -1,6 +1,8 @@
 package com.hfsolution.feature.stockmanagement.dto.request.stock;
 
 
+import java.math.BigDecimal;
+
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.Pattern;
 import jakarta.validation.constraints.Positive;
@@ -22,6 +24,8 @@ public class StockUpdateRequest {
         regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{1,2}:\\d{2}:\\d{2} (AM|PM)$",
         message = "Factory date must be in the format yyyy-MM-dd hh:mm:ss AM/PM."
     )
+    @Positive(message = "Import Price must be greater than 0")
+    private BigDecimal importPrice; 
     private String factoryDate;
     private String factory;
     private String remark;

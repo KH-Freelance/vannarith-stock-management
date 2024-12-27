@@ -122,6 +122,7 @@ public class StockServicelmp implements StockService {
             stock.setBatchId(stockRequest.getBatchId());
             stock.setProductId(product.getEntity().getId());
             stock.setQty(stockRequest.getQty());
+            stock.setImportPrice(stockRequest.getImportPrice());
             stock.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(stockRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
             stock.setFactory(stockRequest.getFactory());
             LocalDateTime factoryDate = LocalDateTime.parse(stockRequest.getFactoryDate(),DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a"));
@@ -186,6 +187,7 @@ public class StockServicelmp implements StockService {
             Stock stock = stockResult.getEntity();
             // Optional.ofNullable(stockUpdateRequest.getProductId()).ifPresent(stock::setPro);
             Optional.ofNullable(stockUpdateRequest.getQty()).ifPresent(stock::setQty);
+            Optional.ofNullable(stockUpdateRequest.getImportPrice()).ifPresent(stock::setImportPrice);
             Optional.ofNullable(stockUpdateRequest.getExpiryDate())
             .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
             .ifPresent(stock::setExpiryDate);
@@ -410,6 +412,7 @@ public class StockServicelmp implements StockService {
         }
     } 
     @Override
+    @Transactional
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
 
         httpServletRequest.setAttribute(ACTION,"SEARCH STOCK");
@@ -472,16 +475,22 @@ public class StockServicelmp implements StockService {
 
             Page<StockHistoryDto> stockHistoryDtoPage = stockHistoryResult.getPage().map(stockHistory ->{
                 StockHistoryDto stockHistoryDto = new StockHistoryDto();
-                BeanUtils.copyProperties(stockHistory, stockHistoryDto);
+                if (stockHistoryDto!=null){
+                    BeanUtils.copyProperties(stockHistory, stockHistoryDto);
+                }
 
                 StockHistoryDto.User userDto = new StockHistoryDto.User(stockHistory.getFirstname(),stockHistory.getLastname());
                 stockHistoryDto.setUser(userDto);
 
                 StockDetailDto stockDto = new StockDetailDto();
-                BeanUtils.copyProperties(stockHistory.getStock(), stockDto);
+                if (stockHistory.getStock()!=null){
+                    BeanUtils.copyProperties(stockHistory.getStock(), stockDto);
+                }
 
                 ProductDto productDto = new ProductDto();
-                BeanUtils.copyProperties(stockHistory.getStock().getProduct(), productDto);
+                if (stockHistory.getStock().getProduct()!=null){
+                    BeanUtils.copyProperties(stockHistory.getStock().getProduct(), productDto);
+                }
                 stockDto.setProduct(productDto);
 
                 stockHistoryDto.setStock(stockDto);

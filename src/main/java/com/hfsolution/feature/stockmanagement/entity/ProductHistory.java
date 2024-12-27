@@ -30,12 +30,6 @@ public class ProductHistory {
     @Column(name = "price")
     private BigDecimal price;
 
-    @Column(name = "factory")
-    private String factory;
-
-    @Column(name = "import_price")
-    private BigDecimal importPrice;
-
     @Column(name = "discount")
     private BigDecimal discount;
 

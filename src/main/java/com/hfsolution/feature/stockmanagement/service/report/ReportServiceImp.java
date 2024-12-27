@@ -301,11 +301,11 @@ public class ReportServiceImp  implements ReportService{
                 reportStock.setProductId(product.getId());
                 reportStock.setStockId(stock.getId());
                 reportStock.setBatchId(stock.getBatchId());
-                reportStock.setAssetValue(product.getImportPrice().multiply(BigDecimal.valueOf(stock.getQty())));
+                reportStock.setAssetValue(stock.getImportPrice().multiply(BigDecimal.valueOf(stock.getQty())));
                 reportStock.setRetailValue(product.getPrice().multiply(BigDecimal.valueOf(stock.getQty())));
                 reportStock.setProductName(product.getProductName());
                 reportStock.setSalePrice(product.getPrice());
-                reportStock.setAvgCost(product.getImportPrice());
+                reportStock.setAvgCost(stock.getImportPrice());
                 //reportStock.setFactory(product.getFactory());
                 reportStock.setInn(product.getProductDesc());
                 reportStock.setStockOnHand(stock.getQty());
@@ -361,7 +361,19 @@ public class ReportServiceImp  implements ReportService{
                 ReportCustomerDto cusomerReport = new ReportCustomerDto();
                 cusomerReport.setCustomerId(customer.getId());
                 cusomerReport.setCustomerName(customer.getCustomerName());
-                cusomerReport.setCurrentCredit(customer.getCredit());
+
+                // Calculate Current Credit
+                BigDecimal credit = BigDecimal.ZERO;
+                for (Purchase purchase : customer.getPurchases()) {
+                    if(purchase.getPaymentType().compareTo(PaymentType.CASH) == 0 || purchase.getPaymentStatus().compareTo(PaymentStatus.PAID) == 0) continue;
+                    BigDecimal totalAoumtPaid = BigDecimal.ZERO;
+                    for (Payment payment : purchase.getPayments()) {
+                        totalAoumtPaid = totalAoumtPaid.add(payment.getAmount());
+                    }
+                    credit = credit.add(purchase.getTotal().subtract(totalAoumtPaid));
+                    
+                }
+                cusomerReport.setCurrentCredit(credit);
 
                 BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findPurchaseByCustomerIdAndCreatedDateBetween(customer.getId(),startDate,endDate);
                 ReportCustomerDto.CreditCategories creditCategoies = new ReportCustomerDto.CreditCategories();
@@ -391,7 +403,6 @@ public class ReportServiceImp  implements ReportService{
                 }
                 BigDecimal totalCredit = creditCategoies.getCreditDay1To30().add(creditCategoies.getCreditDay31To60().add(creditCategoies.getCreditDay61To90().add(creditCategoies.getCreditMoreThan90())));
                 cusomerReport.setCreditCategories(creditCategoies);
-                cusomerReport.setCurrentCredit(customer.getCredit());
                 cusomerReport.setTotalCredit(totalCredit);
                 reportCustomerDtos.add(cusomerReport);
 

@@ -65,8 +65,8 @@ public class ReportController {
         String startDate,
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate,
-        String customerName,
-        String productName
+        @RequestParam(required = false) String customerName,
+        @RequestParam(required = false)  String productName
         ) {
         return reportService.excelReportCombined(startDate, endDate,productName,customerName);
     }
@@ -86,8 +86,8 @@ public class ReportController {
         String startDate,
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate,
-        String customerName,
-        String productName
+        @RequestParam(required = false) String customerName,
+        @RequestParam(required = false)  String productName
         ) {
         return reportService.reportSale(startDate, endDate,productName,customerName);
     }
@@ -98,8 +98,8 @@ public class ReportController {
         String startDate,
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate,
-        String customerName,
-        String productName
+        @RequestParam(required = false)  String customerName,
+        @RequestParam(required = false) String productName
         ) {
         return reportService.excelReportSale(startDate, endDate,productName,customerName);
     }

@@ -1,5 +1,6 @@
 package com.hfsolution.feature.stockmanagement.entity;
 
+import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
@@ -49,12 +50,14 @@ public class Stock {
     @Column(name = "qty")
     private Long qty;
 
+    @Column(name = "import_price")
+    private BigDecimal importPrice;
+
     @Column(name = "factory") 
     private String factory;
 
     @Column(name = "factory_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
     @ExcelProperty(converter = TimestampConverter.class)
-
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp factoryDate;
 

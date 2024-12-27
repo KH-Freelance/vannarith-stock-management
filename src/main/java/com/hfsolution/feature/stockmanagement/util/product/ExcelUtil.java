@@ -99,7 +99,7 @@ public class ExcelUtil {
             createCell(row, columnCount++, UpdatedDate.getProductName(), style);
             createCell(row, columnCount++, UpdatedDate.getProductDesc(), style);
             createCell(row, columnCount++, UpdatedDate.getPrice(), style);
-            createCell(row, columnCount++, UpdatedDate.getImportPrice(), style);
+            createCell(row, columnCount++, UpdatedDate.getPrice(), style);
             createCell(row, columnCount++, UpdatedDate.getDiscount(), style);
             createCell(row, columnCount++, UpdatedDate.getCreatedDate(), style);
             createCell(row, columnCount++, UpdatedDate.getUpdatedDate(), style);
@@ -144,7 +144,7 @@ public class ExcelUtil {
                        case 1 -> prodcut.setProductName(cell.getStringCellValue());
                        case 2 -> prodcut.setProductDesc(cell.getStringCellValue());
                        case 3 -> prodcut.setPrice(new BigDecimal(cell.getNumericCellValue()));
-                       case 4 -> prodcut.setImportPrice(new BigDecimal(cell.getNumericCellValue()));
+                       case 4 -> prodcut.setPrice(new BigDecimal(cell.getNumericCellValue()));
                        case 5 -> prodcut.setDiscount(new BigDecimal(cell.getNumericCellValue()));
                        case 6 -> prodcut.setCreatedDate(Timestamp.valueOf(cell.getStringCellValue()));
                        case 7 -> prodcut.setUpdatedDate(Timestamp.valueOf(cell.getStringCellValue()));

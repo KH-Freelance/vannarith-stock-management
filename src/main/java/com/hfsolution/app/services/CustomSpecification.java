@@ -111,14 +111,14 @@ public class CustomSpecification<T> implements Specification<T> {
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Predicate handleStandardField(Root<T> root, CriteriaBuilder criteriaBuilder, String key, String value) {
         String[] nestedKeys = key.split("\\.");
-    
+        
         // Handle nested properties using join
         Path<?> path = root;
         for (int i = 0; i < nestedKeys.length - 1; i++) {
             path = ((From<?, ?>) path).join(nestedKeys[i]);
         }
         String field = nestedKeys[nestedKeys.length - 1];
-    
+        
         if (value.matches("^\\[.*~.*\\]$")) {
             // Range match: k=[min~max]
             String[] range = value.substring(1, value.length() - 1).split("~");
@@ -141,8 +141,11 @@ public class CustomSpecification<T> implements Specification<T> {
             }
             return criteriaBuilder.and(orPredicates.toArray(new Predicate[0]));
         } else if (value.startsWith("~")) {
-            // Fuzzy match: k=~v
-            return criteriaBuilder.like(path.get(field), "%" + value.substring(1) + "%");
+            // Fuzzy match: k=~v (case-insensitive)
+            return criteriaBuilder.like(
+                criteriaBuilder.lower(path.get(field)),
+                "%" + value.substring(1).toLowerCase() + "%"
+            );
         } else if (value.startsWith("!{")) {
             // Not in list: k=!{v1 v2 v3}
             String[] values = value.substring(2, value.length() - 1).split(" ");
@@ -151,9 +154,10 @@ public class CustomSpecification<T> implements Specification<T> {
             // Exact match: k=v
             return criteriaBuilder.equal(path.get(field), parseValue(value));
         }
-    
+        
         return null;
     }
+
 
 
     private Object parseValue(String value) {

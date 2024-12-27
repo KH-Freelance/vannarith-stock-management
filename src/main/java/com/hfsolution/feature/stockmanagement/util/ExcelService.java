@@ -195,7 +195,7 @@ public class ExcelService {
             createCell(row, columnCount++, UpdatedDate.getProductName(), style);
             createCell(row, columnCount++, UpdatedDate.getProductDesc(), style);
             createCell(row, columnCount++, UpdatedDate.getPrice(), style);
-            createCell(row, columnCount++, UpdatedDate.getImportPrice(), style);
+            createCell(row, columnCount++, UpdatedDate.getPrice(), style);
             createCell(row, columnCount++, UpdatedDate.getDiscount(), style);
             createCell(row, columnCount++, UpdatedDate.getCreatedDate(), style);
             createCell(row, columnCount++, UpdatedDate.getUpdatedDate(), style);

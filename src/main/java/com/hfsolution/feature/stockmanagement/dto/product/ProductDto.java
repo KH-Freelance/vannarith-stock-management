@@ -15,18 +15,11 @@ public class ProductDto {
 
     private Long id;
 
-
     private String productName;
-
 
     private String productDesc;
 
-
     private BigDecimal price;
-
-    private String factory;
-
-    private BigDecimal importPrice;
 
     private BigDecimal discount;
 
@@ -35,9 +28,6 @@ public class ProductDto {
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
-
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
-    private Timestamp expiryDate;
 
     private String imageUrl;
   
