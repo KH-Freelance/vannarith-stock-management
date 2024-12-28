@@ -14,7 +14,18 @@ public class ReturnCashRequest {
     @NotBlank(message = "Purchase code is required.")
     private String purchaseCode;  
 
-    @NotNull(message = "Product Id purchases cannot be empty")
+    
+    @NotNull(message = "Purchase Detail Id purchases cannot be empty")
     @Valid
-    private List<Long> productIds;    
+    private List<SourcePurchaseDetail> purchaseDetail;    
+
+    // @Data
+    // public static class SourcePurchaseDetail {
+
+    //     @NotBlank(message = "Batch ID is required.")
+    //     private String batchId;  
+
+    //     @NotBlank(message = "Product ID is required.")
+    //     private long productId;  
+    // }
 }

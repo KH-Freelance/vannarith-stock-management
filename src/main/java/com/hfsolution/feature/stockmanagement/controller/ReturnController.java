@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
+
+import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnCashRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnRequest;
 import com.hfsolution.feature.stockmanagement.service.returns.ReturnService;
 import io.swagger.v3.oas.annotations.Operation;
@@ -16,7 +18,7 @@ import io.swagger.v3.oas.annotations.Parameter;
 import jakarta.validation.Valid;
 
 @RestController
-@RequestMapping("/purchase")
+@RequestMapping("/return")
 public class ReturnController {
 
     @Autowired
@@ -43,14 +45,14 @@ public class ReturnController {
         return returnService.searchDetail(id);
     }  
 
-    @PostMapping("/purchase")
+    @PostMapping("/invoice")
     private Object returnInvoice(@Valid @RequestBody ReturnRequest returnRequest){
         return returnService.returnPurchase(returnRequest);
     }
 
     @PostMapping("/cash")
-    private Object returnCash(@Valid @RequestBody ReturnRequest returnRequest){
-        return returnService.returnPurchase(returnRequest);
+    private Object returnCash(@Valid @RequestBody ReturnCashRequest returnCashRequest){
+        return returnService.returnCash(returnCashRequest);
     }
     
 

@@ -44,15 +44,14 @@ public class ReturnItem {
     @JoinColumn(name = "product_id", referencedColumnName = "id", updatable = false, insertable = false)
     private Product product;
 
-
     @Column(name = "product_id")
     private Long productId;
 
     @Column(name = "qty", nullable = false)
     private Long qty; 
 
-    @Column(name = "amount", nullable = false) 
+    @Column(name = "price", nullable = false) 
     @JsonSerialize(using = BigDecimalSerializer.class) 
-    private BigDecimal amount;
+    private BigDecimal price;
 
 }
