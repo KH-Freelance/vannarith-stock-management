@@ -11,7 +11,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnCashRequest;
-import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnSaleRequest;
 import com.hfsolution.feature.stockmanagement.service.returns.ReturnService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -38,16 +38,16 @@ public class ReturnController {
         return returnService.search(q,pageNo,pageSize,sort,sortByColum);
     }
 
-    @GetMapping("/return/search-detail/{id}")
+    @GetMapping("/search-detail/{id}")
     public Object searchDetail( 
         @PathVariable long id
         ) {
         return returnService.searchDetail(id);
     }  
 
-    @PostMapping("/invoice")
-    private Object returnInvoice(@Valid @RequestBody ReturnRequest returnRequest){
-        return returnService.returnPurchase(returnRequest);
+    @PostMapping("/sale")
+    private Object returnInvoice(@Valid @RequestBody ReturnSaleRequest returnRequest){
+        return returnService.returnSale(returnRequest);
     }
 
     @PostMapping("/cash")

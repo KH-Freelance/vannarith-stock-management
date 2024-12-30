@@ -5,7 +5,7 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class SourcePurchaseDetail {
+public class PurchaseDetail {
 
     @NotBlank(message = "Batch ID is required.")
     private String batchId;  

@@ -15,6 +15,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SuccessResponse;
@@ -33,9 +35,9 @@ import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseDto;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnCashRequest;
-import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnRequest;
-import com.hfsolution.feature.stockmanagement.dto.request.returns.SourcePurchaseDetail;
-import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnRequest.SourcePurchase;
+import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnSaleRequest;
+import com.hfsolution.feature.stockmanagement.dto.request.returns.PurchaseDetail;
+import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnSaleRequest.SourcePurchase;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
@@ -67,7 +69,7 @@ public class ReturnServicelmp implements ReturnService {
     private final ReturnDao returnDao;
     private final ProductHistoryDao productHistoryDao;
     private final String CASH = "CASH";
-    private final String INVOICE = "INVOICE";
+    private final String SALE = "SALE";
 
     @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
@@ -146,9 +148,10 @@ public class ReturnServicelmp implements ReturnService {
     }
 
     @Override
-    public Object returnPurchase(ReturnRequest returnRequest) {
+    @Transactional
+    public Object returnSale(ReturnSaleRequest returnRequest) {
 
-        httpServletRequest.setAttribute(ACTION,"RETURN PURCHASE");
+        httpServletRequest.setAttribute(ACTION,"RETURN SALE");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
         try {
             
@@ -159,9 +162,14 @@ public class ReturnServicelmp implements ReturnService {
             BaseEntityResponseDto<Purchase> sourcePurchaseResult = purchaseDao.findByPurchaseCode(sourcePurchaseCode);
             if(!sourcePurchaseResult.getStatus().equals(SUCCESS) || sourcePurchaseResult.getEntity()==null){
                 String msg = AppTools.appGetMessage("048").replace("[code]",sourcePurchaseCode);
-                throw new AppException("048",msg);
+                throw new AppException("048",msg,"Y");
             }
             Purchase sourcePurchase = sourcePurchaseResult.getEntity();
+            //CHECK PAYMENT sources PURCHASE
+            if(sourcePurchase.getPaymentStatus().compareTo(PaymentStatus.PAID) != 0){
+                String msg = AppTools.appGetMessage("061").replace("[code]",sourcePurchaseCode);
+                throw new AppException("061",msg,"Y");
+            }
 
             //GET TARGET PURCHASE CODE 
             BaseEntityResponseDto<Purchase> targetPurchaseResult = purchaseDao.findByPurchaseCode(targetPurchaseCode);
@@ -178,11 +186,25 @@ public class ReturnServicelmp implements ReturnService {
             }
 
             //CALCULATE TOTAL AMOUNT & QTY OF RETURN ITEM
+            Map<Long, Product> productMap = new HashMap<>();
+            Map<String, Stock> stockMap = new HashMap<>();
             BigDecimal totalSourceItemAmt = BigDecimal.ZERO;
             Long totalQty = 0l;
-            for (SourcePurchaseDetail detail : returnRequest.getSourcePurchase().getSourcePurchaseDetail()) {
+            for (PurchaseDetail detail : returnRequest.getSourcePurchase().getPurchaseDetail()) {
 
                 Long productId = detail.getProductId();
+                String batchId = detail.getBatchId();
+
+                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(productId,batchId);
+                if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
+                    String msg = AppTools.appGetMessage("058").replace("[product]","#"+batchId+":"+productId);
+                    throw new AppException("058",msg,"Y");
+                }
+                Stock stock = stockResult.getEntity();
+                Product product = stock.getProduct();
+                productMap.put(stock.getProductId(),product);
+                stockMap.put(batchId+":"+productId, stock);
+                
                 PurchaseItem sourceItem = sourcePurchase.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
@@ -197,9 +219,9 @@ public class ReturnServicelmp implements ReturnService {
             returns.setId(returnDao.getReturnId());
             returns.setSourcePurchaseCode(sourcePurchaseCode);
             returns.setTargetPurchaseCode(targetPurchaseCode);
-            returns.setReturnType(CASH);
+            returns.setReturnType(SALE);
             
-            for (SourcePurchaseDetail detail : returnRequest.getSourcePurchase().getSourcePurchaseDetail()) {
+            for (PurchaseDetail detail : returnRequest.getSourcePurchase().getPurchaseDetail()) {
 
                 Long productId = detail.getProductId();
                 String batchId = detail.getBatchId();
@@ -208,13 +230,8 @@ public class ReturnServicelmp implements ReturnService {
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
 
-                //UPDATE STOCK
-                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(productId,batchId);
-                if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("046").replace("[product]",sourceItem.getProduct().getProductName());
-                    throw new AppException("046",msg,"Y");
-                }
-                Stock stock = stockResult.getEntity();
+                //UPDATE STOCK WITH SOURCE ITEM
+                Stock stock = stockMap.get(batchId+":"+productId);
                 stock.setQty(stock.getQty()+sourceItem.getQty());
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
                 stockDao.saveEntityAsync(stock);
@@ -236,9 +253,11 @@ public class ReturnServicelmp implements ReturnService {
             //MINUS SOURCE PAYMENT
             Payment sourcePayment = new Payment();
             sourcePayment.setId(paymentDao.getPaymentId());
-            sourcePayment.setPurchase(targetPurchase);
+            sourcePayment.setPurchase(sourcePurchase);
             sourcePayment.setAmount(totalSourceItemAmt.negate());
-            paymentDao.saveEntity(sourcePayment);
+            sourcePayment.setPaymentMethod("RETURN");
+            paymentDao.saveEntityAsync(sourcePayment);
+
 
             //TOTAL = OLD PAYMENT + NEW PAYMENT 
             BigDecimal total = totalSourceItemAmt;
@@ -256,29 +275,46 @@ public class ReturnServicelmp implements ReturnService {
             // CALCULATE REFUND AMOUNT 
             // CALCULATE AMOUNT FOR FINAL PAID AND CHANGE PURCHASE STATUS
             BigDecimal refundAmt = BigDecimal.ZERO;
-            if(total.compareTo(targetPurchase.getTotal()) > 0){
+            if(total.compareTo(targetPurchase.getTotal()) > 0){ 
                 refundAmt = total.subtract(targetPurchase.getTotal());       
                 totalSourceItemAmt = totalSourceItemAmt.subtract(refundAmt); 
-                targetPurchase.setPaymentStatus(PaymentStatus.PAID);
-                purchaseDao.saveEntityAsync(targetPurchase);
-            }
+                targetPurchase.setPaymentStatus(PaymentStatus.PAID); 
+                purchaseDao.saveEntityAsync(targetPurchase); 
+            } 
 
-            //SAVE RETURN
-            returns.setRefundAmount(refundAmt);
-            returnDao.saveEntity(returns);
 
             //MAKE TARGET PAYMENT
             Payment targetPayment = new Payment();
             targetPayment.setId(paymentDao.getPaymentId());
             targetPayment.setPurchase(targetPurchase);
             targetPayment.setAmount(totalSourceItemAmt);
+            targetPayment.setPaymentMethod("RETURN");
             paymentDao.saveEntity(targetPayment);
 
-            response.setStatus(SUCCESS);
-            response.setCode("051");
-            response.setMsg(AppTools.appGetMessage("051")
+            //SAVE RETURN
+            returns.setRefundAmount(refundAmt);
+            returnDao.saveEntity(returns);
+
+
+            DecimalFormat formatAmt =  new DecimalFormat("#,##0.00");
+            String code = "060";
+            String msg = AppTools.appGetMessage(code)
+            .replace("[amount]", formatAmt.format(totalSourceItemAmt))
             .replace("[source_code]", sourcePurchaseCode)
-            .replace("[target_code]", targetPurchaseCode));
+            .replace("[target_code]", targetPurchaseCode);
+
+            if(refundAmt.compareTo(BigDecimal.ZERO)>0){
+                code = "059";
+                msg = AppTools.appGetMessage(code)
+                .replace("[refund_amount]",formatAmt.format(refundAmt))
+                .replace("[amount]", formatAmt.format(totalSourceItemAmt))
+                .replace("[source_code]", sourcePurchaseCode)
+                .replace("[target_code]", targetPurchaseCode);
+            }
+
+            response.setStatus(SUCCESS);
+            response.setCode(code);
+            response.setMsg(msg);
             return response;
 
         }catch (DatabaseException e) {
@@ -299,7 +335,6 @@ public class ReturnServicelmp implements ReturnService {
         SuccessResponse<Purchase> response = new SuccessResponse<>();
         try {
             
-
             //GET SOURCE PURCHASE CODE 
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findByPurchaseCode(returnCashRequest.getPurchaseCode());
             if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getEntity()==null){
@@ -313,7 +348,7 @@ public class ReturnServicelmp implements ReturnService {
             Map<String, Stock> stockMap = new HashMap<>();
             BigDecimal refundAmount = BigDecimal.ZERO;
             Long totalQty = 0l;
-            for (SourcePurchaseDetail detail : returnCashRequest.getPurchaseDetail()) {
+            for (PurchaseDetail detail : returnCashRequest.getPurchaseDetail()) {
 
                 Long productId = detail.getProductId();
                 String batchId = detail.getBatchId();
@@ -336,7 +371,6 @@ public class ReturnServicelmp implements ReturnService {
                 totalQty = sourceItem.getQty()+totalQty;
 
 
-
             }
 
             //ADD INTO RETURN AND RETURN ITEM 
@@ -344,9 +378,9 @@ public class ReturnServicelmp implements ReturnService {
             returns.setId(returnDao.getReturnId());
             returns.setSourcePurchaseCode(returnCashRequest.getPurchaseCode());
             returns.setTargetPurchaseCode("N/A");
-            returns.setReturnType(INVOICE);
+            returns.setReturnType(CASH);
             
-            for (SourcePurchaseDetail detail : returnCashRequest.getPurchaseDetail()) {
+            for (PurchaseDetail detail : returnCashRequest.getPurchaseDetail()) {
 
                 Long productId = detail.getProductId();
                 String batchId = detail.getBatchId();
@@ -391,7 +425,7 @@ public class ReturnServicelmp implements ReturnService {
             response.setStatus(SUCCESS);
             response.setCode("053");
             response.setMsg(AppTools.appGetMessage("053")
-            .replace("[refunded_amount]",new DecimalFormat("#,##0.00").format(refundAmount))
+            .replace("[refund_amount]",new DecimalFormat("#,##0.00").format(refundAmount))
             .replace("[purchase_code]",returnCashRequest.getPurchaseCode()));
             return response;
 

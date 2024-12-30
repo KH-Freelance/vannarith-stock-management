@@ -8,7 +8,7 @@ import lombok.Data;
 import java.util.List;
 
 @Data
-public class ReturnRequest {
+public class ReturnSaleRequest {
 
     @NotBlank(message = "Target Purchase code is required.")
     private String targetPurchaseCode;  
@@ -22,9 +22,9 @@ public class ReturnRequest {
         @NotBlank(message = "Purchase code is required.")
         private String purchaseCode;  
 
-        @NotNull(message = "Source Purchase Detail Id purchases cannot be empty")
+        @NotNull(message = "Purchase Detail Id purchases cannot be empty")
         @Valid
-        private List<SourcePurchaseDetail> sourcePurchaseDetail;    
+        private List<PurchaseDetail>  purchaseDetail;    
     }
 
     // @Data

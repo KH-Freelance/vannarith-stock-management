@@ -678,9 +678,19 @@ public class PurchaseServicelmp implements PurchaseService {
                 }));
                 BigDecimal remainingPayment = purchase.getTotal();
                 for (Payment payment : purchase.getPayments()) {
-                    if(payment.getPaymentMethod()!=null && !payment.getPaymentMethod().equals("RETURN")){
+                    // if(payment.getPaymentMethod()!=null && !payment.getPaymentMethod().equals("DEBIT")){
+                    //     remainingPayment = remainingPayment.subtract(payment.getAmount());
+                    // }
+                    System.out.println("A=========="+payment.getPurchase().getPurchaseCode()+"==="+remainingPayment);
+                    System.out.println("B=========="+payment.getPurchase().getPurchaseCode()+"==="+payment.getAmount());
+                    if (payment.getAmount().compareTo(BigDecimal.ZERO) > 0) {
                         remainingPayment = remainingPayment.subtract(payment.getAmount());
+                    }else{
+                        remainingPayment = remainingPayment.add(payment.getAmount());
                     }
+                    
+                    
+                    System.out.println("C=========="+payment.getPurchase().getPurchaseCode()+"==="+remainingPayment);
                    
                 }
                 purchaseDto.setRemainingPayment(remainingPayment);

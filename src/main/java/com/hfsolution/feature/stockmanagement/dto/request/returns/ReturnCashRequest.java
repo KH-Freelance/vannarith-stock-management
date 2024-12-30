@@ -17,7 +17,7 @@ public class ReturnCashRequest {
     
     @NotNull(message = "Purchase Detail Id purchases cannot be empty")
     @Valid
-    private List<SourcePurchaseDetail> purchaseDetail;    
+    private List<PurchaseDetail> purchaseDetail;    
 
     // @Data
     // public static class SourcePurchaseDetail {
