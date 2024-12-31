@@ -21,6 +21,7 @@ public class PurchaseDto {
 
     private Customer customer;
 
+
     private User user; 
 
     private Long qty;

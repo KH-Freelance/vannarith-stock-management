@@ -125,8 +125,9 @@ public class StockServicelmp implements StockService {
             stock.setImportPrice(stockRequest.getImportPrice());
             stock.setExpiryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(stockRequest.getExpiryDate()), LocalTime.MIDNIGHT)));
             stock.setFactory(stockRequest.getFactory());
-            LocalDateTime factoryDate = LocalDateTime.parse(stockRequest.getFactoryDate(),DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a"));
-            stock.setFactoryDate(Timestamp.valueOf(factoryDate));
+            // LocalDateTime factoryDate = LocalDateTime.parse(stockRequest.getFactoryDate(),DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a"));
+            // stock.setFactoryDate(Timestamp.valueOf(factoryDate));
+            stock.setFactoryDate(Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(stockRequest.getFactoryDate()), LocalTime.MIDNIGHT)));
             stock.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stock.addStockHistory(stockHistory);
@@ -192,11 +193,14 @@ public class StockServicelmp implements StockService {
             .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
             .ifPresent(stock::setExpiryDate);
             Optional.ofNullable(stockUpdateRequest.getFactory()).ifPresent(stock::setFactory);
+            // Optional.ofNullable(stockUpdateRequest.getFactoryDate())
+            // .map(factoryDate -> {
+            //     LocalDateTime factoryDateTime = LocalDateTime.parse(factoryDate, DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a"));
+            //     return Timestamp.valueOf(factoryDateTime);
+            // })
+            // .ifPresent(stock::setFactoryDate);
             Optional.ofNullable(stockUpdateRequest.getFactoryDate())
-            .map(factoryDate -> {
-                LocalDateTime factoryDateTime = LocalDateTime.parse(factoryDate, DateTimeFormatter.ofPattern("yyyy-MM-dd hh:mm:ss a"));
-                return Timestamp.valueOf(factoryDateTime);
-            })
+            .map(date -> Timestamp.valueOf(LocalDateTime.of(LocalDate.parse(date), LocalTime.MIDNIGHT)))
             .ifPresent(stock::setFactoryDate);
             stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             stockDao.saveEntity(stock);

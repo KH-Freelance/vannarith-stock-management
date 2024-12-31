@@ -10,6 +10,8 @@ public class PurchaseItemDto {
 
     private Long id;
 
+    private String batchId;
+
     private ProductDto product;
 
     private String status;

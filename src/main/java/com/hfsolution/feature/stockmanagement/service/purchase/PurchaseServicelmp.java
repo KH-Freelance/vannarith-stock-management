@@ -409,6 +409,7 @@ public class PurchaseServicelmp implements PurchaseService {
                     BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
                     BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice).abs();
     
+                    purchaseItem.setBatchId(stock.getBatchId());
                     purchaseItem.setDiscount(discountPrice);
                     purchaseItem.setPrice(totalProdcutPrice);
                     purchaseItem.setProductId(product.getId());
@@ -681,16 +682,12 @@ public class PurchaseServicelmp implements PurchaseService {
                     // if(payment.getPaymentMethod()!=null && !payment.getPaymentMethod().equals("DEBIT")){
                     //     remainingPayment = remainingPayment.subtract(payment.getAmount());
                     // }
-                    System.out.println("A=========="+payment.getPurchase().getPurchaseCode()+"==="+remainingPayment);
-                    System.out.println("B=========="+payment.getPurchase().getPurchaseCode()+"==="+payment.getAmount());
                     if (payment.getAmount().compareTo(BigDecimal.ZERO) > 0) {
                         remainingPayment = remainingPayment.subtract(payment.getAmount());
                     }else{
                         remainingPayment = remainingPayment.add(payment.getAmount());
                     }
                     
-                    
-                    System.out.println("C=========="+payment.getPurchase().getPurchaseCode()+"==="+remainingPayment);
                    
                 }
                 purchaseDto.setRemainingPayment(remainingPayment);

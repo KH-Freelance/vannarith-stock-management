@@ -37,6 +37,9 @@ public class PurchaseItem {
     @Column(name = "product_id")
     private Long productId;
 
+    @Column(name = "batch_id")
+    private String batchId;
+
     @Column(name = "status")
     private String status;
 
