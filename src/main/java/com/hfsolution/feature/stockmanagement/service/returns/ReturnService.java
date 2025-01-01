@@ -11,7 +11,8 @@ public interface ReturnService {
 
     
     public Object search(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
-    public Object searchDetail(long id);
+    public Object searchV2(String  q, int pageNo, int pageSize, Sort.Direction sort, String sortByColum);
+    public Object searchDetail(Long id);
     public Object returnSale(ReturnSaleRequest returnRequest);
     public Object returnCash(ReturnCashRequest returnCashRequest);
     

@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.purchase;
+package com.hfsolution.feature.stockmanagement.dto.returns;
 import lombok.Data;
 import java.math.BigDecimal;
 
@@ -8,7 +8,7 @@ import com.hfsolution.feature.stockmanagement.dto.product.ProductDto;
 
 
 @Data
-public class PurchaseItemDto {
+public class ReturnItemDto {
 
 
     private Long id;
@@ -17,17 +17,11 @@ public class PurchaseItemDto {
 
     private ProductDto product;
 
-    private String status;
-
     private Long qty;
 
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal price;
 
-    @JsonSerialize(using = BigDecimalSerializer.class) 
-    private BigDecimal discount;
-
-   
 
 
 }

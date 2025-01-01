@@ -39,6 +39,8 @@ public class ReturnDao extends BaseDBDao<Return,Long>{
     this.returnRepository = repository;
   }
 
+  
+
   public BaseEntityResponseDto<Return> searchReturn(Specification<Return> returns, Pageable pageable){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

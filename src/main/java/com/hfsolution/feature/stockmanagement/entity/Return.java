@@ -6,6 +6,7 @@ import java.util.List;
 import java.math.BigDecimal;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
+import com.hfsolution.feature.user.entity.User;
 
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
@@ -36,6 +37,10 @@ public class Return {
 
     @Column(name = "target_purchase_code", nullable = false)
     private String targetPurchaseCode;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user; 
 
     @OneToMany(mappedBy = "returnEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ReturnItem> returnItems = new ArrayList<>();

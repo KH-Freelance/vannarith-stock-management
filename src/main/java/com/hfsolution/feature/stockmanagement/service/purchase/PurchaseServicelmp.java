@@ -400,13 +400,16 @@ public class PurchaseServicelmp implements PurchaseService {
                     Stock stock = stockMap.get(productPurchase.getStockId());
                     Product product = productMap.get(stock.getProductId());
     
-                   
-                     //CALCULATE
+                    //CALCULATE
                     BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(productPurchase.getQty()));
                     BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
-                                        .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
-                                        .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
-                    BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
+                                        .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO));
+                    if (totalDiscount.compareTo(BigDecimal.valueOf(100)) > 0) {
+                        String msg = AppTools.appGetMessage("063");
+                        throw new AppException("063", msg);
+                    }
+                    BigDecimal discountPriceParam = purchaseRequest.getDiscount();
+                    BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100))).subtract(discountPriceParam);
                     BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice).abs();
     
                     purchaseItem.setBatchId(stock.getBatchId());

@@ -47,6 +47,9 @@ public class ReturnItem {
     @Column(name = "product_id")
     private Long productId;
 
+    @Column(name = "batch_id")
+    private String bacthId;
+
     @Column(name = "qty", nullable = false)
     private Long qty; 
 

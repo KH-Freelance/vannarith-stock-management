@@ -6,8 +6,11 @@ import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.util.ArrayList;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.Optional;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
@@ -24,6 +27,7 @@ import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
 import com.hfsolution.app.util.AppTools;
+import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
@@ -33,11 +37,19 @@ import com.hfsolution.feature.stockmanagement.dao.PurchaseItemDao;
 import com.hfsolution.feature.stockmanagement.dao.ReturnDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
+import com.hfsolution.feature.stockmanagement.dto.customer.CustomerDto;
+import com.hfsolution.feature.stockmanagement.dto.product.ProductDto;
+import com.hfsolution.feature.stockmanagement.dto.purchase.PaymentDto;
+import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseDetailDto;
 import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseDto;
+import com.hfsolution.feature.stockmanagement.dto.purchase.PurchaseItemDto;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnCashRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnSaleRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.PurchaseDetail;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnSaleRequest.SourcePurchase;
+import com.hfsolution.feature.stockmanagement.dto.returns.ReturnDetailDto;
+import com.hfsolution.feature.stockmanagement.dto.returns.ReturnDto;
+import com.hfsolution.feature.stockmanagement.dto.returns.ReturnItemDto;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
@@ -47,6 +59,8 @@ import com.hfsolution.feature.stockmanagement.entity.Return;
 import com.hfsolution.feature.stockmanagement.entity.ReturnItem;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
+import com.hfsolution.feature.stockmanagement.enums.PaymentType;
+import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.repository.UserRepository;
 import lombok.RequiredArgsConstructor;
 import jakarta.persistence.criteria.CriteriaBuilder.In;
@@ -70,6 +84,7 @@ public class ReturnServicelmp implements ReturnService {
     private final ProductHistoryDao productHistoryDao;
     private final String CASH = "CASH";
     private final String SALE = "SALE";
+    private final UserRepository userRepository;
 
     @Override
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
@@ -125,25 +140,116 @@ public class ReturnServicelmp implements ReturnService {
     } 
 
     @Override
-    public Object searchDetail(long id) {
-        httpServletRequest.setAttribute(ACTION,"SEARCH RETURN PURCHASE DETAIL BY ID");
+    @Transactional
+    public Object searchV2(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
+        httpServletRequest.setAttribute(ACTION,"SEARCH RETURN");
         SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
+        try {
+            Specification<Return> returns = new CustomSpecification<>(q);
+            PageRequestDto pageRequestDto = new PageRequestDto();
+            pageRequestDto.setPageNo(pageNo);
+            pageRequestDto.setPageSize(pageSize);
+            pageRequestDto.setSort(sort);
+            pageRequestDto.setSortByColumn(sortByColum);
+            Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+            BaseEntityResponseDto<Return> returnResult = returnDao.searchReturn(returns,pageable);
+            if(!returnResult.getStatus().equals(SUCCESS) || returnResult.getPage()==null){
+                String msg = AppTools.appGetMessage("062");
+                throw new AppException("062",msg);
+            }
+
+            Page<ReturnDto> purchaseDtoPage = returnResult.getPage().map(returnData ->{
+                ReturnDto returnDto = new ReturnDto();
+                returnDto.setTotal(returnData.calculateTotalPrice());
+                returnDto.setQty(returnData.calculateTotalQty());
+                BeanUtils.copyProperties(returnData, returnDto);
+                //Check produt for purchase item
+                returnData.getReturnItems().stream().forEach((data->{
+                    if(data.getProduct()==null){
+                        // Fallback to product history
+                        ProductHistory productHistory = productHistoryDao.findById(data.getProductId()).getEntity();
+                        if (productHistory != null) {
+                            Product product = new Product();
+                            BeanUtils.copyProperties(productHistory, product);
+                            data.setProduct(product);
+                        }
+                    }
+                }));
+                return returnDto;
+            });
+
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(purchaseDtoPage);
+            return response;
+
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Object searchDetail(Long id) {
+        httpServletRequest.setAttribute(ACTION,"SEARCH RETURN DETAIL BY ID");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
         try {
             BaseEntityResponseDto<Return> returnResult = returnDao.findById(id);
             if(!returnResult.getStatus().equals(SUCCESS) || returnResult.getEntity()==null){
-                String msg = AppTools.appGetMessage("050");
-                throw new AppException("050",msg);
+                String msg = AppTools.appGetMessage("062");
+                throw new AppException("062",msg);
             }
+
+            Return returns = returnResult.getEntity();
+
+            ReturnDetailDto returnDetailDto = new ReturnDetailDto();
+            BeanUtils.copyProperties(returns, returnDetailDto);
+
+            com.hfsolution.feature.stockmanagement.dto.user.User userDto = new com.hfsolution.feature.stockmanagement.dto.user.User();
+            BeanUtils.copyProperties(returns.getUser(), userDto);
+
+            List<ReturnItemDto> returnItemDtos = new ArrayList<>();
+            for (ReturnItem returnItem : returns.getReturnItems()) {
+                Product product = returnItem.getProduct();
+                if(product==null){
+                    // Fallback to product history
+                    ProductHistory productHistory = productHistoryDao.findById(returnItem.getProductId()).getEntity();
+                    if (productHistory != null) {
+                        product = new Product();
+                        BeanUtils.copyProperties(productHistory, product);
+                    }
+                }
+                ReturnItemDto returnItemDto = new ReturnItemDto();
+                BeanUtils.copyProperties(returnItem, returnItemDto);
+                ProductDto productDto = new ProductDto();
+                BeanUtils.copyProperties(product, productDto);
+                returnItemDto.setProduct(productDto);
+                returnItemDtos.add(returnItemDto);
+            }
+
+            
+            returnDetailDto.setReturnItemDtos(returnItemDtos);
+            returnDetailDto.setUser(userDto);
+            
+
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
-            response.setData(returnResult.getEntity());
+            response.setData(returnDetailDto);
             return response;
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {
             throw e;   
         }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),true);
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
 
@@ -154,7 +260,13 @@ public class ReturnServicelmp implements ReturnService {
         httpServletRequest.setAttribute(ACTION,"RETURN SALE");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
         try {
-            
+            Long userId = (Long) Optional.ofNullable(httpServletRequest.getAttribute(USERID)).orElseThrow(() -> new AppException("002", "User ID is null"));
+            Optional<User> userResult = userRepository.findById(userId);
+            if(!userResult.isPresent()){
+                String msg = AppTools.appGetMessage("002");
+                throw new AppException("002",msg);
+            }
+            User user = userResult.get();
             String sourcePurchaseCode = returnRequest.getSourcePurchase().getPurchaseCode();
             String targetPurchaseCode = returnRequest.getTargetPurchaseCode();
 
@@ -220,6 +332,7 @@ public class ReturnServicelmp implements ReturnService {
             returns.setSourcePurchaseCode(sourcePurchaseCode);
             returns.setTargetPurchaseCode(targetPurchaseCode);
             returns.setReturnType(SALE);
+            returns.setUser(user);
             
             for (PurchaseDetail detail : returnRequest.getSourcePurchase().getPurchaseDetail()) {
 
@@ -241,6 +354,7 @@ public class ReturnServicelmp implements ReturnService {
                 returnItem.setQty(sourceItem.getQty());
                 //returnItem.setProduct(sourceItem.getProduct());
                 returnItem.setProductId(productId);
+                returnItem.setBacthId(batchId);
                 returns.addReturnItem(returnItem);
 
                 //UPDATE PURCHASE ITEM STATUS
@@ -334,7 +448,13 @@ public class ReturnServicelmp implements ReturnService {
         httpServletRequest.setAttribute(ACTION,"RETURN CASH");
         SuccessResponse<Purchase> response = new SuccessResponse<>();
         try {
-            
+            Long userId = (Long) Optional.ofNullable(httpServletRequest.getAttribute(USERID)).orElseThrow(() -> new AppException("002", "User ID is null"));
+            Optional<User> userResult = userRepository.findById(userId);
+            if(!userResult.isPresent()){
+                String msg = AppTools.appGetMessage("002");
+                throw new AppException("002",msg);
+            }
+            User user = userResult.get();
             //GET SOURCE PURCHASE CODE 
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findByPurchaseCode(returnCashRequest.getPurchaseCode());
             if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getEntity()==null){
@@ -379,6 +499,7 @@ public class ReturnServicelmp implements ReturnService {
             returns.setSourcePurchaseCode(returnCashRequest.getPurchaseCode());
             returns.setTargetPurchaseCode("N/A");
             returns.setReturnType(CASH);
+            returns.setUser(user);
             
             for (PurchaseDetail detail : returnCashRequest.getPurchaseDetail()) {
 
@@ -401,6 +522,7 @@ public class ReturnServicelmp implements ReturnService {
                 returnItem.setQty(purchaseItems.getQty());
                 //returnItem.setProduct(purchaseItems.getProduct());
                 returnItem.setProductId(productId);
+                returnItem.setBacthId(batchId);
                 returns.addReturnItem(returnItem);
 
                 //UPDATE PURCHASE ITEM STATUS
