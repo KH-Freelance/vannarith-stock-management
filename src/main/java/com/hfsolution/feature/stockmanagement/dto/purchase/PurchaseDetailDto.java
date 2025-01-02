@@ -27,6 +27,8 @@ public class PurchaseDetailDto {
 
     private Long qty;
 
+    private BigDecimal discount;
+
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal total;
 

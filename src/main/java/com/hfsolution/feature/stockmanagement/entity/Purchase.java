@@ -56,6 +56,9 @@ public class Purchase {
     @Column(name = "qty")
     private Long qty;
 
+    @Column(name = "discount")
+    private BigDecimal discount;
+
     @Column(name = "total")
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal total;
@@ -112,6 +115,9 @@ public class Purchase {
 
         if(this.createdDate==null){
             this.createdDate = new Timestamp(System.currentTimeMillis());
+        }
+        if(this.discount==null){
+            this.discount = BigDecimal.ZERO;
         }
         if(this.updatedDate==null){
             this.updatedDate = new Timestamp(System.currentTimeMillis());

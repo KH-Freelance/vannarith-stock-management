@@ -26,6 +26,8 @@ public class PurchaseDto {
 
     private Long qty;
 
+    private BigDecimal discount;
+
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal total = BigDecimal.ZERO;
 
@@ -39,6 +41,7 @@ public class PurchaseDto {
     private PaymentStatus paymentStatus = PaymentStatus.PAID;
 
     private String location;
+
 
     private String purchaseCode;
 

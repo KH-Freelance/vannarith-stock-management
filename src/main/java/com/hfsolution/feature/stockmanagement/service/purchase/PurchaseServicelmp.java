@@ -388,6 +388,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchase.setId(purchaseDao.getPurchaseId());
                 purchase.setCustomer(customer);
                 purchase.setUser(user);
+                purchase.setDiscount(purchaseRequest.getDiscount());
                 purchase.setLocation(purchaseRequest.getLocation());
                 purchase.setPaymentType(purchaseRequest.getPaymentType()); 
                 purchase.setPurchaseCode(purchaseCode);
@@ -408,12 +409,13 @@ public class PurchaseServicelmp implements PurchaseService {
                         String msg = AppTools.appGetMessage("063");
                         throw new AppException("063", msg);
                     }
+
                     BigDecimal discountPriceParam = purchaseRequest.getDiscount();
                     BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100))).subtract(discountPriceParam);
                     BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice).abs();
     
                     purchaseItem.setBatchId(stock.getBatchId());
-                    purchaseItem.setDiscount(discountPrice);
+                    purchaseItem.setDiscount(product.getDiscount());
                     purchaseItem.setPrice(totalProdcutPrice);
                     purchaseItem.setProductId(product.getId());
                     purchaseItem.setQty(productPurchase.getQty());
@@ -444,8 +446,7 @@ public class PurchaseServicelmp implements PurchaseService {
                 }else{
                     // Status CREDIT
                     purchase.setPaymentStatus(PaymentStatus.CREDIT);
-                    // customer.setCredit(customer.getCredit().add(totalPrice));
-                    // customerDao.saveEntity(customer);
+
                 }
                 purchase.setQty(totalQty);
                 purchase.setTotal(totalPrice);
@@ -542,7 +543,7 @@ public class PurchaseServicelmp implements PurchaseService {
             payment.setId(paymentDao.getPaymentId());
             payment.setPurchase(purchase);
             payment.setAmount(payRequest.getAmount());
-            payRequest.setPaymentMethod(payRequest.getPaymentMethod());
+            payment.setPaymentMethod(payRequest.getPaymentMethod());
             paymentDao.saveEntity(payment);
 
             // Update Purchase Status to PAID

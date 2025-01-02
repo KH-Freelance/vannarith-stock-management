@@ -21,10 +21,10 @@ public class PurchaseItemDto {
 
     private Long qty;
 
-    @JsonSerialize(using = BigDecimalSerializer.class) 
+    // @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal price;
 
-    @JsonSerialize(using = BigDecimalSerializer.class) 
+    // @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal discount;
 
    

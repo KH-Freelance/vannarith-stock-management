@@ -28,26 +28,16 @@ import com.hfsolution.app.exception.DatabaseException;
 import com.hfsolution.app.services.CustomSpecification;
 
 import com.hfsolution.app.util.AppTools;
-import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.ExpenseDao;
-import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dto.request.expense.ExpenseDto;
 import com.hfsolution.feature.stockmanagement.dto.request.expense.ExpenseRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.expense.ExpenseUpdateRequest;
-import com.hfsolution.feature.stockmanagement.dto.stock.StockDto;
 import com.hfsolution.feature.stockmanagement.entity.Expense;
-import com.hfsolution.feature.stockmanagement.entity.Payment;
-import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.entity.Purchase;
-import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
-import com.hfsolution.feature.stockmanagement.enums.PaymentType;
 import com.hfsolution.feature.user.entity.User;
 import com.hfsolution.feature.user.repository.UserRepository;
-
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
-import jakarta.servlet.http.HttpServletResponse;
 import jakarta.transaction.Transactional;
 import static com.hfsolution.app.constant.AppConstant.*;
 
