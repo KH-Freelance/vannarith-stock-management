@@ -29,9 +29,9 @@ public class HfSolutionApplication {
 		return args -> {
 
 			// var hak = RegisterRequest.builder()
-            //         .firstname("hak222222")
-            //         .lastname("hak222222")
-            //         .email("hak222222@mail.com")
+            //         .firstname("hak2222222")
+            //         .lastname("hak2222222")
+            //         .email("hak2222222@mail.com")
             //         .password("hak2222222")
             //         .roleId(1)
             //         .build();

@@ -196,7 +196,7 @@ public class ExcelService {
             createCell(row, columnCount++, UpdatedDate.getProductDesc(), style);
             createCell(row, columnCount++, UpdatedDate.getPrice(), style);
             createCell(row, columnCount++, UpdatedDate.getPrice(), style);
-            createCell(row, columnCount++, UpdatedDate.getDiscount(), style);
+            //createCell(row, columnCount++, UpdatedDate.getDiscount(), style);
             createCell(row, columnCount++, UpdatedDate.getCreatedDate(), style);
             createCell(row, columnCount++, UpdatedDate.getUpdatedDate(), style);
             //createCell(row, columnCount++, UpdatedDate.getExpiryDate(), style);
@@ -323,7 +323,7 @@ public class ExcelService {
             createCell(row, columnCount++, customer.getEmail(), style);
             createCell(row, columnCount++, customer.getPhone(), style);
             createCell(row, columnCount++, customer.getAddress(), style);
-            createCell(row, columnCount++, customer.getDiscount(), style);
+            //createCell(row, columnCount++, customer.getDiscount(), style);
             createCell(row, columnCount++, customer.getCredit(), style);
             createCell(row, columnCount++, customer.getCreatedDate(), style);
             createCell(row, columnCount++, customer.getUpdatedDate(), style);

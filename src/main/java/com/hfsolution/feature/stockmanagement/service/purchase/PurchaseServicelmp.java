@@ -404,14 +404,14 @@ public class PurchaseServicelmp implements PurchaseService {
                     //CALCULATE
                     BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(productPurchase.getQty()));
                     BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
-                                        .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO));
+                                        .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
+                                        .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
                     if (totalDiscount.compareTo(BigDecimal.valueOf(100)) > 0) {
                         String msg = AppTools.appGetMessage("063");
                         throw new AppException("063", msg);
                     }
 
-                    BigDecimal discountPriceParam = purchaseRequest.getDiscount();
-                    BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100))).subtract(discountPriceParam);
+                    BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
                     BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice).abs();
     
                     purchaseItem.setBatchId(stock.getBatchId());
@@ -757,13 +757,19 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchaseItemDtos.add(purchaseItemDto);
             }
 
+            BigDecimal remainingPayment = purchase.getTotal();
             List<PaymentDto> paymentDtos = new ArrayList<>();
             for (Payment payment : purchase.getPayments()) {
                 PaymentDto paymentDto = new PaymentDto();
                 BeanUtils.copyProperties(payment, paymentDto);
                 paymentDtos.add(paymentDto);
+                if (payment.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    remainingPayment = remainingPayment.subtract(payment.getAmount());
+                }else{
+                    remainingPayment = remainingPayment.add(payment.getAmount());
+                }
             }
-            
+            purchaseDto.setRemainingPayment(remainingPayment);
             purchaseDto.setPurchaseItems(purchaseItemDtos);
             purchaseDto.setPayments(paymentDtos);
             purchaseDto.setCustomer(customerDto);

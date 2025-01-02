@@ -12,6 +12,7 @@ public class ProductUpdateRequest {
     private String productName;
     private String productDesc;
     private BigDecimal price;
+    private BigDecimal discount;
     //private String factory;
     // private BigDecimal importPrice;
     private MultipartFile file;

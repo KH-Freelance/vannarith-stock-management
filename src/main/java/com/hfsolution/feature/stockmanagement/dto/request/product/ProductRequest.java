@@ -21,6 +21,7 @@ public class ProductRequest {
     private MultipartFile file;
     @Positive(message = "Price must be greater than 0")
     private BigDecimal price; 
+    private BigDecimal discount;
     // @NotBlank(message = "Expiry date is required.")
     // @Pattern(
     //     regexp = "^\\d{4}-\\d{2}-\\d{2}$",

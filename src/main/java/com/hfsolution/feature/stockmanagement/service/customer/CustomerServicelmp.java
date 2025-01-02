@@ -206,7 +206,7 @@ public class CustomerServicelmp implements CustomerService {
             Customer.setEmail(CustomerRequest.getEmail());
             Customer.setPhone(CustomerRequest.getPhone());
             Customer.setAddress(CustomerRequest.getAddress());
-            Customer.setDiscount(CustomerRequest.getDiscount());
+            //Customer.setDiscount(CustomerRequest.getDiscount());
             Customer.setCreatedDate(new Timestamp(System.currentTimeMillis()));
             Customer.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
 

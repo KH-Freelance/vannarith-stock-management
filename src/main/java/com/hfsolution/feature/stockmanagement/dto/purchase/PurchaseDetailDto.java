@@ -32,6 +32,9 @@ public class PurchaseDetailDto {
     @JsonSerialize(using = BigDecimalSerializer.class) 
     private BigDecimal total;
 
+    @JsonSerialize(using = BigDecimalSerializer.class) 
+    private BigDecimal remainingPayment;
+
     private PaymentType paymentType = PaymentType.CASH;
 
     private PaymentStatus paymentStatus = PaymentStatus.PAID;

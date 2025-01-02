@@ -455,7 +455,7 @@ public class ReturnServicelmp implements ReturnService {
                 throw new AppException("002",msg);
             }
             User user = userResult.get();
-            //GET SOURCE PURCHASE CODE 
+            //GET PURCHASE CODE 
             BaseEntityResponseDto<Purchase> purchaseResult = purchaseDao.findByPurchaseCode(returnCashRequest.getPurchaseCode());
             if(!purchaseResult.getStatus().equals(SUCCESS) || purchaseResult.getEntity()==null){
                 String msg = AppTools.appGetMessage("048").replace("[code]",returnCashRequest.getPurchaseCode());
@@ -533,12 +533,27 @@ public class ReturnServicelmp implements ReturnService {
             }
 
             //MINUS SOURCE PAYMENT
-            Payment sourcePayment = new Payment();
-            sourcePayment.setId(paymentDao.getPaymentId());
-            sourcePayment.setPurchase(purchaseInfo);
-            sourcePayment.setAmount(refundAmount.negate());
-            sourcePayment.setPaymentMethod("RETURN");
-            paymentDao.saveEntityAsync(sourcePayment);
+            Payment payment = new Payment();
+            // if(purchaseInfo.getPaymentStatus().equals(PaymentStatus.CREDIT) ){
+            //     BigDecimal remainingPayment = purchaseInfo.getTotal();
+            //     for (Payment paymentData : purchaseInfo.getPayments()) {
+            //         if (paymentData.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+            //             remainingPayment = remainingPayment.subtract(paymentData.getAmount());
+            //         }else{
+            //             remainingPayment = remainingPayment.add(paymentData.getAmount());
+            //         }
+            //     }
+            //     payment.setAmount(r);
+            // }else{
+            //     payment.setAmount(refundAmount.negate());
+            // }
+
+            payment.setAmount(refundAmount.negate());
+            payment.setId(paymentDao.getPaymentId());
+            payment.setPurchase(purchaseInfo);
+            // sourcePayment.setAmount(refundAmount.negate());
+            payment.setPaymentMethod("RETURN");
+            paymentDao.saveEntityAsync(payment);
 
             //SAVE RETURN
             returns.setRefundAmount(refundAmount);
