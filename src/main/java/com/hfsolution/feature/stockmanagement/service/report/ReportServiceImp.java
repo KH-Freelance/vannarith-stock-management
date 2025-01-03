@@ -641,6 +641,9 @@ public class ReportServiceImp  implements ReportService{
                         StringBuilder sales = new StringBuilder();
                         sales.append(rt.getSourcePurchaseCode());
                         sales.append(":");
+                        sales.append("(");
+                        sales.append(rt.getReturnType());
+                        sales.append(") ");
                         sales.append(returnItem.getProduct().getProductName());
                         sales.append(" - ");
                         sales.append(returnItem.getBacthId());

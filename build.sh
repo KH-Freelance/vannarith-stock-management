@@ -8,7 +8,7 @@
 file="build.sh"
 
 # Extract the current version number
-current_version=136
+current_version=137
 
 # Increment the version number by 1
 new_version=$((current_version + 1))
@@ -23,4 +23,4 @@ docker build --platform linux/amd64 --push -t kimsourtann/stock-management:stagi
 
 echo "Deploying v$new_version"
 # Deploy to EC2
-ssh -i "$HOME/Downloads/"stock-keypair.pem  ubuntu@ec2-3-17-133-210.us-east-2.compute.amazonaws.com "sed -i 's|image: psainghak/stock-management:staging-v[0-9]*|image: kimsourtann/stock-management:staging-v"$new_version"|' stockmanagement/docker-compose.yml &&   docker compose -f stockmanagement/docker-compose.yml up -d"
+ssh -i "$HOME/Downloads/"stock-keypair.pem  ubuntu@ec2-3-17-133-210.us-east-2.compute.amazonaws.com "sed -i 's|image: kimsourtann/stock-management:staging-v[0-9]*|image: kimsourtann/stock-management:staging-v"$new_version"|' stockmanagement/docker-compose.yml &&   docker compose -f stockmanagement/docker-compose.yml up -d"
