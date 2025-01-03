@@ -150,7 +150,7 @@ public class ReportServiceImp  implements ReportService{
     @SuppressWarnings("unchecked")
     @Override
     @Transactional
-    public ResponseEntity<Void> excelReportReturn(String startDate, String endDate) {
+    public ResponseEntity<Void> excelReportReturn(String startDate, String endDate, String customerName) {
         httpServletRequest.setAttribute(ACTION,"REPORT RETURN EXCEL");
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long startTime = System.currentTimeMillis();
@@ -159,7 +159,7 @@ public class ReportServiceImp  implements ReportService{
             httpServletResponse.setCharacterEncoding("UTF-8");
             String fileName = URLEncoder.encode("return-report", "UTF-8").replaceAll("\\+", "%20");
             httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
-            SuccessResponse<ReportReturnDto> result = (SuccessResponse<ReportReturnDto>) this.reportReturn(startDate, endDate);
+            SuccessResponse<ReportReturnDto> result = (SuccessResponse<ReportReturnDto>) this.reportReturn(startDate, endDate, customerName);
             EasyExcel.write(httpServletResponse.getOutputStream(), ReturnDto.class)
             .registerWriteHandler(AppTools.createCustomStyle())
             .sheet("return-report").doWrite(result.getData().getContent());
@@ -226,7 +226,7 @@ public class ReportServiceImp  implements ReportService{
                     (SuccessResponse<List<ReportStockDto>>) this.reportStock(startDate, endDate));
 
             CompletableFuture<SuccessResponse<ReportReturnDto>> returnFuture = CompletableFuture.supplyAsync(() ->
-                    (SuccessResponse<ReportReturnDto>) this.reportReturn(startDate, endDate));
+                    (SuccessResponse<ReportReturnDto>) this.reportReturn(startDate, endDate,customerName));
 
             CompletableFuture<SuccessResponse<List<ReportCustomerDto>>> customerFuture = CompletableFuture.supplyAsync(() ->
                     (SuccessResponse<List<ReportCustomerDto>>) this.reportCustomer(startDate, endDate));
@@ -616,14 +616,22 @@ public class ReportServiceImp  implements ReportService{
 
     @Override
     @Transactional
-    public Object reportReturn(String startDate, String endDate) {
+    public Object reportReturn(String startDate, String endDate, String customerName) {
         httpServletRequest.setAttribute(ACTION,"REPORT RETURN");
         SuccessResponse<Object> response = new SuccessResponse<>();
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long startTime = System.currentTimeMillis();
         try {
             List<Return> returns = returnDao.findAllByCreatedDateBetween(startDate, endDate).getEntityList();
-            List<Purchase> purchases =purchaseDao.findByPurchaseCodes(returns.stream().map(rt->rt.getSourcePurchaseCode()).toList()).getEntityList();
+            List<Purchase> purchases = new ArrayList<>();
+            if(customerName != null) {
+                purchases = purchaseDao.findByPurchaseCodeInAndCustomerCustomerNameContaining(returns.stream().map(rt->rt.getSourcePurchaseCode()).toList(),customerName).getEntityList();
+            }else{
+                purchases = purchaseDao.findByPurchaseCodeIn(returns.stream().map(rt->rt.getSourcePurchaseCode()).toList()).getEntityList();
+            }
+
+            
+
             Map<String, Purchase> purchaseMap = purchases.stream().collect(Collectors.toMap(Purchase::getPurchaseCode, purchase -> purchase));
             List<ReturnDto> returnDtos = new ArrayList<>();
             returns.stream().forEach(rt->{

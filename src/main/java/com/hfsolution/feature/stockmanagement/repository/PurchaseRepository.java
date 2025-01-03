@@ -87,6 +87,7 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
 
     Purchase findByPurchaseCode(String purchaseCode);
 
+    List<Purchase> findByPurchaseCodeInAndCustomerCustomerNameContaining(List<String> purchaseCodes, String customerName);
     List<Purchase> findByPurchaseCodeIn(List<String> purchaseCodes);
 
     

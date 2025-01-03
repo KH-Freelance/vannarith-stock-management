@@ -57,8 +57,26 @@ public class PurchaseDao extends BaseDBDao<Purchase,Long>{
 
   }
 
-  public BaseEntityResponseDto<Purchase>  findByPurchaseCodes(List<String> purchaseCodes){
+  public BaseEntityResponseDto<Purchase>  findByPurchaseCodeInAndCustomerCustomerNameContaining(List<String> purchaseCodes, String customerName){
 
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+      
+      List<Purchase> entities = purchaseRepository.findByPurchaseCodeInAndCustomerCustomerNameContaining(purchaseCodes,customerName);
+      var appModel = new BaseEntityResponseDto<Purchase>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entities);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+  public BaseEntityResponseDto<Purchase>  findByPurchaseCodeIn(List<String> purchaseCodes){
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 

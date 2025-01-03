@@ -97,9 +97,10 @@ public class ReportController {
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
         String startDate,
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
-        String endDate
+        String endDate,
+        @RequestParam(required = false)  String customerName
         ) {
-        return reportService.reportReturn(startDate, endDate);
+        return reportService.reportReturn(startDate, endDate,customerName);
     }
 
     @GetMapping("/excel-returns")
@@ -107,9 +108,10 @@ public class ReportController {
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
         String startDate,
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
-        String endDate
+        String endDate,
+        @RequestParam(required = false)  String customerName
         ) {
-        return reportService.excelReportReturn(startDate, endDate);
+        return reportService.excelReportReturn(startDate, endDate,customerName);
     }
 
     @GetMapping("/excel-sales")
