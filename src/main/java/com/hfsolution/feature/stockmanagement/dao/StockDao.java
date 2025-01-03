@@ -84,6 +84,26 @@ public class StockDao extends BaseDBDao<Stock,Long>{
 
   // }
 
+  public BaseEntityResponseDto<Stock> findStockByBatchId(String batchId){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      Stock entity = stockRepository.findByBatchId(batchId);
+      var appModel = new BaseEntityResponseDto<Stock>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntity(entity);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
   public BaseEntityResponseDto<Stock> findStockByProductIDAndBatchId(Long id,String batchId){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();

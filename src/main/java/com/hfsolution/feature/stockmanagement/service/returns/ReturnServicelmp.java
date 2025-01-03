@@ -298,28 +298,24 @@ public class ReturnServicelmp implements ReturnService {
             }
 
             //CALCULATE TOTAL AMOUNT & QTY OF RETURN ITEM
-            Map<Long, Product> productMap = new HashMap<>();
             Map<String, Stock> stockMap = new HashMap<>();
             BigDecimal totalSourceItemAmt = BigDecimal.ZERO;
             Long totalQty = 0l;
-            for (PurchaseDetail detail : returnRequest.getSourcePurchase().getPurchaseDetail()) {
+            for (String batchId : returnRequest.getSourcePurchase().getBatchId()) {
 
-                Long productId = detail.getProductId();
-                String batchId = detail.getBatchId();
 
-                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(productId,batchId);
+                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByBatchId(batchId);
                 if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("058").replace("[product]","#"+batchId+":"+productId);
+                    String msg = AppTools.appGetMessage("058").replace("[batch_id]",batchId);
                     throw new AppException("058",msg,"Y");
                 }
                 Stock stock = stockResult.getEntity();
-                Product product = stock.getProduct();
-                productMap.put(stock.getProductId(),product);
-                stockMap.put(batchId+":"+productId, stock);
+                Long productId = stock.getProductId();
+                stockMap.put(batchId, stock);
                 
                 PurchaseItem sourceItem = sourcePurchase.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
+                .findFirst().orElseThrow(() -> new AppException("Item not found for product : " + stock.getProduct().getProductName()));
                 BigDecimal price = sourceItem.getPrice();
                 totalSourceItemAmt = totalSourceItemAmt.add(price);
                 totalQty = sourceItem.getQty()+totalQty;
@@ -334,17 +330,18 @@ public class ReturnServicelmp implements ReturnService {
             returns.setReturnType(SALE);
             returns.setUser(user);
             
-            for (PurchaseDetail detail : returnRequest.getSourcePurchase().getPurchaseDetail()) {
+            for (String batchId : returnRequest.getSourcePurchase().getBatchId()) {
 
-                Long productId = detail.getProductId();
-                String batchId = detail.getBatchId();
+
+                Stock stock = stockMap.get(batchId);
+                Long productId = stock.getProductId();
+
                 ReturnItem returnItem = new ReturnItem();
                 PurchaseItem sourceItem = sourcePurchase.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
 
                 //UPDATE STOCK WITH SOURCE ITEM
-                Stock stock = stockMap.get(batchId+":"+productId);
                 stock.setQty(stock.getQty()+sourceItem.getQty());
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
                 stockDao.saveEntityAsync(stock);
@@ -365,18 +362,22 @@ public class ReturnServicelmp implements ReturnService {
             }
 
             //MINUS SOURCE PAYMENT
-            Payment sourcePayment = new Payment();
-            sourcePayment.setId(paymentDao.getPaymentId());
-            sourcePayment.setPurchase(sourcePurchase);
-            sourcePayment.setAmount(totalSourceItemAmt.negate());
-            sourcePayment.setPaymentMethod("RETURN");
-            paymentDao.saveEntityAsync(sourcePayment);
+            // Payment sourcePayment = new Payment();
+            // sourcePayment.setId(paymentDao.getPaymentId());
+            // sourcePayment.setPurchase(sourcePurchase);
+            // sourcePayment.setAmount(totalSourceItemAmt.negate());
+            // sourcePayment.setPaymentMethod("RETURN");
+            // paymentDao.saveEntityAsync(sourcePayment);
 
 
             //TOTAL = OLD PAYMENT + NEW PAYMENT 
             BigDecimal total = totalSourceItemAmt;
             for (Payment targetPurchasePayment : targetPurchase.getPayments()) {
-                total = total.add(targetPurchasePayment.getAmount());
+                if (targetPurchasePayment.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                    total = total.subtract(targetPurchasePayment.getAmount());
+                }else{
+                    total = total.add(targetPurchasePayment.getAmount());
+                }
             } 
 
             //IF TOTAL = TARGET PURCHSE AMOUNT
@@ -443,6 +444,7 @@ public class ReturnServicelmp implements ReturnService {
 
 
     @Override
+    @Transactional
     public Object returnCash(ReturnCashRequest returnCashRequest) {
 
         httpServletRequest.setAttribute(ACTION,"RETURN CASH");
@@ -464,28 +466,23 @@ public class ReturnServicelmp implements ReturnService {
             Purchase purchaseInfo = purchaseResult.getEntity();
 
             //CALCULATE TOTAL AMOUNT & QTY OF RETURN ITEM
-            Map<Long, Product> productMap = new HashMap<>();
             Map<String, Stock> stockMap = new HashMap<>();
             BigDecimal refundAmount = BigDecimal.ZERO;
             Long totalQty = 0l;
-            for (PurchaseDetail detail : returnCashRequest.getPurchaseDetail()) {
+            for (String batchId : returnCashRequest.getBatchId()) {
 
-                Long productId = detail.getProductId();
-                String batchId = detail.getBatchId();
-
-                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(productId,batchId);
+                BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByBatchId(batchId);
                 if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("058").replace("[product]","#"+batchId+":"+productId);
+                    String msg = AppTools.appGetMessage("058").replace("[stock]",batchId);
                     throw new AppException("058",msg,"Y");
                 }
                 Stock stock = stockResult.getEntity();
-                Product product = stock.getProduct();
-                productMap.put(stock.getProductId(),product);
-                stockMap.put(batchId+":"+productId, stock);
+                Long productId = stock.getProductId();
+                stockMap.put(batchId, stock);
 
                 PurchaseItem sourceItem = purchaseInfo.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
+                .findFirst().orElseThrow(() -> new AppException("Item not found for product: " +  stock.getProduct().getProductName()));
                 BigDecimal price = sourceItem.getPrice();
                 refundAmount = refundAmount.add(price);
                 totalQty = sourceItem.getQty()+totalQty;
@@ -501,18 +498,17 @@ public class ReturnServicelmp implements ReturnService {
             returns.setReturnType(CASH);
             returns.setUser(user);
             
-            for (PurchaseDetail detail : returnCashRequest.getPurchaseDetail()) {
+            for (String batchId : returnCashRequest.getBatchId()) {
 
-                Long productId = detail.getProductId();
-                String batchId = detail.getBatchId();
+                Stock stock = stockMap.get(batchId);
+                Long productId = stock.getProductId();
 
                 ReturnItem returnItem = new ReturnItem();
                 PurchaseItem purchaseItems = purchaseInfo.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
-                .findFirst().orElseThrow(() -> new AppException("Item not found for product ID: " + productId));
+                .findFirst().orElseThrow(() -> new AppException("Item not found for product: " +  stock.getProduct().getProductName()));
 
                 //UPDATE STOCK
-                Stock stock = stockMap.get(batchId+":"+productId);
                 stock.setQty(stock.getQty()+purchaseItems.getQty());
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
                 stockDao.saveEntityAsync(stock);
@@ -533,27 +529,38 @@ public class ReturnServicelmp implements ReturnService {
             }
 
             //MINUS SOURCE PAYMENT
-            Payment payment = new Payment();
-            // if(purchaseInfo.getPaymentStatus().equals(PaymentStatus.CREDIT) ){
-            //     BigDecimal remainingPayment = purchaseInfo.getTotal();
+            
+            // if(purchaseInfo.getPaymentStatus().equals(PaymentStatus.CREDIT)){
+            //     BigDecimal existingPay = purchaseInfo.getTotal();
             //     for (Payment paymentData : purchaseInfo.getPayments()) {
             //         if (paymentData.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-            //             remainingPayment = remainingPayment.subtract(paymentData.getAmount());
+            //             existingPay = existingPay.subtract(paymentData.getAmount());
             //         }else{
-            //             remainingPayment = remainingPayment.add(paymentData.getAmount());
+            //             existingPay = existingPay.add(paymentData.getAmount());
             //         }
             //     }
-            //     payment.setAmount(r);
-            // }else{
-            //     payment.setAmount(refundAmount.negate());
-            // }
+            //     if(refundAmount.compareTo(purchaseInfo.getTotal())==0 ){
+            //         refundAmount = existingPay;
+            //     }
+            //     if(refundAmount.compareTo(existingPay)<0 ){
 
-            payment.setAmount(refundAmount.negate());
-            payment.setId(paymentDao.getPaymentId());
-            payment.setPurchase(purchaseInfo);
-            // sourcePayment.setAmount(refundAmount.negate());
-            payment.setPaymentMethod("RETURN");
-            paymentDao.saveEntityAsync(payment);
+            //     }
+                
+            // }
+            
+            // System.out.println("===============FINAL PAID"+refundAmount);
+            if(!purchaseInfo.getPaymentStatus().equals(PaymentStatus.PAID)){
+
+                Payment payment = new Payment();
+                payment.setAmount(refundAmount.negate());
+                payment.setId(paymentDao.getPaymentId());
+                payment.setPurchase(purchaseInfo);
+                payment.setAmount(refundAmount.negate());
+                payment.setPaymentMethod("RETURN");
+                paymentDao.saveEntityAsync(payment);
+                
+            }
+            
 
             //SAVE RETURN
             returns.setRefundAmount(refundAmount);

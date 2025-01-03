@@ -7,9 +7,9 @@ import lombok.Data;
 @Data
 public class PurchaseDetail {
 
-    @NotBlank(message = "Batch ID is required.")
-    private String batchId;  
+    // @NotBlank(message = "Batch ID is required.")
+    // private String batchId;  
 
-    @Positive(message = "Product ID must numeric.")
-    private Long productId;  
+    // @Positive(message = "Product ID must numeric.")
+    // private Long productId;  
 }

@@ -22,9 +22,9 @@ public class ReturnSaleRequest {
         @NotBlank(message = "Purchase code is required.")
         private String purchaseCode;  
 
-        @NotNull(message = "Purchase Detail Id purchases cannot be empty")
+        @NotNull(message = "Purchase Detail purchases cannot be empty")
         @Valid
-        private List<PurchaseDetail>  purchaseDetail;    
+        private List<String>  batchId;    
     }
 
     // @Data
