@@ -61,6 +61,26 @@ public class ReturnDao extends BaseDBDao<Return,Long>{
 
   }
 
+  public BaseEntityResponseDto<Return> findAllByCreatedDateBetween(String startDate, String endDate){
+
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+
+    try {
+
+      List<Return> entities = returnRepository.findAllByCreatedDateBetween(Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
+      var appModel = new BaseEntityResponseDto<Return>();
+      appModel.setStatus(SUCCESS);
+      appModel.setEntityList(entities);
+      appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+      return appModel;
+
+    } catch (Exception e) {
+      throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+    }
+
+  }
+
 
   public Long getReturnId(){
 

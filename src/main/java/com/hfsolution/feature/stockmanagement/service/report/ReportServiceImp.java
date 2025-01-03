@@ -21,6 +21,7 @@ import java.util.stream.Collectors;
 import org.springframework.beans.BeanUtils;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import com.alibaba.excel.EasyExcel;
 import com.alibaba.excel.ExcelWriter;
@@ -35,13 +36,17 @@ import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
+import com.hfsolution.feature.stockmanagement.dao.PurchaseItemDao;
+import com.hfsolution.feature.stockmanagement.dao.ReturnDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.report.CustomReportCustomerDto;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportCustomerDto;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportPurchase;
+import com.hfsolution.feature.stockmanagement.dto.report.ReportReturnDto;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportSaleDto;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportStockDto;
+import com.hfsolution.feature.stockmanagement.dto.report.ReturnDto;
 import com.hfsolution.feature.stockmanagement.dto.report.SaleDto;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSummaryDTO;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
@@ -49,6 +54,8 @@ import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
 import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
+import com.hfsolution.feature.stockmanagement.entity.PurchaseItem;
+import com.hfsolution.feature.stockmanagement.entity.Return;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.enums.PaymentStatus;
 import com.hfsolution.feature.stockmanagement.enums.PaymentType;
@@ -66,6 +73,8 @@ public class ReportServiceImp  implements ReportService{
     private final ProductDao productDao;
     private final PurchaseDao purchaseDao;
     private final CustomerDao customerDao;
+    private final PurchaseItemDao purchaseItemDao;
+    private final ReturnDao returnDao;
     private final ProductHistoryDao productHistoryDao;
 
     private final HttpServletRequest httpServletRequest;
@@ -116,6 +125,7 @@ public class ReportServiceImp  implements ReportService{
             result.getData().stream().forEach(customer->{
                 CustomReportCustomerDto customReportCustomerDto = new CustomReportCustomerDto();
                 customReportCustomerDto.setCustomerId(customer.getCustomerId());
+                customReportCustomerDto.setCurrentCredit(customer.getCurrentCredit());
                 customReportCustomerDto.setCustomerName(customer.getCustomerName());
                 customReportCustomerDto.setTotalCredit(customer.getTotalCredit());
                 customReportCustomerDto.setCreditDay1To30(customer.getCreditCategories().getCreditDay1To30());
@@ -128,6 +138,31 @@ public class ReportServiceImp  implements ReportService{
             EasyExcel.write(httpServletResponse.getOutputStream(), CustomReportCustomerDto.class)
             .registerWriteHandler(AppTools.createCustomStyle())
             .sheet("customer-report").doWrite(customReportCustomerDtos);
+            return ResponseEntity.status(HttpStatus.OK).build();
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
+        }
+    }
+    @SuppressWarnings("unchecked")
+    @Override
+    @Transactional
+    public ResponseEntity<Void> excelReportReturn(String startDate, String endDate) {
+        httpServletRequest.setAttribute(ACTION,"REPORT RETURN EXCEL");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
+        try {
+            httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            httpServletResponse.setCharacterEncoding("UTF-8");
+            String fileName = URLEncoder.encode("return-report", "UTF-8").replaceAll("\\+", "%20");
+            httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
+            SuccessResponse<ReportReturnDto> result = (SuccessResponse<ReportReturnDto>) this.reportReturn(startDate, endDate);
+            EasyExcel.write(httpServletResponse.getOutputStream(), ReturnDto.class)
+            .registerWriteHandler(AppTools.createCustomStyle())
+            .sheet("return-report").doWrite(result.getData().getContent());
             return ResponseEntity.status(HttpStatus.OK).build();
         }catch (DatabaseException e) {
             throw e;   
@@ -169,24 +204,29 @@ public class ReportServiceImp  implements ReportService{
     @SuppressWarnings("unchecked")
     @Override
     @Transactional
+
     public ResponseEntity<Void> excelReportCombined(String startDate, String endDate, String customerName, String productName) {
         httpServletRequest.setAttribute(ACTION, "COMBINED REPORT EXCEL");
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long startTime = System.currentTimeMillis();
         try {
-            httpServletResponse.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
-            httpServletResponse.setCharacterEncoding("UTF-8");
+            HttpServletResponse response = httpServletResponse;
+            response.setContentType("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+            response.setCharacterEncoding("UTF-8");
             String fileName = URLEncoder.encode("combined-report", "UTF-8").replaceAll("\\+", "%20");
-            httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
+            response.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
 
             // Create Excel writer
-            ExcelWriter excelWriter = EasyExcel.write(httpServletResponse.getOutputStream())
+            ExcelWriter excelWriter = EasyExcel.write(response.getOutputStream())
                     .registerWriteHandler(AppTools.createCustomStyle())
                     .build();
 
             // Run all report fetching tasks in parallel
             CompletableFuture<SuccessResponse<List<ReportStockDto>>> stockFuture = CompletableFuture.supplyAsync(() ->
                     (SuccessResponse<List<ReportStockDto>>) this.reportStock(startDate, endDate));
+
+            CompletableFuture<SuccessResponse<ReportReturnDto>> returnFuture = CompletableFuture.supplyAsync(() ->
+                    (SuccessResponse<ReportReturnDto>) this.reportReturn(startDate, endDate));
 
             CompletableFuture<SuccessResponse<List<ReportCustomerDto>>> customerFuture = CompletableFuture.supplyAsync(() ->
                     (SuccessResponse<List<ReportCustomerDto>>) this.reportCustomer(startDate, endDate));
@@ -195,7 +235,7 @@ public class ReportServiceImp  implements ReportService{
                     (SuccessResponse<ReportSaleDto>) this.reportSale(startDate, endDate, productName, customerName));
 
             // Wait for all futures to complete and process the results
-            CompletableFuture<Void> allOf = CompletableFuture.allOf(stockFuture, customerFuture, saleFuture);
+            CompletableFuture<Void> allOf = CompletableFuture.allOf(stockFuture,returnFuture, customerFuture, saleFuture);
 
             allOf.join(); // Block until all futures are done
 
@@ -203,6 +243,11 @@ public class ReportServiceImp  implements ReportService{
             SuccessResponse<List<ReportStockDto>> stockResult = stockFuture.get();
             WriteSheet stockSheet = EasyExcel.writerSheet("stock-report").head(ReportStockDto.class).build();
             excelWriter.write(stockResult.getData(), stockSheet);
+
+            // Add Return Report Sheet
+            SuccessResponse<ReportReturnDto> returnResult = returnFuture.get();
+            WriteSheet returnSheet = EasyExcel.writerSheet("return-report").head(ReturnDto.class).build();
+            excelWriter.write(returnResult.getData().getContent(), returnSheet);
 
             // Add Customer Report Sheet
             SuccessResponse<List<ReportCustomerDto>> customerResult = customerFuture.get();
@@ -555,23 +600,58 @@ public class ReportServiceImp  implements ReportService{
             
             ReportSaleDto reportSaleDto = new ReportSaleDto();
             reportSaleDto.setContent(saleDtos);
-            reportSaleDto.setColumns(Arrays.asList(
-            "Type",
-            "Date",
-            "Purchase Code",
-            "Customer",
-            "Product",
-            "INN",
-            "Phone",
-            "Location",
-            "Qty",
-            "Sales Price",
-            "Total Amount"));
             response.setStatus(SUCCESS);
             response.setCode(SUCCESS_CODE);
             response.setData(reportSaleDto);
             return response;
             
+        }catch (DatabaseException e) {
+            throw e;   
+        }catch (AppException e) {
+            throw e;   
+        }catch(Exception e){
+            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
+        }
+    }
+
+    @Override
+    @Transactional
+    public Object reportReturn(String startDate, String endDate) {
+        httpServletRequest.setAttribute(ACTION,"REPORT RETURN");
+        SuccessResponse<Object> response = new SuccessResponse<>();
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
+        try {
+            List<Return> returns = returnDao.findAllByCreatedDateBetween(startDate, endDate).getEntityList();
+            List<Purchase> purchases =purchaseDao.findByPurchaseCodes(returns.stream().map(rt->rt.getSourcePurchaseCode()).toList()).getEntityList();
+            Map<String, Purchase> purchaseMap = purchases.stream().collect(Collectors.toMap(Purchase::getPurchaseCode, purchase -> purchase));
+            List<ReturnDto> returnDtos = new ArrayList<>();
+            returns.stream().forEach(rt->{
+                rt.getReturnItems().stream().forEach(returnItem->{
+                    if(purchaseMap.get(rt.getSourcePurchaseCode()) !=null){
+                        ReturnDto returnDto = new ReturnDto();
+                        StringBuilder sales = new StringBuilder();
+                        sales.append(rt.getSourcePurchaseCode());
+                        sales.append(":");
+                        sales.append(returnItem.getProduct().getProductName());
+                        sales.append(" - ");
+                        sales.append(returnItem.getBacthId());
+                        returnDto.setSales(sales.toString());
+                        returnDto.setType(rt.getReturnType());
+                        returnDto.setCustomer(purchaseMap.get(rt.getSourcePurchaseCode()).getCustomer().getCustomerName());
+                        returnDto.setReturnedToSales(rt.getTargetPurchaseCode());
+                        returnDto.setReturnedBy(rt.getUser().getFirstname()+" "+rt.getUser().getLastname());
+                        returnDto.setReturnedAt(rt.getCreatedDate());
+                        returnDtos.add(returnDto);
+                    }
+                });
+            });
+            ReportReturnDto reportReturnDto = new ReportReturnDto();
+            reportReturnDto.setContent(returnDtos);
+            response.setStatus(SUCCESS);
+            response.setCode(SUCCESS_CODE);
+            response.setData(reportReturnDto);
+            return response;
         }catch (DatabaseException e) {
             throw e;   
         }catch (AppException e) {

@@ -18,6 +18,7 @@ import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 import jakarta.persistence.OneToMany;
+import jakarta.persistence.OneToOne;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import lombok.Data;
@@ -32,6 +33,7 @@ public class Return {
     @Column(name = "id")
     private Long id;
 
+
     @Column(name = "source_purchase_code", nullable = false)
     private String sourcePurchaseCode;
 
@@ -40,7 +42,7 @@ public class Return {
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "user_id", nullable = false)
-    private User user; 
+    private User user;
 
     @OneToMany(mappedBy = "returnEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     private List<ReturnItem> returnItems = new ArrayList<>();

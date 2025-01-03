@@ -10,7 +10,7 @@ import lombok.Setter;
 @Getter
 public class ReportSaleDto {
 
-   List<String> columns = new ArrayList<>();
+   String[] columns = new String[]{"Type","Date","Purchase Code","Customer","Product","INN","Phone","Location","Qty","Sales Price","Total Amount"};
    List<SaleDto> content = new ArrayList<>();
 
 }

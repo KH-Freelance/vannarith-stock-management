@@ -3,6 +3,7 @@ package com.hfsolution.feature.stockmanagement.dao;
 
 import static com.hfsolution.app.constant.AppResponseStatus.*;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import static com.hfsolution.app.constant.AppResponseCode.*;
@@ -102,6 +103,26 @@ public class PurchaseItemDao extends BaseDBDao<PurchaseItem,Long>{
     }
 
   }
+
+  // public BaseEntityResponseDto<PurchaseItem> findAllByStatusAndCreatedDateBetween(String status, String startDate, String endDate){
+
+  //   String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+  //   long startTime = System.currentTimeMillis();
+
+  //   try {
+
+  //     List<PurchaseItem> entities = purchaseItemRepository.findAllByStatusAndCreatedDateBetween(status, Timestamp.valueOf(startDate),Timestamp.valueOf(endDate));
+  //     var appModel = new BaseEntityResponseDto<PurchaseItem>();
+  //     appModel.setStatus(SUCCESS);
+  //     appModel.setEntityList(entities);
+  //     appModel.setSummaryExecInfo(InfoGenerator.generateInfo(currentMethodName, startTime));
+  //     return appModel;
+
+  //   } catch (Exception e) {
+  //     throw new DatabaseException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime));
+  //   }
+
+  // }
 
   public BaseEntityResponseDto<PurchaseItem> search(Specification<PurchaseItem> PurchaseItem){
 

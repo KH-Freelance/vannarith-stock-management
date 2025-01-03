@@ -87,5 +87,7 @@ public interface PurchaseRepository extends IBaseRepository<Purchase,Long>, JpaS
 
     Purchase findByPurchaseCode(String purchaseCode);
 
+    List<Purchase> findByPurchaseCodeIn(List<String> purchaseCodes);
+
     
 } 

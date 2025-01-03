@@ -30,7 +30,7 @@ public class AsyncConfig {
   Executor taskExecutor() {
     var taskExecutor = new ThreadPoolTaskExecutor();
     // Can execute 20 tasks at the same time.
-    taskExecutor.setCorePoolSize(20);
+    taskExecutor.setCorePoolSize(30);
     taskExecutor.setThreadNamePrefix("GBL-THD-");
     taskExecutor.setQueueCapacity(1000);
     taskExecutor.setMaxPoolSize(10000);

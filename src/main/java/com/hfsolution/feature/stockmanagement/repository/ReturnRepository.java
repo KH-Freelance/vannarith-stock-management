@@ -1,5 +1,6 @@
 package com.hfsolution.feature.stockmanagement.repository;
 
+import java.sql.Timestamp;
 import java.util.List;
 
 import org.springframework.data.domain.Pageable;
@@ -39,6 +40,12 @@ public interface ReturnRepository extends IBaseRepository<Return,Long>, JpaSpeci
     // @Modifying
     // @Transactional
     // void deleteByProductId(long id);
+
+    List<Return>  findAllByCreatedDateBetween(Timestamp startDate,Timestamp endDate);
+
+    // @Query("SELECT u, ud FROM User u JOIN UserDetails ud ON u.id = ud.id")
+    // List<Object[]> fetchUserDetails();
+
     
     @Query(value = "SELECT nextval('return_id_seq')", nativeQuery = true)
     Long getNextReturnId();
