@@ -8,7 +8,7 @@
 file="build.sh"
 
 # Extract the current version number
-current_version=137
+current_version=141
 
 # Increment the version number by 1
 new_version=$((current_version + 1))
@@ -19,7 +19,6 @@ sed -i "" "s/current_version=$current_version/current_version=$new_version/g" "$
 echo "Updated version to v$new_version in $file"
 
 docker build --platform linux/amd64 --push -t kimsourtann/stock-management:staging-v"$new_version" .
-
 
 echo "Deploying v$new_version"
 # Deploy to EC2

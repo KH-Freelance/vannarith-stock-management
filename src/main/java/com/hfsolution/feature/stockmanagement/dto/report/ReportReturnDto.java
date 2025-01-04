@@ -9,6 +9,6 @@ import lombok.Setter;
 @Getter
 @Setter
 public class ReportReturnDto {
-    String [] columns = new String[]{"Sales","Customer","Type","Returned To Sales","Returned By","Returned At"};
+    String [] columns = new String[]{"Sales","Customer","Type", "Refund Amount","Returned To Sales","Returned By","Returned At"};
     List<ReturnDto> content = new ArrayList<>();
 }

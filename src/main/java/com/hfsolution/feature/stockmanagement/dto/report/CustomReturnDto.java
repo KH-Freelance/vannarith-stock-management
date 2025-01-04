@@ -2,12 +2,8 @@ package com.hfsolution.feature.stockmanagement.dto.report;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-
-import org.apache.poi.ss.formula.functions.T;
-
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hfsolution.app.util.TimestampConverter;
 
@@ -16,36 +12,32 @@ import lombok.Setter;
 
 @Getter
 @Setter
-public class ReturnDto {
-    @JsonProperty("Sales")
-    @ExcelProperty("Sales")
-    private String sales;
-    @JsonIgnore
+public class CustomReturnDto {
+    
+    @ExcelProperty("Purchase Code")
     private String purchaseCode;
-    @JsonIgnore
+
+    @ExcelProperty("Product Name")
     private String productName;
-    @JsonIgnore
+
+    @ExcelProperty("Product's Batch Number")
     private String batchId;
-    @JsonProperty("Customer")
+
+    @ExcelProperty("Refund Amount")
+    private BigDecimal refundAmount;
+    
     @ExcelProperty("Customer")
     private String customer;
-    @JsonProperty("Type")
+    
     @ExcelProperty("Type")
     private String type;
     
-    @JsonProperty("Returned To Sales")
     @ExcelProperty("Returned To Sales")
     private String returnedToSales;
-
-    @JsonProperty("Refund Amount")
-    @ExcelProperty("Refund Amount")
-    private BigDecimal refundAmount;
-
-    @JsonProperty("Returned By")
+    
     @ExcelProperty("Returned By")
     private String returnedBy;
-    @JsonProperty("Returned At")
+    
     @ExcelProperty(value = "Returned At",converter = TimestampConverter.class)
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
     private Timestamp returnedAt;
 }

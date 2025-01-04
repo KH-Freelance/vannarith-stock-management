@@ -41,6 +41,7 @@ import com.hfsolution.feature.stockmanagement.dao.ReturnDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.report.CustomReportCustomerDto;
+import com.hfsolution.feature.stockmanagement.dto.report.CustomReturnDto;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportCustomerDto;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportPurchase;
 import com.hfsolution.feature.stockmanagement.dto.report.ReportReturnDto;
@@ -160,9 +161,22 @@ public class ReportServiceImp  implements ReportService{
             String fileName = URLEncoder.encode("return-report", "UTF-8").replaceAll("\\+", "%20");
             httpServletResponse.setHeader(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=" + fileName + ".xlsx");
             SuccessResponse<ReportReturnDto> result = (SuccessResponse<ReportReturnDto>) this.reportReturn(startDate, endDate, customerName);
-            EasyExcel.write(httpServletResponse.getOutputStream(), ReturnDto.class)
+            List<CustomReturnDto> customReportReturnDtos = new ArrayList<>();
+            result.getData().getContent().stream().forEach(returnDto->{
+                CustomReturnDto customReportReturnDto = new CustomReturnDto();
+                customReportReturnDto.setBatchId(returnDto.getBatchId());
+                customReportReturnDto.setPurchaseCode(returnDto.getPurchaseCode());
+                customReportReturnDto.setProductName(returnDto.getProductName());
+                customReportReturnDto.setType(returnDto.getType());
+                customReportReturnDto.setReturnedAt(returnDto.getReturnedAt());
+                customReportReturnDto.setReturnedBy(returnDto.getReturnedBy());
+                customReportReturnDto.setCustomer(returnDto.getCustomer());
+                customReportReturnDto.setReturnedToSales(returnDto.getReturnedToSales());
+                customReportReturnDtos.add(customReportReturnDto);
+            });
+            EasyExcel.write(httpServletResponse.getOutputStream(), CustomReturnDto.class)
             .registerWriteHandler(AppTools.createCustomStyle())
-            .sheet("return-report").doWrite(result.getData().getContent());
+            .sheet("return-report").doWrite(customReportReturnDtos);
             return ResponseEntity.status(HttpStatus.OK).build();
         }catch (DatabaseException e) {
             throw e;   
@@ -648,6 +662,11 @@ public class ReportServiceImp  implements ReportService{
                         sales.append(" - ");
                         sales.append(returnItem.getBacthId());
                         returnDto.setSales(sales.toString());
+                        returnDto.setType(rt.getReturnType());
+                        returnDto.setBatchId(returnItem.getBacthId());
+                        returnDto.setPurchaseCode(rt.getSourcePurchaseCode());
+                        returnDto.setProductName(returnItem.getProduct().getProductName());
+                        returnDto.setRefundAmount(rt.getRefundAmount());
                         returnDto.setType(rt.getReturnType());
                         returnDto.setCustomer(purchaseMap.get(rt.getSourcePurchaseCode()).getCustomer().getCustomerName());
                         returnDto.setReturnedToSales(rt.getTargetPurchaseCode());

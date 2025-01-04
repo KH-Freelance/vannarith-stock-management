@@ -92,7 +92,7 @@ public class ReportController {
         return reportService.reportSale(startDate, endDate,productName,customerName);
     }
 
-    @GetMapping("/returns")
+    @GetMapping("/return")
     public Object reportSale( 
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
         String startDate,
@@ -103,7 +103,7 @@ public class ReportController {
         return reportService.reportReturn(startDate, endDate,customerName);
     }
 
-    @GetMapping("/excel-returns")
+    @GetMapping("/excel-return")
     public Object excelReportReturn( 
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
         String startDate,
