@@ -316,6 +316,11 @@ public class ReturnServicelmp implements ReturnService {
                 PurchaseItem sourceItem = sourcePurchase.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst().orElseThrow(() -> new AppException("Item not found for product : " + stock.getProduct().getProductName()));
+                String itemStatus = sourceItem.getStatus();
+                if(itemStatus==null || itemStatus.isBlank() || itemStatus.isEmpty() || itemStatus.equalsIgnoreCase("RETURN") ){
+                    String msg = AppTools.appGetMessage("064").replace("[product]",sourceItem.getProduct().getProductName());
+                    throw new AppException("064",msg,"Y");
+                }
                 BigDecimal price = sourceItem.getPrice();
                 totalSourceItemAmt = totalSourceItemAmt.add(price);
                 totalQty = sourceItem.getQty()+totalQty;
@@ -473,19 +478,24 @@ public class ReturnServicelmp implements ReturnService {
 
                 BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByBatchId(batchId);
                 if(!stockResult.getStatus().equals(SUCCESS) || stockResult.getEntity()==null){
-                    String msg = AppTools.appGetMessage("058").replace("[stock]",batchId);
+                    String msg = AppTools.appGetMessage("058").replace("[batch_id]",batchId);
                     throw new AppException("058",msg,"Y");
                 }
                 Stock stock = stockResult.getEntity();
                 Long productId = stock.getProductId();
                 stockMap.put(batchId, stock);
 
-                PurchaseItem sourceItem = purchaseInfo.getPurchaseItems().stream()
+                PurchaseItem itemInfo = purchaseInfo.getPurchaseItems().stream()
                 .filter(item -> item.getProduct().getId().equals(productId))
                 .findFirst().orElseThrow(() -> new AppException("Item not found for product: " +  stock.getProduct().getProductName()));
-                BigDecimal price = sourceItem.getPrice();
+                String itemStatus = itemInfo.getStatus();
+                if(itemStatus==null || itemStatus.isBlank() || itemStatus.isEmpty() || itemStatus.equalsIgnoreCase("RETURN") ){
+                    String msg = AppTools.appGetMessage("064").replace("[product]",itemInfo.getProduct().getProductName());
+                    throw new AppException("064",msg,"Y");
+                }
+                BigDecimal price = itemInfo.getPrice();
                 refundAmount = refundAmount.add(price);
-                totalQty = sourceItem.getQty()+totalQty;
+                totalQty = itemInfo.getQty()+totalQty;
 
 
             }
