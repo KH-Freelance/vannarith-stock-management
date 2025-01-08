@@ -70,8 +70,7 @@ public class CustomerController {
 
     @PostMapping(value = "/upload", consumes = {"multipart/form-data"})
     public Object  test(@RequestPart("file")MultipartFile file) throws InterruptedException, ExecutionException{
-        telegramRestClientConsumer.sendFileToTelegram(file, "-4553450364");
-
+        telegramRestClientConsumer.sendFileToTelegram(file,"7758004942:AAHxjD_dEeRFuB-lgMSUoMzc2uBZ6Uivstg1", "-4553450364");
         return "Success";
     }
 

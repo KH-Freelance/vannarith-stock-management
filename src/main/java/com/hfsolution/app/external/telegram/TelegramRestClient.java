@@ -9,7 +9,7 @@ import org.springframework.web.bind.annotation.RequestParam;
 
 import com.hfsolution.app.config.restclient.RestClientConfig;
 
-@FeignClient(name = "telegramRestClient", url = "${rest.telegram.url}", configuration = RestClientConfig.class)
+@FeignClient(name = "telegramRestClient", url = "${rest.telegram.monitor.url}", configuration = RestClientConfig.class)
 public interface TelegramRestClient {
 
     @GetMapping("/sendMessage")

@@ -32,7 +32,8 @@ public class TelegramRestClientConsumer {
     private  Environment env;
 
     @Async
-    public CompletableFuture<Void> sendFileToTelegram(MultipartFile file, String chatId) {
+    public CompletableFuture<String> sendFileToTelegram(MultipartFile file,String token, String chatId) {
+        String status = "fail";
         try {
             RestTemplate restTemplate = new RestTemplate();
 
@@ -48,7 +49,7 @@ public class TelegramRestClientConsumer {
 
             // Send the request
             ResponseEntity<String> response = restTemplate.exchange(
-                env.getProperty("rest.telegram.url")+"/sendDocument",
+                env.getProperty("rest.telegram.business.url")+token+"/sendDocument",
                 HttpMethod.POST,
                 requestEntity,
                 String.class
@@ -56,6 +57,7 @@ public class TelegramRestClientConsumer {
 
             // Handle the response
             if (response.getStatusCode().is2xxSuccessful()) {
+                status = "success";
                 System.out.println("File sent successfully!");
             } else {
                 System.err.println("Failed to send the file: " + response.getBody());
@@ -63,7 +65,7 @@ public class TelegramRestClientConsumer {
         } catch (Exception e) {
             e.printStackTrace();
         }
-        return CompletableFuture.completedFuture(null);
+        return CompletableFuture.completedFuture(status);
     }
     
 
@@ -86,8 +88,7 @@ public class TelegramRestClientConsumer {
                 textMsg.append("\n#SUMMARY: ").append(summary);
             }
 
-            textMsg.append("\n#ERROR: ").append(errorMsg);
-            ;
+            textMsg.append("\n#ERROR: ").append(errorMsg);;
             telegramRestClient.sentMonitorMsg(telegramId, textMsg.toString());
 
         } catch (Exception e) {
