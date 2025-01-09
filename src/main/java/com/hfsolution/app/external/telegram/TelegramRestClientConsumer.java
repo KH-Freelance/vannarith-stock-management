@@ -6,6 +6,7 @@ import lombok.RequiredArgsConstructor;
 
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
+import org.springframework.core.io.FileSystemResource;
 import org.springframework.http.HttpEntity;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpMethod;
@@ -19,6 +20,8 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.util.AppLog;
+
+import java.io.File;
 import java.util.concurrent.CompletableFuture;
 
 
@@ -67,6 +70,8 @@ public class TelegramRestClientConsumer {
         }
         return CompletableFuture.completedFuture(status);
     }
+
+    
     
 
     @Async
@@ -99,5 +104,43 @@ public class TelegramRestClientConsumer {
         }
         return CompletableFuture.completedFuture(status);
     }
+
+    @Async
+    public CompletableFuture<String> sendFileToTelegram(File file, String token, String chatId) {
+        String status = "fail";
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            // Prepare the file
+            MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+            body.add("chat_id", chatId);
+            body.add("document", new FileSystemResource(file));
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+            HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+            // Send the request
+            ResponseEntity<String> response = restTemplate.exchange(
+                env.getProperty("rest.telegram.business.url") + token + "/sendDocument",
+                HttpMethod.POST,
+                requestEntity,
+                String.class
+            );
+
+            // Handle the response
+            if (response.getStatusCode().is2xxSuccessful()) {
+                status = "success";
+                System.out.println("File sent successfully!");
+            } else {
+                System.err.println("Failed to send the file: " + response.getBody());
+            }
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        return CompletableFuture.completedFuture(status);
+    }
+
 
 }

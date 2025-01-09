@@ -2,6 +2,7 @@ package com.hfsolution.feature.stockmanagement.service.schedule;
 
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 
+import java.io.File;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -18,6 +19,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
+import org.springframework.http.ResponseEntity;
 import org.springframework.scheduling.annotation.Scheduled;
 import org.springframework.stereotype.Service;
 
@@ -56,13 +58,13 @@ public class ScheduleServiceImp implements ScheduleService{
     private final RecoveryService recoveryService;
     private final HttpServletRequest httpServletRequest;
 
-    @Scheduled(fixedRate = 10000) 
+    // @Scheduled(fixedRate = 10000) 
     public void executeScheduledTasks() {
         
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long startTime = System.currentTimeMillis();
         try {
-            List<Schedule> schedules = scheduleDao.findActiveStatus().getEntityList();
+            List<Schedule> schedules = scheduleDao.findActiveAndNotYetExecute().getEntityList();
         
             if(!schedules.isEmpty()){
                 LocalDateTime currentDate = LocalDateTime.now();
@@ -70,14 +72,34 @@ public class ScheduleServiceImp implements ScheduleService{
                 for (Schedule schedule : schedules) {
                     String functionType = schedule.getFunctionType();
                     boolean isRunning = isRunning(schedule,currentDate);
-                    System.out.println("========"+isRunning+"\n");
+                    // System.out.println("========"+isRunning+"\n");
+                    
                     if (isRunning) {
 
                         if ("BACKUP".equals(functionType)) {
                             
                         }else{
-                            
+                            // System.out.println("===========1");
+                            // File reportFile = reportService.excelReportSaleTest(
+                            //     "2025-01-01 20:43:09.817",
+                            //     "2025-01-08 20:43:09.817",
+                            //     null,
+                            //     null
+                            // );
+                            // System.out.println("===========2");
+    
+                            // // Send the file to Telegram
+                            // telegramRestClientConsumer.sendFileToTelegram(reportFile, schedule.getTelegramToken(), schedule.getChatId());
+    
+                            // // Delete the temporary file after sending
+                            // if (reportFile.exists()) {
+                            //     reportFile.delete();
+                            // }
                         }
+
+                        schedule.setExecute(true);
+                        schedule.setLastExecuteDate(new Timestamp(System.currentTimeMillis()));
+                        scheduleDao.saveEntityAsync(schedule);
 
                     }
                 }
@@ -94,12 +116,12 @@ public class ScheduleServiceImp implements ScheduleService{
 
         LocalDateTime scheduledDate = schedule.getScheduleDate().toLocalDateTime().withSecond(0).withNano(0);
         currentDate = currentDate.withSecond(0).withNano(0);
-        currentDate = LocalDateTime.of(2025, 1, 13, 16, 30).withSecond(0).withNano(0);
         String type = schedule.getScheduledType();
+        //currentDate = LocalDateTime.of(2025, 1, 13, 16, 30).withSecond(0).withNano(0);
     
-        System.out.println("========" +currentDate+"===="+currentDate.getDayOfWeek());
-        System.out.println("========" +scheduledDate +"===="+scheduledDate.getDayOfWeek());
-        System.out.println("========" + type);
+        // System.out.println("========" +currentDate+"===="+currentDate.getDayOfWeek());
+        // System.out.println("========" +scheduledDate +"===="+scheduledDate.getDayOfWeek());
+        // System.out.println("========" + type);
     
         if (currentDate.isBefore(scheduledDate)) {
             return false; 

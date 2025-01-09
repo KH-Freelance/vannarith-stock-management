@@ -39,13 +39,13 @@ public class ScheduleDao extends BaseDBDao<Schedule, Long>{
 
  
 
-  public BaseEntityResponseDto<Schedule> findActiveStatus(){
+  public BaseEntityResponseDto<Schedule> findActiveAndNotYetExecute(){
 
     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
     long startTime = System.currentTimeMillis();
 
     try {
-      List<Schedule> entity = scheduleRepository.findAllByActiveTrue();
+      List<Schedule> entity = scheduleRepository.findAllByActiveTrueAndExecuteFalse();
       var appModel = new BaseEntityResponseDto<Schedule>();
       appModel.setStatus(SUCCESS);
       appModel.setEntityList(entity);

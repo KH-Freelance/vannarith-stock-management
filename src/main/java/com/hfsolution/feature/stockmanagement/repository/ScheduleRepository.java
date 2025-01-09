@@ -9,6 +9,6 @@ import com.hfsolution.feature.stockmanagement.entity.Schedule;
 
 public interface ScheduleRepository extends IBaseRepository<Schedule,Long>, JpaSpecificationExecutor<Schedule>{
 
-    List<Schedule> findAllByActiveTrue();
+    List<Schedule> findAllByActiveTrueAndExecuteFalse();
 
 } 

@@ -538,7 +538,7 @@ public class ReturnServicelmp implements ReturnService {
                 
             }
 
-            //MINUS SOURCE PAYMENT
+            //MINUS PAYMENT
             
             // if(purchaseInfo.getPaymentStatus().equals(PaymentStatus.CREDIT)){
             //     BigDecimal existingPay = purchaseInfo.getTotal();
@@ -559,6 +559,7 @@ public class ReturnServicelmp implements ReturnService {
             // }
             
             // System.out.println("===============FINAL PAID"+refundAmount);
+            //
             if(!purchaseInfo.getPaymentStatus().equals(PaymentStatus.PAID)){
 
                 Payment payment = new Payment();

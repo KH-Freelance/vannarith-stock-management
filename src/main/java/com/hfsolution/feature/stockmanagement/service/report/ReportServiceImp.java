@@ -3,6 +3,10 @@ package com.hfsolution.feature.stockmanagement.service.report;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
+
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.OutputStream;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.net.URLEncoder;
@@ -212,6 +216,29 @@ public class ReportServiceImp  implements ReportService{
             throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
+
+    // @Override
+    // @Transactional
+    // public File excelReportSaleTest(String startDate, String endDate, String productName, String customerName) {
+    //     String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    //     long startTime = System.currentTimeMillis();
+    //     try {
+    //         // Generate temporary file for Excel
+    //         File tempFile = File.createTempFile("sale-report", ".xlsx");
+    //         try (OutputStream outputStream = new FileOutputStream(tempFile)) {
+    //             SuccessResponse<ReportSaleDto> result = (SuccessResponse<ReportSaleDto>) this.reportSale(startDate, endDate, productName, customerName);
+    //             EasyExcel.write(outputStream, SaleDto.class)
+    //                 .registerWriteHandler(AppTools.createCustomStyle())
+    //                 .sheet("sale-report")
+    //                 .doWrite(result.getData().getContent());
+    //         }
+    //         return tempFile;
+    //     } catch (Exception e) {
+    //         throw new AppException(FAIL_CODE, e.getMessage(), InfoGenerator.generateInfo(currentMethodName, startTime), true);
+    //     }
+    // }
+
+
 
 
 

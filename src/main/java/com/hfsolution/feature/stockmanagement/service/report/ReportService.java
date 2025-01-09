@@ -1,5 +1,7 @@
 package com.hfsolution.feature.stockmanagement.service.report;
 
+import java.io.File;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 
@@ -15,4 +17,5 @@ public interface ReportService {
     public Object reportPurchase(String startDate, String endDate);
     public Object reportSale(String startDate, String endDate,String productName, String customerName);
     public Object reportReturn(String startDate, String endDate, String customerName);
+    //public File excelReportSaleTest(String startDate, String endDate, String productName, String customerName) ;
 }
