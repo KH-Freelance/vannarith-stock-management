@@ -36,7 +36,6 @@ import com.hfsolution.feature.auth.services.AuthenticationService;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
-import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
@@ -55,7 +54,7 @@ import com.hfsolution.feature.stockmanagement.dto.stock.UnpaidDto;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
+
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.PurchaseItem;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
@@ -91,7 +90,6 @@ public class PurchaseServicelmp implements PurchaseService {
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
     // private final String CSV_FILENAME="purchase";
-    private final ProductHistoryDao productHistoryDao;
 
     @Override
     @Transactional
@@ -135,15 +133,15 @@ public class PurchaseServicelmp implements PurchaseService {
                 for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
                     PurchaseItemDto purchaseItemDto = new PurchaseItemDto();
                     Product product = purchaseItem.getProduct();
-                    if(product==null){
-                        // Fallback to product history
-                        ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
-                        if (productHistory != null) {
-                            product = new Product();
-                            BeanUtils.copyProperties(productHistory, product);
-                            purchaseItem.setProduct(product);
-                        }
-                    }
+                    // if(product==null){
+                    //     // Fallback to product history
+                    //     ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
+                    //     if (productHistory != null) {
+                    //         product = new Product();
+                    //         BeanUtils.copyProperties(productHistory, product);
+                    //         purchaseItem.setProduct(product);
+                    //     }
+                    // }
                     BeanUtils.copyProperties(purchaseItem, purchaseItemDto);
                     ProductDto productDto = new ProductDto();
                     BeanUtils.copyProperties(product, productDto);
@@ -670,22 +668,20 @@ public class PurchaseServicelmp implements PurchaseService {
                 purchaseDto.setCustomer(new PurchaseDto.Customer(purchase.getCustomer().getId(), purchase.getCustomer().getCustomerName()));
                 purchaseDto.setUser(new PurchaseDto.User(purchase.getUser().getId(), purchase.getUser().getFirstname(),purchase.getUser().getLastname()));
                 //Check produt for purchase item
-                purchase.getPurchaseItems().stream().forEach((data->{
-                    if(data.getProduct()==null){
-                        // Fallback to product history
-                        ProductHistory productHistory = productHistoryDao.findById(data.getProductId()).getEntity();
-                        if (productHistory != null) {
-                            Product product = new Product();
-                            BeanUtils.copyProperties(productHistory, product);
-                            data.setProduct(product);
-                        }
-                    }
-                }));
+                // purchase.getPurchaseItems().stream().forEach((data->{
+                //     if(data.getProduct()==null){
+                //         // Fallback to product history
+                //         ProductHistory productHistory = productHistoryDao.findById(data.getProductId()).getEntity();
+                //         if (productHistory != null) {
+                //             Product product = new Product();
+                //             BeanUtils.copyProperties(productHistory, product);
+                //             data.setProduct(product);
+                //         }
+                //     }
+                // }));
                 BigDecimal remainingPayment = purchase.getTotal();
                 for (Payment payment : purchase.getPayments()) {
-                    // if(payment.getPaymentMethod()!=null && !payment.getPaymentMethod().equals("DEBIT")){
-                    //     remainingPayment = remainingPayment.subtract(payment.getAmount());
-                    // }
+
                     if (payment.getAmount().compareTo(BigDecimal.ZERO) > 0) {
                         remainingPayment = remainingPayment.subtract(payment.getAmount());
                     }else{
@@ -741,14 +737,7 @@ public class PurchaseServicelmp implements PurchaseService {
             List<PurchaseItemDto> purchaseItemDtos = new ArrayList<>();
             for (PurchaseItem purchaseItem : purchase.getPurchaseItems()) {
                 Product product = purchaseItem.getProduct();
-                if(product==null){
-                    // Fallback to product history
-                    ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
-                    if (productHistory != null) {
-                        product = new Product();
-                        BeanUtils.copyProperties(productHistory, product);
-                    }
-                }
+    
                 PurchaseItemDto purchaseItemDto = new PurchaseItemDto();
                 BeanUtils.copyProperties(purchaseItem, purchaseItemDto);
                 ProductDto productDto = new ProductDto();

@@ -43,7 +43,6 @@ import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.app.util.CSVHelperV2;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
-import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.StockCsv;
@@ -56,7 +55,7 @@ import com.hfsolution.feature.stockmanagement.dto.stock.StockHistoryDto;
 import com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto;
 import com.hfsolution.feature.stockmanagement.dto.user.User;
 import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
+
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 import com.hfsolution.feature.stockmanagement.entity.StockHistory;
 import com.hfsolution.feature.stockmanagement.util.stock.ExcelUtil;
@@ -78,7 +77,6 @@ public class StockServicelmp implements StockService {
     private final StockHistoryDao stockHistoryDao;
     private final UserRepository userRepository;
     private final ProductDao productDao;
-    private final ProductHistoryDao productHistoryDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final String CSV_FILENAME="stock";
@@ -386,19 +384,7 @@ public class StockServicelmp implements StockService {
             calculatePercentageOfQty(stockResult.getPage());
             Page<StockDto> stockDtoPage = stockResult.getPage().map(stock ->{
                 StockDto stockDto = new StockDto();
-                if (stock.getProduct()!=null) {
-                    // Normal product case
-                    stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
-                } else {
-                    // Fallback to product history
-                    ProductHistory productHistory = productHistoryDao.findById(stock.getProductId()).getEntity();
-                    if (productHistory != null) {
-                        Product product = new Product();
-                        BeanUtils.copyProperties(productHistory, product);
-                        stock.setProduct(product);
-                        stockDto.setProduct(new StockDto.Product(productHistory.getId(),productHistory.getProductName()));
-                    }
-                }
+                stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
                 BeanUtils.copyProperties(stock, stockDto);
                 return stockDto;
             });
@@ -682,14 +668,6 @@ public class StockServicelmp implements StockService {
             Double stockPercentage = stockResult.getEntity().getPercentage();
 
             Product product = stockResult.getEntity().getProduct();
-            if(product==null){
-                // Fallback to product history
-                ProductHistory productHistory = productHistoryDao.findById(stockResult.getEntity().getProductId()).getEntity();
-                if (productHistory != null) {
-                    product = new Product();
-                    BeanUtils.copyProperties(productHistory, product);
-                }
-            }
 
             //COPY Product Property
             ProductDto productDto = new ProductDto();

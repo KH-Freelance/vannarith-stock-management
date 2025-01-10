@@ -31,7 +31,6 @@ import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
-import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseItemDao;
 import com.hfsolution.feature.stockmanagement.dao.ReturnDao;
@@ -52,7 +51,7 @@ import com.hfsolution.feature.stockmanagement.dto.returns.ReturnDto;
 import com.hfsolution.feature.stockmanagement.dto.returns.ReturnItemDto;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
+
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.PurchaseItem;
 import com.hfsolution.feature.stockmanagement.entity.Return;
@@ -81,7 +80,6 @@ public class ReturnServicelmp implements ReturnService {
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
     private final ReturnDao returnDao;
-    private final ProductHistoryDao productHistoryDao;
     private final String CASH = "CASH";
     private final String SALE = "SALE";
     private final UserRepository userRepository;
@@ -165,18 +163,18 @@ public class ReturnServicelmp implements ReturnService {
                 returnDto.setTotal(returnData.calculateTotalPrice());
                 returnDto.setQty(returnData.calculateTotalQty());
                 BeanUtils.copyProperties(returnData, returnDto);
-                //Check produt for purchase item
-                returnData.getReturnItems().stream().forEach((data->{
-                    if(data.getProduct()==null){
-                        // Fallback to product history
-                        ProductHistory productHistory = productHistoryDao.findById(data.getProductId()).getEntity();
-                        if (productHistory != null) {
-                            Product product = new Product();
-                            BeanUtils.copyProperties(productHistory, product);
-                            data.setProduct(product);
-                        }
-                    }
-                }));
+                // //Check produt for purchase item
+                // returnData.getReturnItems().stream().forEach((data->{
+                //     if(data.getProduct()==null){
+                //         // Fallback to product history
+                //         ProductHistory productHistory = productHistoryDao.findById(data.getProductId()).getEntity();
+                //         if (productHistory != null) {
+                //             Product product = new Product();
+                //             BeanUtils.copyProperties(productHistory, product);
+                //             data.setProduct(product);
+                //         }
+                //     }
+                // }));
                 return returnDto;
             });
 
@@ -219,14 +217,14 @@ public class ReturnServicelmp implements ReturnService {
             List<ReturnItemDto> returnItemDtos = new ArrayList<>();
             for (ReturnItem returnItem : returns.getReturnItems()) {
                 Product product = returnItem.getProduct();
-                if(product==null){
-                    // Fallback to product history
-                    ProductHistory productHistory = productHistoryDao.findById(returnItem.getProductId()).getEntity();
-                    if (productHistory != null) {
-                        product = new Product();
-                        BeanUtils.copyProperties(productHistory, product);
-                    }
-                }
+                // if(product==null){
+                //     // Fallback to product history
+                //     ProductHistory productHistory = productHistoryDao.findById(returnItem.getProductId()).getEntity();
+                //     if (productHistory != null) {
+                //         product = new Product();
+                //         BeanUtils.copyProperties(productHistory, product);
+                //     }
+                // }
                 ReturnItemDto returnItemDto = new ReturnItemDto();
                 BeanUtils.copyProperties(returnItem, returnItemDto);
                 ProductDto productDto = new ProductDto();

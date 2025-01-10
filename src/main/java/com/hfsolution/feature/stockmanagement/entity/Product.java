@@ -3,6 +3,14 @@ package com.hfsolution.feature.stockmanagement.entity;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.FilterDef;
+import org.hibernate.annotations.Loader;
+import org.hibernate.annotations.NamedQuery;
+import org.hibernate.annotations.ParamDef;
+import org.hibernate.annotations.SQLDelete;
+import org.hibernate.annotations.Where;
+
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.hfsolution.app.util.TimestampConverter;
@@ -19,6 +27,9 @@ import lombok.Setter;
 @Getter
 @Entity
 @Table(name = "Product")
+@SQLDelete(sql = "UPDATE Product SET deleted = true WHERE id = ?")
+@FilterDef(name = "deletedProductFilter", parameters = @ParamDef(name = "deleted", type = Boolean.class))
+@Filter(name = "deletedProductFilter", condition = "deleted = :deleted")
 public class Product {
 
     @Id
@@ -33,12 +44,6 @@ public class Product {
 
     @Column(name = "price")
     private BigDecimal price;
-
-    // @Column(name = "factory") 
-    // private String factory;
-
-    // @Column(name = "import_price")
-    // private BigDecimal importPrice;
 
     @Column(name = "discount")
     private BigDecimal discount;
@@ -56,18 +61,13 @@ public class Product {
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp updatedDate;
 
-    // @Column(name = "expiry_date", columnDefinition = "TIMESTAMP WITH TIME ZONE")
-    // @ExcelProperty(converter = TimestampConverter.class)
-
-    // @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Phnom_Penh")
-    // private Timestamp expiryDate;
-
     @Column(name = "image_url")
     private String imageUrl;
 
+    private boolean deleted;
+
     @PrePersist
     public void preInsert() {
-        // Set default values or modify fields before inserting
         if (this.discount == null) {
             this.discount = BigDecimal.ZERO;
         }

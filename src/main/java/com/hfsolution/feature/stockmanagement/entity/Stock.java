@@ -5,6 +5,10 @@ import java.sql.Timestamp;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.hibernate.annotations.Filter;
+import org.hibernate.annotations.NotFound;
+import org.hibernate.annotations.NotFoundAction;
+
 import com.alibaba.excel.annotation.ExcelIgnore;
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
@@ -14,6 +18,7 @@ import com.hfsolution.app.util.TimestampConverter;
 import jakarta.persistence.CascadeType;
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EntityManager;
 import jakarta.persistence.FetchType;
 import jakarta.persistence.Id;
 import jakarta.persistence.JoinColumn;
@@ -103,6 +108,13 @@ public class Stock {
         return this.product != null;
     }
 
+
+//     public Product getUser(EntityManager entityManager) {
+//     return entityManager.createQuery(
+//         "SELECT u FROM User u WHERE u.id = :userId", Product.class)
+//         .setParameter("userId", this.userId)
+//         .getSingleResult();
+// }
   
     @PrePersist
     public void preInsert() {

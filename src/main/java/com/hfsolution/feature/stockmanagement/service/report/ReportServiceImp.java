@@ -38,7 +38,6 @@ import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
-import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseDao;
 import com.hfsolution.feature.stockmanagement.dao.PurchaseItemDao;
 import com.hfsolution.feature.stockmanagement.dao.ReturnDao;
@@ -57,7 +56,7 @@ import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseSumma
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
+
 import com.hfsolution.feature.stockmanagement.entity.Purchase;
 import com.hfsolution.feature.stockmanagement.entity.PurchaseItem;
 import com.hfsolution.feature.stockmanagement.entity.Return;
@@ -80,7 +79,6 @@ public class ReportServiceImp  implements ReportService{
     private final CustomerDao customerDao;
     private final PurchaseItemDao purchaseItemDao;
     private final ReturnDao returnDao;
-    private final ProductHistoryDao productHistoryDao;
 
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
@@ -592,14 +590,14 @@ public class ReportServiceImp  implements ReportService{
                     SaleDto saleDto = new SaleDto();
                   
                     Product product = purchaseItem.getProduct();
-                    if(purchaseItem.getProduct()==null){
-                        // Fallback to product history
-                        ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
-                        if (productHistory != null) {
-                            product = new Product();
-                            BeanUtils.copyProperties(productHistory, product);
-                        }
-                    }
+                    // if(purchaseItem.getProduct()==null){
+                    //     // Fallback to product history
+                    //     ProductHistory productHistory = productHistoryDao.findById(purchaseItem.getProductId()).getEntity();
+                    //     if (productHistory != null) {
+                    //         product = new Product();
+                    //         BeanUtils.copyProperties(productHistory, product);
+                    //     }
+                    // }
                     
                     // Filter out Product That not contain Product Name that user want to search because one Purcahse have many product 
                     if(productName != null && !product.getProductName().contains(productName)) continue;

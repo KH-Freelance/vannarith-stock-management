@@ -37,8 +37,6 @@ import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
-import com.hfsolution.feature.stockmanagement.dao.ProductHistoryDao;
-
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.ProductCsv;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
@@ -59,7 +57,6 @@ public class ProductServicelmp implements ProductService {
     private final CloudinaryProperties cloudinaryProperties;
     private final ProductDao productDao;
     private final CustomerDao customerDao;
-    private final ProductHistoryDao productHistoryDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
     private final String CSV_FILENAME = "product";
@@ -163,10 +160,9 @@ public class ProductServicelmp implements ProductService {
         long startTime = System.currentTimeMillis();
         try {
             Product product =  productDao.deleteByProductID(id).getEntity();
-            ProductHistory productHistory = new ProductHistory();
-            BeanUtils.copyProperties(product, productHistory);
-            productHistoryDao.saveEntityAsync(productHistory);
-            productHistory.setDeletedDate(new Timestamp(System.currentTimeMillis()));
+            // ProductHistory productHistory = new ProductHistory();
+            // BeanUtils.copyProperties(product, productHistory);
+            // productHistory.setDeletedDate(new Timestamp(System.currentTimeMillis()));
             String msg = AppTools.appGetMessage("007");
             response.setStatus(SUCCESS);
             response.setCode("007");

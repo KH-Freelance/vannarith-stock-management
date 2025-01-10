@@ -1,6 +1,9 @@
 package com.hfsolution.app.config.database;
 
+import java.util.Map;
 import java.util.Properties;
+
+import org.hibernate.cfg.AvailableSettings;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -19,7 +22,6 @@ import com.hfsolution.app.config.database.routing.PostgressDataSourceRouter;
 
 @Configuration
 @DependsOn("postgressDataSourceRouter")
-
 @EnableJpaRepositories(basePackages = {
 	"com.hfsolution.feature.user.repository",
 	"com.hfsolution.feature.token.repository",
@@ -55,10 +57,11 @@ public class PostgressPersistenceConfig {
 		jpaVendorAdapter.setDatabase(Database.POSTGRESQL);
 		jpaVendorAdapter.setGenerateDdl(true);
 		entityManagerFactoryBean.setJpaVendorAdapter(jpaVendorAdapter);
+		
 		return entityManagerFactoryBean;
 
 	}
-	
+		
 	@Bean("postgressTransactionManager")
 	public PlatformTransactionManager postgressTransactionManager() {
 		JpaTransactionManager transactionManager = new JpaTransactionManager();

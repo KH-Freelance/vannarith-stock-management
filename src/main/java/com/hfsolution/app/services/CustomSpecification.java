@@ -160,7 +160,7 @@ public class CustomSpecification<T> implements Specification<T> {
 
 
 
-    private Object parseValue(String value) {
+  private Object parseValue(String value) {
     // Attempt to parse as Integer
     try {
         return Integer.parseInt(value);
@@ -169,6 +169,10 @@ public class CustomSpecification<T> implements Specification<T> {
         try {
             return new BigDecimal(value);
         } catch (NumberFormatException e2) {
+            // Attempt to parse as Boolean
+            if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                return Boolean.parseBoolean(value);
+            }
             // Attempt to parse as LocalDateTime
             try {
                 return AppTools.formatDateStringToTimestamp(value,"yyyy-MM-dd HH:mm:ss.SSS");
