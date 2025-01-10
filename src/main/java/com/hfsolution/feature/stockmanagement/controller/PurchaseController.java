@@ -16,6 +16,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PayRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest;
 import com.hfsolution.feature.stockmanagement.service.customer.CustomerService;
@@ -23,7 +25,10 @@ import com.hfsolution.feature.stockmanagement.service.product.ProductService;
 import com.hfsolution.feature.stockmanagement.service.purchase.PurchaseService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import static com.hfsolution.app.constant.AppConstant.*;
 
 @RestController
 @RequestMapping("/purchase")
@@ -31,6 +36,9 @@ public class PurchaseController {
 
     @Autowired
     private PurchaseService purchaseService;
+
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
     @Autowired
     private ProductService productService;
@@ -56,6 +64,7 @@ public class PurchaseController {
     public Object getSearchV2( 
         @PathVariable long id
         ) {
+            httpServletRequest.setAttribute(REQ_INFO,"Pay ID = " +id);
         return purchaseService.searchDetail(id);
     }  
 
@@ -78,6 +87,7 @@ public class PurchaseController {
     public Object getUnpaidByCustomerId( 
             @PathVariable long customerId
         ) {
+        httpServletRequest.setAttribute(REQ_INFO,"Pay ID = " +customerId);
         return purchaseService.getUnpaidByCustomerId(customerId);
     }  
 
@@ -98,16 +108,19 @@ public class PurchaseController {
 
     @PostMapping("/add")
     private Object purchase(@Valid @RequestBody PurchaseRequest productRequest){
+        httpServletRequest.setAttribute(REQ_INFO,AppTools.convertObjectToJson(productRequest));
         return purchaseService.addPurchase(productRequest);
     }
 
     @PostMapping("/pay/{id}")
     private Object pay(@PathVariable long id,@Valid @RequestBody PayRequest payRequest){
+        httpServletRequest.setAttribute(REQ_INFO,"Pay ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(payRequest));
         return purchaseService.pay(id,payRequest);
     }
 
     @DeleteMapping("/delete/{id}")
     private Object deletePurchaseyId( @PathVariable long id){
+        httpServletRequest.setAttribute(REQ_INFO,"Purchase ID = " +id);
         return purchaseService.deletePurchaseById(id);
     }
 

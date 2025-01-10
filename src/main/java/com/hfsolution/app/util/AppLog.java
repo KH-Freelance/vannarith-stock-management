@@ -32,6 +32,7 @@ public class AppLog<T> {
 	String userId;
 	String action;
 	String info;
+    String step;
     T request;
 	T response;
 

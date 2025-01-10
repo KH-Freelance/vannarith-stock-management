@@ -1,5 +1,6 @@
 package com.hfsolution.feature.stockmanagement.controller;
 
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Sort;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PathVariable;
@@ -11,14 +12,19 @@ import com.hfsolution.feature.stockmanagement.enums.ReportSaleType;
 import com.hfsolution.feature.stockmanagement.service.report.ReportService;
 
 import io.swagger.v3.oas.annotations.Operation;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.constraints.Pattern;
 import lombok.RequiredArgsConstructor;
+
+import static com.hfsolution.app.constant.AppConstant.*;
 
 @RestController
 @RequestMapping("/report")
 @RequiredArgsConstructor
 public class ReportController {
     final ReportService reportService;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
     @GetMapping("/stock")
     public Object reportStock( 
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "Start Date must be in the format yyyy-MM-dd HH:mm:ss")
@@ -26,6 +32,7 @@ public class ReportController {
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate
         ) {
+            httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate);
         return reportService.reportStock(startDate, endDate);
     }
 
@@ -36,6 +43,7 @@ public class ReportController {
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate
         ) {
+            httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate  );
         return reportService.excelReportStock(startDate, endDate);
     }
 
@@ -46,6 +54,7 @@ public class ReportController {
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate
         ) {
+            httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate );
         return reportService.reportCustomer(startDate, endDate);
     }
 
@@ -56,6 +65,7 @@ public class ReportController {
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate
         ) {
+            httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate );
         return reportService.excelReportCustomer(startDate, endDate);
     }
 
@@ -68,6 +78,7 @@ public class ReportController {
         @RequestParam(required = false) String customerName,
         @RequestParam(required = false)  String productName
         ) {
+            httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate +", "+"Custome r= " +customerName+", "+"Product = " +productName  );
         return reportService.excelReportCombined(startDate, endDate,productName,customerName);
     }
 
@@ -78,6 +89,7 @@ public class ReportController {
         @Pattern(regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}.\\d{3}$", message = "End Date must be in the format yyyy-MM-dd HH:mm:ss")
         String endDate
         ) {
+            httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate  );
         return reportService.reportPurchase(startDate, endDate);
     }
     
@@ -101,6 +113,7 @@ public class ReportController {
         String endDate,
         @RequestParam(required = false)  String customerName
         ) {
+            httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate +", "+"Customer= " +customerName  );
         return reportService.reportReturn(startDate, endDate,customerName);
     }
 
@@ -112,6 +125,8 @@ public class ReportController {
         String endDate,
         @RequestParam(required = false)  String customerName
         ) {
+
+            httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate +", "+"Customer= " +customerName  );
         return reportService.excelReportReturn(startDate, endDate,customerName);
     }
 
@@ -124,6 +139,8 @@ public class ReportController {
         @RequestParam(required = false)  String customerName,
         @RequestParam(required = false) String productName
         ) {
+
+        httpServletRequest.setAttribute(REQ_INFO,"Start Date = " +startDate+", "+"End Date = " +endDate +", "+"Custome r= " +customerName+", "+"Product = " +productName  );
         return reportService.excelReportSale(startDate, endDate,productName,customerName);
     }
 }

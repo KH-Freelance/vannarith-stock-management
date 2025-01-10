@@ -13,6 +13,7 @@ import java.io.IOException;
 import lombok.RequiredArgsConstructor;
 
 import org.apache.commons.lang3.math.NumberUtils;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.lang.NonNull;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.context.SecurityContextHolder;
@@ -23,6 +24,7 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 import org.springframework.web.servlet.HandlerExceptionResolver;
 import com.hfsolution.app.services.JwtService;
+import com.hfsolution.app.util.AppLog;
 import com.hfsolution.feature.token.repository.TokenRepository;
 
 @Component
@@ -33,6 +35,8 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
   private final UserDetailsService userDetailsService;
   private final TokenRepository tokenRepository;
   private final HandlerExceptionResolver handlerExceptionResolver;
+  @Autowired
+    private HttpServletRequest httpServletRequest;
 
   @Override
   protected void doFilterInternal(
@@ -41,10 +45,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
       @NonNull FilterChain filterChain
   ) throws ServletException, IOException {
 
+
+
     if (request.getServletPath().contains("/api/v1/auth")) {
       filterChain.doFilter(request, response);
       return;
     }
+    String uri = httpServletRequest.getRequestURI();
     final String authHeader = request.getHeader("Authorization");
     final String jwt;
 
@@ -86,6 +93,13 @@ public class JwtAuthenticationFilter extends OncePerRequestFilter {
           SecurityContextHolder.getContext().setAuthentication(authToken);
         }
       }
+
+      // var appLog = new AppLog<>();
+      // appLog.setAction("REQUEST");
+      // appLog.setUri(uri);
+      // appLog.setUserId(USERID);
+      // appLog.setUsername(USERNAME);
+      // appLog.writeToLog();
       filterChain.doFilter(request, response);
     } catch (Exception e) {
       handlerExceptionResolver.resolveException(request, response, null, e);

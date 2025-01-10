@@ -24,12 +24,16 @@ import org.springframework.web.multipart.MultipartFile;
 import com.hfsolution.app.dto.BaseEntityResponseDto;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.external.telegram.TelegramRestClientConsumer;
+import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.customer.CustomerUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.customer.CustomerService;
 
+import static com.hfsolution.app.constant.AppConstant.*;
+
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 @RestController
@@ -38,6 +42,8 @@ public class CustomerController {
 
     @Autowired
     private CustomerService customerService;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
     @Autowired
     TelegramRestClientConsumer telegramRestClientConsumer;
@@ -76,16 +82,19 @@ public class CustomerController {
 
     @PostMapping("/add")
     private Object addCustomer(@Valid @RequestBody CustomerRequest CustomerRequest){
+        httpServletRequest.setAttribute(REQ_INFO,AppTools.convertObjectToJson(CustomerRequest));
         return customerService.addCustomer(CustomerRequest);
     }
 
     @DeleteMapping("/delete/{id}")
     private Object deleteCustomerById( @PathVariable long id){
+        httpServletRequest.setAttribute(REQ_INFO,"Customer ID = " +id);
         return customerService.deleteCustomerById(id);
     }
 
     @PutMapping("/update/{id}")
     private Object updateCustomerById(@PathVariable long id,@Valid @RequestBody CustomerUpdateRequest CustomerUpdateRequest){
+        httpServletRequest.setAttribute(REQ_INFO,"Customer ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(CustomerUpdateRequest));
         return customerService.updateCustomer(id,CustomerUpdateRequest);
     }
 

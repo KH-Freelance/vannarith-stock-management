@@ -30,9 +30,28 @@ import org.springframework.data.domain.Pageable;
 import com.alibaba.excel.write.metadata.style.WriteCellStyle;
 import com.alibaba.excel.write.metadata.style.WriteFont;
 import com.alibaba.excel.write.style.HorizontalCellStyleStrategy;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.DeserializationFeature;
+import com.fasterxml.jackson.databind.MapperFeature;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hfsolution.feature.stockmanagement.entity.Stock;
 
 public class AppTools {
+
+    @SuppressWarnings("deprecation")
+    public static String convertObjectToJson(Object object) {
+        if (object == null) {
+            return "";
+        }
+        var mapper = new ObjectMapper();
+        mapper.configure(DeserializationFeature.FAIL_ON_UNKNOWN_PROPERTIES, false);
+        mapper.configure(MapperFeature.DEFAULT_VIEW_INCLUSION, true);
+        try {
+            return mapper.writeValueAsString(object);
+        } catch (JsonProcessingException e) {
+        }
+        return "";
+    }
 
     public static String appGetMessage(final String errorCode) {
 

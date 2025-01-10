@@ -10,12 +10,18 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
+import static com.hfsolution.app.constant.AppConstant.*;
+
+import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnCashRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.returns.ReturnSaleRequest;
 import com.hfsolution.feature.stockmanagement.service.returns.ReturnService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import static com.hfsolution.app.constant.AppConstant.*;
 
 @RestController
 @RequestMapping("/return")
@@ -23,6 +29,8 @@ public class ReturnController {
 
     @Autowired
     private ReturnService returnService;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
     
     @GetMapping("/search")
     @Operation(summary = "List return infomation")
@@ -61,11 +69,13 @@ public class ReturnController {
 
     @PostMapping("/sale")
     private Object returnInvoice(@Valid @RequestBody ReturnSaleRequest returnRequest){
+        httpServletRequest.setAttribute(REQ_INFO,AppTools.convertObjectToJson(returnRequest));
         return returnService.returnSale(returnRequest);
     }
 
     @PostMapping("/cash")
     private Object returnCash(@Valid @RequestBody ReturnCashRequest returnCashRequest){
+        httpServletRequest.setAttribute(REQ_INFO,AppTools.convertObjectToJson(returnCashRequest));
         return returnService.returnCash(returnCashRequest);
     }
     

@@ -14,13 +14,18 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
+
+import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.product.ProductService;
 import com.hfsolution.feature.stockmanagement.service.stock.StockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import static com.hfsolution.app.constant.AppConstant.*;
 
 
 
@@ -33,6 +38,8 @@ public class StockController {
 
     @Autowired
     private ProductService productService;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
     @GetMapping("/search")
     @Operation(summary = "List stocks")
@@ -84,16 +91,19 @@ public class StockController {
 
     @PostMapping("/add")
     private Object addStock(@Valid @RequestBody StockRequest StockRequest){
+        httpServletRequest.setAttribute(REQ_INFO, AppTools.convertObjectToJson(StockRequest));
         return stockService.addStock(StockRequest);
     }
 
     @PutMapping("/add-quantity/{id}")
     private Object addQuantity(@PathVariable long id,@Valid @RequestBody StockUpdateRequest stockUpdateRequest){
+        httpServletRequest.setAttribute(REQ_INFO,"Stock ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(stockUpdateRequest));
         return stockService.addQuantity(id,stockUpdateRequest);
     }
 
     @PutMapping("/remove-quantity/{id}")
     private Object removeQuantity(@PathVariable long id,@Valid @RequestBody StockUpdateRequest stockUpdateRequest){
+        httpServletRequest.setAttribute(REQ_INFO,"Stock ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(stockUpdateRequest));
         return stockService.removeQuantity(id,stockUpdateRequest);
     }
 
@@ -132,12 +142,14 @@ public class StockController {
 
     @DeleteMapping("/delete/{id}")
     private Object deleteStockById( @PathVariable long id){
+        httpServletRequest.setAttribute(REQ_INFO,"Stock ID = " +id);
         return stockService.deleteStockById(id);
     }
 
 
     @PutMapping("/update/{id}")
     private Object updateStockById(@PathVariable long id,@Valid @RequestBody StockUpdateRequest stockUpdateRequest){
+        httpServletRequest.setAttribute(REQ_INFO,"Stock ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(stockUpdateRequest));
         return stockService.updateStock(id,stockUpdateRequest);
     }
 

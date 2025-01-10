@@ -21,8 +21,13 @@ import org.springframework.web.multipart.MultipartFile;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import com.hfsolution.app.dto.SuccessResponse;
+import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.service.ExportService;
 import com.hfsolution.feature.stockmanagement.service.recovery.RecoveryService;
+
+import jakarta.servlet.http.HttpServletRequest;
+
+import static com.hfsolution.app.constant.AppConstant.*;
 
 @RestController
 @RequestMapping("/data")
@@ -30,9 +35,12 @@ public class RecoveryController {
 
     @Autowired
     private RecoveryService recoveryService;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
     @PostMapping(value = "/backup/{filename}")
     private Object backup(@PathVariable String filename) throws URISyntaxException, IOException{
+        httpServletRequest.setAttribute(REQ_INFO,"Pay Name = " +filename);
         return recoveryService.backup(filename);
     }
 
@@ -43,6 +51,7 @@ public class RecoveryController {
 
     @GetMapping(value = "/download/{filename}")
     private ResponseEntity<Resource> getExcelData(@PathVariable String filename) throws URISyntaxException, IOException{
+        httpServletRequest.setAttribute(REQ_INFO,"Pay Name = " +filename);
         return recoveryService.getExcelData(filename);
     }
     

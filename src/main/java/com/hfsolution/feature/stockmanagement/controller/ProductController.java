@@ -21,12 +21,16 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 import com.hfsolution.app.properties.CloudinaryProperties;
+import com.hfsolution.app.util.AppTools;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.product.ProductService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
+
+import static com.hfsolution.app.constant.AppConstant.*;
 
 @RestController
 @RequestMapping("/product")
@@ -34,6 +38,8 @@ public class ProductController {
 
     @Autowired
     private ProductService productService;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
     
     @GetMapping("/search")
     @Operation(summary = "List products")
@@ -81,6 +87,7 @@ public class ProductController {
 
     @PostMapping("/add")
     private Object addProduct(@Valid @RequestBody ProductRequest productRequest){
+        httpServletRequest.setAttribute(REQ_INFO,AppTools.convertObjectToJson(productRequest));
         return productService.addProduct(productRequest);
     }
 
@@ -94,11 +101,13 @@ public class ProductController {
 
     @DeleteMapping("/delete/{id}")
     private Object deleteProductById( @PathVariable long id){
+        httpServletRequest.setAttribute(REQ_INFO,"Product ID = " +id);
         return productService.deleteProductById(id);
     }
 
     @PutMapping("/update/{id}")
     private Object updateProductById(@PathVariable long id,@Valid @RequestBody ProductUpdateRequest productUpdateRequest){
+        httpServletRequest.setAttribute(REQ_INFO,"Product ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(productUpdateRequest));
         return productService.updateProductById(id,productUpdateRequest);
     }
 

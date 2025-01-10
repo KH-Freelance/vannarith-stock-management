@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
+import static com.hfsolution.app.constant.AppConstant.*;
+
 import com.hfsolution.feature.stockmanagement.dto.request.schedule.ScheduleRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
@@ -23,6 +25,7 @@ import com.hfsolution.feature.stockmanagement.service.schedule.ScheduleService;
 import com.hfsolution.feature.stockmanagement.service.stock.StockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 
 
@@ -33,6 +36,8 @@ public class ScheduleController {
 
     @Autowired
     private ScheduleService scheduleService;
+    @Autowired
+    private HttpServletRequest httpServletRequest;
 
 
     @GetMapping("/search")

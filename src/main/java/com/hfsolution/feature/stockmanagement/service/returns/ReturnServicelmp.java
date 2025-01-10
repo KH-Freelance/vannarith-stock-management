@@ -286,7 +286,7 @@ public class ReturnServicelmp implements ReturnService {
             //GET TARGET PURCHASE CODE 
             BaseEntityResponseDto<Purchase> targetPurchaseResult = purchaseDao.findByPurchaseCode(targetPurchaseCode);
             if(!targetPurchaseResult.getStatus().equals(SUCCESS) || targetPurchaseResult.getEntity()==null){
-                String msg = AppTools.appGetMessage("048").replace("[code]",sourcePurchaseCode);
+                String msg = AppTools.appGetMessage("048").replace("[code]",targetPurchaseCode);
                 throw new AppException("048",msg,"Y");
             }
             Purchase targetPurchase = targetPurchaseResult.getEntity();
@@ -538,40 +538,32 @@ public class ReturnServicelmp implements ReturnService {
                 
             }
 
+            
             //MINUS PAYMENT
-            
-            // if(purchaseInfo.getPaymentStatus().equals(PaymentStatus.CREDIT)){
-            //     BigDecimal existingPay = purchaseInfo.getTotal();
-            //     for (Payment paymentData : purchaseInfo.getPayments()) {
-            //         if (paymentData.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-            //             existingPay = existingPay.subtract(paymentData.getAmount());
-            //         }else{
-            //             existingPay = existingPay.add(paymentData.getAmount());
-            //         }
-            //     }
-            //     if(refundAmount.compareTo(purchaseInfo.getTotal())==0 ){
-            //         refundAmount = existingPay;
-            //     }
-            //     if(refundAmount.compareTo(existingPay)<0 ){
-
-            //     }
-                
-            // }
-            
-            // System.out.println("===============FINAL PAID"+refundAmount);
-            //
             if(!purchaseInfo.getPaymentStatus().equals(PaymentStatus.PAID)){
-
-                Payment payment = new Payment();
-                payment.setAmount(refundAmount.negate());
-                payment.setId(paymentDao.getPaymentId());
-                payment.setPurchase(purchaseInfo);
-                payment.setAmount(refundAmount.negate());
-                payment.setPaymentMethod("RETURN");
-                paymentDao.saveEntityAsync(payment);
+                
+                BigDecimal remainPayment = purchaseInfo.getTotal();
+                for (Payment paymentData : purchaseInfo.getPayments()) {
+                    remainPayment = paymentData.getAmount().compareTo(BigDecimal.ZERO) > 0 
+                    ? remainPayment.subtract(paymentData.getAmount()) 
+                    : remainPayment.add(paymentData.getAmount());
+                }
+                BigDecimal paymentAmount = refundAmount;
+                if(refundAmount.compareTo(remainPayment)>0){
+                    refundAmount = refundAmount.subtract(remainPayment);
+                    paymentAmount = remainPayment;
+                }
+                if(paymentAmount.compareTo(BigDecimal.ZERO)!=0){
+                    Payment payment = new Payment();
+                    payment.setAmount(paymentAmount.negate());
+                    payment.setId(paymentDao.getPaymentId());
+                    payment.setPurchase(purchaseInfo);
+                    payment.setPaymentMethod("RETURN");
+                    paymentDao.saveEntityAsync(payment);
+                }
                 
             }
-            
+
 
             //SAVE RETURN
             returns.setRefundAmount(refundAmount);

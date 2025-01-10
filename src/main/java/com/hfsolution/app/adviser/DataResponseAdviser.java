@@ -47,11 +47,11 @@ public class DataResponseAdviser implements ResponseBodyAdvice<Object>{
         appLog.setUri(uri);
         appLog.setUserId(userId);
         appLog.setUsername(username);
-        appLog.setAction(action);
+        appLog.setAction("RESPONSE");
         appLog.setRequest(requestInfo);
         appLog.setResponse(body);
+        appLog.setStep(action);
         appLog.writeToLog();
-       
         return body;
     }
 
