@@ -55,6 +55,11 @@ public class ScheduleController {
         return ResponseEntity.ok(scheduleService.search(q,pageNo,pageSize,sort,sortByColum));
     }
 
+    // @GetMapping("/get")
+    // private Object get(){
+    //     return scheduleService.executeTask();
+    // }
+
 
     @PutMapping("/update/{id}")
     private Object updateStockById(@PathVariable long id,@Valid @RequestBody ScheduleRequest scheduleRequest){

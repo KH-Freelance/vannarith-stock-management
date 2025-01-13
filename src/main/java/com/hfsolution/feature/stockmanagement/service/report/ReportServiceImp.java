@@ -4,6 +4,7 @@ import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import static com.hfsolution.app.constant.AppResponseCode.SUCCESS_CODE;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 
+import java.io.ByteArrayOutputStream;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.OutputStream;
@@ -79,6 +80,7 @@ public class ReportServiceImp  implements ReportService{
     private final CustomerDao customerDao;
     private final PurchaseItemDao purchaseItemDao;
     private final ReturnDao returnDao;
+    //private final ProductHistoryDao productHistoryDao;
 
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
@@ -193,6 +195,7 @@ public class ReportServiceImp  implements ReportService{
     @Override
     @Transactional
     public ResponseEntity<Void> excelReportSale(String startDate, String endDate,String productName, String customerName) {
+
         httpServletRequest.setAttribute(ACTION,"REPORT SALE EXCEL");
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long startTime = System.currentTimeMillis();
@@ -214,6 +217,40 @@ public class ReportServiceImp  implements ReportService{
             throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
     }
+
+    @SuppressWarnings("unchecked")
+    @Override
+    @Transactional
+    public File reportSaleFile(String startDate, String endDate,String filename) {
+
+        //httpServletRequest.setAttribute(ACTION, "REPORT SALE EXCEL");
+        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+        long startTime = System.currentTimeMillis();
+
+        try {
+            // Create a temporary file to write the Excel data
+            //File tempFile = File.createTempFile(filename, ".xlsx");
+            File tempFile = new File(System.getProperty("java.io.tmpdir"), filename + ".xlsx");
+            OutputStream outputStream = new FileOutputStream(tempFile);
+            SuccessResponse<ReportSaleDto> result = (SuccessResponse<ReportSaleDto>) this.reportSale(startDate, endDate, null, null);
+            EasyExcel.write(outputStream, SaleDto.class)
+                .registerWriteHandler(AppTools.createCustomStyle()) 
+                .sheet("sale-report") 
+                .doWrite(result.getData().getContent()); 
+            outputStream.close();
+
+            return tempFile;
+
+        } catch (DatabaseException e) {
+            throw e;
+        } catch (AppException e) {
+            throw e;
+        } catch (Exception e) {
+            throw new AppException(FAIL_CODE, e.getMessage(), InfoGenerator.generateInfo(currentMethodName, startTime), true);
+        } 
+    }
+
+
 
     // @Override
     // @Transactional
@@ -565,7 +602,7 @@ public class ReportServiceImp  implements ReportService{
     @Override
     @Transactional
     public Object reportSale(String startDate, String endDate,String productName, String customerName) {
-        httpServletRequest.setAttribute(ACTION,"REPORT SALE");
+        //httpServletRequest.setAttribute(ACTION,"REPORT SALE");
         SuccessResponse<Object> response = new SuccessResponse<>();
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long startTime = System.currentTimeMillis();

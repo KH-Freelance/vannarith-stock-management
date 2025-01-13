@@ -23,17 +23,17 @@ public class Schedule {
     private String functionType; 
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
-    @Column(name = "scheduled_date", nullable = false)
+    @Column(name = "schedule_date", nullable = false)
     private Timestamp scheduleDate;
 
-    @Column(name = "scheduled_type", nullable = false, length = 10)
-    private String scheduledType; 
+    @Column(name = "schedule_type", nullable = false, length = 10)
+    private String scheduleType; 
 
     @Column(name = "active", nullable = false)
-    private Boolean active = true; 
+    private Boolean active ; 
 
     @Column(name = "execute", nullable = false)
-    private Boolean execute = true; 
+    private Boolean execute ; 
 
     @Column(name = "chat_id", length = 100)
     private String chatId; 
@@ -42,7 +42,7 @@ public class Schedule {
     private String telegramToken;
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
-    @Column(name = "last_execute_date", nullable = false)
+    @Column(name = "last_executed_date", nullable = false)
     private Timestamp lastExecuteDate;
 
 }

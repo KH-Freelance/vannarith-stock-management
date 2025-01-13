@@ -17,5 +17,6 @@ public interface ReportService {
     public Object reportPurchase(String startDate, String endDate);
     public Object reportSale(String startDate, String endDate,String productName, String customerName);
     public Object reportReturn(String startDate, String endDate, String customerName);
+    public File reportSaleFile(String startDate, String endDate,String filename);
     //public File excelReportSaleTest(String startDate, String endDate, String productName, String customerName) ;
 }

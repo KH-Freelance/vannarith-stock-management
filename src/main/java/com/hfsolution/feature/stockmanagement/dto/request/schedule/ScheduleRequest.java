@@ -11,15 +11,12 @@ import lombok.Data;
 @Data
 public class ScheduleRequest {
 
-    @NotBlank(message = "Schedule Type is required.")
     @Pattern(
         regexp = "^(WEEKLY|DAILY|MONTHLY)$",
         message = "Schedule Type must be one of the following: WEEKLY, DAILY, MONTHLY."
     )
     private String scheduleType;
-    @NotBlank(message = "Telegram Token is required.")
     private String telegramToken;
-    @NotBlank(message = "Chat ID is required.")
     private String chatId;
     private boolean active;
     @Pattern(

@@ -29,10 +29,10 @@ public class HfSolutionApplication {
 		return args -> {
 
 			// var hak = RegisterRequest.builder()
-            //         .firstname("sainghakpheng2")
-            //         .lastname("sainghakpheng2")
-            //         .email("sainghakpheng2@mail.com")
-            //         .password("sainghakpheng2")
+            //         .firstname("sainghakpheng4")
+            //         .lastname("sainghakpheng4")
+            //         .email("sainghakpheng4@mail.com")
+            //         .password("sainghakpheng4")
             //         .roleId(1)
             //         .build();
             // System.out.println("Hakzin token: " + service.register(hak).getAccessToken());

@@ -106,7 +106,7 @@ public class TelegramRestClientConsumer {
     }
 
     @Async
-    public CompletableFuture<String> sendFileToTelegram(File file, String token, String chatId) {
+    public CompletableFuture<String> sendFileToTelegram(File file, String token, String chatId,String caption) {
         String status = "fail";
         try {
             RestTemplate restTemplate = new RestTemplate();
@@ -114,6 +114,7 @@ public class TelegramRestClientConsumer {
             // Prepare the file
             MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
             body.add("chat_id", chatId);
+            body.add("caption", caption);
             body.add("document", new FileSystemResource(file));
 
             HttpHeaders headers = new HttpHeaders();
