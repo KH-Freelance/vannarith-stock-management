@@ -22,4 +22,4 @@ docker build --platform linux/amd64 --push -t kimsourtann/stock-management:devel
 
 echo "Deploying v$new_version"
 # Deploy to EC2
-ssh -i "$HOME/Downloads/"stock-keypair.pem  ubuntu@ec2-3-17-133-210.us-east-2.compute.amazonaws.com "sed -i 's|image: psainghak/stock-management:develop-v[0-9]*|image: kimsourtann/stock-management:develop-v"$new_version"|' stockmanagement/docker-compose.yml &&   docker compose -f stockmanagement/docker-compose.yml up -d"
+ssh -i "$HOME/Downloads/"stock-keypair.pem  ubuntu@ec2-3-17-133-210.us-east-2.compute.amazonaws.com "sed -i 's|image: kimsourtann/stock-management:develop-v[0-9]*|image: kimsourtann/stock-management:develop-v"$new_version"|' stockmanagement/docker-compose.yml &&   docker compose -f stockmanagement/docker-compose.yml up -d"

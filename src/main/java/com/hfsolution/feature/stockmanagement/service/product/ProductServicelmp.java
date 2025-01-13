@@ -42,7 +42,6 @@ import com.hfsolution.feature.stockmanagement.dto.request.product.ProductRequest
 import com.hfsolution.feature.stockmanagement.dto.request.product.ProductUpdateRequest;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Product;
-import com.hfsolution.feature.stockmanagement.entity.ProductHistory;
 import com.hfsolution.feature.stockmanagement.util.product.ExcelUtil;
 
 import jakarta.servlet.http.HttpServletRequest;

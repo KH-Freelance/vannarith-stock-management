@@ -26,6 +26,15 @@ import io.swagger.v3.oas.annotations.servers.Server;
                 termsOfService = "Terms of service"
         ),
         servers = {
+                
+                @Server(
+                        description = "DEV ENV HTTPS",
+                        url = "https://dev-api.pe-supplykh.com"
+                ),
+                @Server(
+                        description = "DEV ENV",
+                        url = "http://ec2-3-17-133-210.us-east-2.compute.amazonaws.com"
+                ),
                 @Server(
                         description = "Local ENV",
                         url = "http://localhost:8080"
