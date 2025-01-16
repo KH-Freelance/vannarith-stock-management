@@ -17,11 +17,12 @@ import org.springframework.web.multipart.MultipartFile;
 
 import static com.hfsolution.app.constant.AppConstant.*;
 
-import com.hfsolution.feature.stockmanagement.dto.request.schedule.ScheduleRequest;
+import com.hfsolution.app.util.AppTools;
+import com.hfsolution.feature.stockmanagement.dto.request.configuration.ConfigurationRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
+import com.hfsolution.feature.stockmanagement.service.configuration.ConfigurationService;
 import com.hfsolution.feature.stockmanagement.service.product.ProductService;
-import com.hfsolution.feature.stockmanagement.service.schedule.ScheduleService;
 import com.hfsolution.feature.stockmanagement.service.stock.StockService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.Parameter;
@@ -31,11 +32,11 @@ import jakarta.validation.Valid;
 
 
 @RestController
-@RequestMapping("/schedule")
-public class ScheduleController {
+@RequestMapping("/configuration/system")
+public class ConfigurationController {
 
     @Autowired
-    private ScheduleService scheduleService;
+    private ConfigurationService scheduleService;
     @Autowired
     private HttpServletRequest httpServletRequest;
 
@@ -62,8 +63,9 @@ public class ScheduleController {
 
 
     @PutMapping("/update/{id}")
-    private Object updateStockById(@PathVariable long id,@Valid @RequestBody ScheduleRequest scheduleRequest){
-        return scheduleService.updateScheduleConfig(id,scheduleRequest);
+    private Object updateStockById(@PathVariable long id,@Valid @RequestBody ConfigurationRequest scheduleRequest){
+        httpServletRequest.setAttribute(REQ_INFO,AppTools.convertObjectToJson(scheduleRequest));
+        return scheduleService.updateConfiguration(id,scheduleRequest);
     }
 
 

@@ -7,11 +7,14 @@ import static com.hfsolution.app.constant.AppResponseStatus.SUCCESS;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
+import java.text.DecimalFormat;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+import java.util.concurrent.CompletableFuture;
+import java.util.stream.Collectors;
 
 import org.apache.commons.math3.analysis.function.Log;
 import org.springframework.beans.BeanUtils;
@@ -27,12 +30,14 @@ import com.hfsolution.app.dto.PageRequestDto;
 import com.hfsolution.app.dto.SuccessResponse;
 import com.hfsolution.app.exception.AppException;
 import com.hfsolution.app.exception.DatabaseException;
+import com.hfsolution.app.external.telegram.TelegramRestClientConsumer;
 import com.hfsolution.app.services.CustomSpecification;
 
 import com.hfsolution.app.util.AppTools;
 import com.hfsolution.app.util.CSVHelper;
 import com.hfsolution.app.util.InfoGenerator;
 import com.hfsolution.feature.auth.services.AuthenticationService;
+import com.hfsolution.feature.stockmanagement.dao.ConfigurationDao;
 import com.hfsolution.feature.stockmanagement.dao.CustomerDao;
 import com.hfsolution.feature.stockmanagement.dao.PaymentDao;
 import com.hfsolution.feature.stockmanagement.dao.ProductDao;
@@ -51,6 +56,7 @@ import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseReque
 import com.hfsolution.feature.stockmanagement.dto.request.purchase.PurchaseRequest.ProductPurchase;
 import com.hfsolution.feature.stockmanagement.dto.stock.StockDto;
 import com.hfsolution.feature.stockmanagement.dto.stock.UnpaidDto;
+import com.hfsolution.feature.stockmanagement.entity.Configuration;
 import com.hfsolution.feature.stockmanagement.entity.Customer;
 import com.hfsolution.feature.stockmanagement.entity.Payment;
 import com.hfsolution.feature.stockmanagement.entity.Product;
@@ -89,6 +95,9 @@ public class PurchaseServicelmp implements PurchaseService {
     private final ProductDao productDao;
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
+    private final ConfigurationDao configurationDao;
+    private final String functionTypeNotification = "SALE";
+    private final TelegramRestClientConsumer telegramRestClientConsumer;
     // private final String CSV_FILENAME="purchase";
 
     @Override
@@ -294,6 +303,7 @@ public class PurchaseServicelmp implements PurchaseService {
         long startTime = System.currentTimeMillis();
         try {
 
+            CompletableFuture<BaseEntityResponseDto<Configuration>> futureFunctionTypeNotification = configurationDao.findFunctionTypeAndActiveTrue(functionTypeNotification); 
             //GET USER 
             Long userId = (Long) Optional.ofNullable(httpServletRequest.getAttribute(USERID)).orElseThrow(() -> new AppException("002", "User ID is null"));
             Optional<User> userResult = userRepository.findById(userId);
@@ -459,9 +469,25 @@ public class PurchaseServicelmp implements PurchaseService {
                     paymentDao.saveEntity(payment);
                 }
 
+                DecimalFormat formatAmt =  new DecimalFormat("#,##0.00");
+                BaseEntityResponseDto<Configuration>functionTypeNotificationResult =  futureFunctionTypeNotification.get();
+                Configuration functionTypeNotification = functionTypeNotificationResult.getEntity();
+                if(functionTypeNotificationResult.getEntity()!=null){
+                    String alertingMessage = AppTools.appGetMessage("073")
+                    .replace("[sale_code]", purchase.getPurchaseCode())
+                    //.replace("[product]",products)
+                    .replace("[customer]", purchase.getCustomer().getCustomerName())
+                    .replace("[qty]", String.valueOf(purchase.getQty()))
+                    .replace("[discount]", formatAmt.format(purchase.getDiscount()))
+                    .replace("[total]", formatAmt.format(purchase.getTotal()))
+                    .replace("[payment_type]", String.valueOf(purchase.getPaymentType()))
+                    .replace("[payment_status]",String.valueOf(purchase.getPaymentStatus()))
+                    .replace("[user]", purchase.getUser().getUsername());
+                    telegramRestClientConsumer.alerting(alertingMessage,functionTypeNotification.getTelegramToken(),functionTypeNotification.getChatId());
+                }
+
             }
             
-
             response.setStatus(SUCCESS);
             response.setCode("034");
             response.setMsg(AppTools.appGetMessage("034"));

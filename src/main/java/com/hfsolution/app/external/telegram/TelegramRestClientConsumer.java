@@ -71,6 +71,48 @@ public class TelegramRestClientConsumer {
         return CompletableFuture.completedFuture(status);
     }
 
+    // @Async
+    // public CompletableFuture<String> alerting(String caption,String token, String chatId) {
+    //     String status = "fail";
+    //     try {
+    //         RestTemplate restTemplate = new RestTemplate();
+
+    //         // Prepare the file
+    //         MultiValueMap<String, Object> body = new LinkedMultiValueMap<>();
+    //         body.add("chat_id", chatId);
+    //         body.add("message", caption);
+
+    //         HttpHeaders headers = new HttpHeaders();
+    //         headers.setContentType(MediaType.MULTIPART_FORM_DATA);
+
+    //         HttpEntity<MultiValueMap<String, Object>> requestEntity = new HttpEntity<>(body, headers);
+
+    //         // Send the request
+    //         restTemplate.exchange(
+    //             env.getProperty("rest.telegram.business.url") + token + "/sendMessage",
+    //             HttpMethod.POST,
+    //             requestEntity,
+    //             String.class
+    //         );
+
+    //         // // Handle the response
+    //         // if (response.getStatusCode().is2xxSuccessful()) {
+    //         //     status = "success";
+    //         //     System.out.println("File sent successfully!");
+    //         // } else {
+    //         //     System.err.println("Failed to send the file: " + response.getBody());
+    //         // }
+
+    //     } catch (Exception e) {
+    //         // e.printStackTrace();
+    //         var appLog = new AppLog<>();
+    //         appLog.setInfo(e.getMessage()+" <-> "+caption);
+    //         appLog.setAction("Alerting Action");
+    //         appLog.writeToLog();
+    //     }
+    //     return CompletableFuture.completedFuture(status);
+    // }
+
     
     
 
@@ -142,6 +184,54 @@ public class TelegramRestClientConsumer {
         }
         return CompletableFuture.completedFuture(status);
     }
+
+    public ChatInfoResponse getChatInfo(String token, String chatId) {
+
+        ChatInfoResponse response = new ChatInfoResponse(); 
+        String url = env.getProperty("rest.telegram.business.url") + token + "/getChat?chat_id="+chatId; 
+        
+        try {
+            RestTemplate restTemplate = new RestTemplate(); 
+            ResponseEntity<ChatInfoResponse> entity = restTemplate.exchange(
+                url,
+                HttpMethod.GET,
+                null, 
+                ChatInfoResponse.class
+            );
+            response = entity.getBody(); 
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
+        
+        return response; 
+    }
+    
+    @Async
+    public CompletableFuture<String> alerting(String message,String token, String chatId) {
+        String status = "fail";
+        String url = env.getProperty("rest.telegram.business.url") + token + "/sendMessage?chat_id="+chatId+"&text="+message+"&parse_mode=HTML";
+        try {
+            RestTemplate restTemplate = new RestTemplate();
+
+            restTemplate.exchange(
+                url,
+                HttpMethod.POST,
+                null, 
+                ChatInfoResponse.class
+            );
+
+
+        } catch (Exception e) {
+            // e.printStackTrace();
+            var appLog = new AppLog<>();
+            appLog.setInfo(e.getMessage()+" <-> "+message);
+            appLog.setAction("Alerting Action");
+            appLog.writeToLog();
+        }
+        return CompletableFuture.completedFuture(status);
+    }
+
+    
 
 
 }

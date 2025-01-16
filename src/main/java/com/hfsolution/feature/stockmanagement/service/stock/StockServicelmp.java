@@ -61,6 +61,7 @@ import com.hfsolution.feature.stockmanagement.entity.StockHistory;
 import com.hfsolution.feature.stockmanagement.util.stock.ExcelUtil;
 import com.hfsolution.feature.user.repository.UserRepository;
 
+import io.netty.util.internal.StringUtil;
 import lombok.RequiredArgsConstructor;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.servlet.http.HttpServletResponse;
@@ -384,7 +385,7 @@ public class StockServicelmp implements StockService {
             calculatePercentageOfQty(stockResult.getPage());
             Page<StockDto> stockDtoPage = stockResult.getPage().map(stock ->{
                 StockDto stockDto = new StockDto();
-                stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName()));
+                stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName(),stock.getProduct().getPrice()));
                 BeanUtils.copyProperties(stock, stockDto);
                 return stockDto;
             });

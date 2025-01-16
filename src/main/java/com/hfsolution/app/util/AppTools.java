@@ -4,6 +4,7 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.text.SimpleDateFormat;
+import java.time.DayOfWeek;
 import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.format.DateTimeFormatter;
@@ -66,6 +67,26 @@ public class AppTools {
         
     }
 
+    public static DayOfWeek convertToDayOfWeek(String day) {
+    switch (day) {
+        case "MON":
+            return DayOfWeek.MONDAY;
+        case "TUE":
+            return DayOfWeek.TUESDAY;
+        case "WED":
+            return DayOfWeek.WEDNESDAY;
+        case "THU":
+            return DayOfWeek.THURSDAY;
+        case "FRI":
+            return DayOfWeek.FRIDAY;
+        case "SAT":
+            return DayOfWeek.SATURDAY;
+        case "SUN":
+            return DayOfWeek.SUNDAY;
+        default:
+            throw new IllegalArgumentException("Invalid day of week abbreviation: " + day);
+    }
+}
     
 
 

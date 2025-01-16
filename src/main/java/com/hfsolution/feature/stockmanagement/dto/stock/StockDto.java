@@ -5,6 +5,8 @@ import java.sql.Timestamp;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import com.hfsolution.app.util.BigDecimalSerializer;
 import com.hfsolution.app.util.TimestampConverter;
 
 import jakarta.persistence.Column;
@@ -39,5 +41,6 @@ public class StockDto {
     public static class Product {
         long id;
         String productName;
+        BigDecimal price;
     }
 }

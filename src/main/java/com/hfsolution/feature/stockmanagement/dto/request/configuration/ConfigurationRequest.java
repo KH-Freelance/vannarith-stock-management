@@ -1,4 +1,4 @@
-package com.hfsolution.feature.stockmanagement.dto.request.schedule;
+package com.hfsolution.feature.stockmanagement.dto.request.configuration;
 
 
 import java.math.BigDecimal;
@@ -9,20 +9,26 @@ import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
-public class ScheduleRequest {
+public class ConfigurationRequest {
 
     @Pattern(
         regexp = "^(WEEKLY|DAILY|MONTHLY)$",
         message = "Schedule Type must be one of the following: WEEKLY, DAILY, MONTHLY."
     )
+    //@NotBlank(message = "Schedule Type is required.")
     private String scheduleType;
+    //@NotBlank(message = "Telegram Tokenis required.")
     private String telegramToken;
+    //@NotBlank(message = "Chat ID is required.")
     private String chatId;
     private boolean active;
     @Pattern(
-    regexp = "^\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}$",
-    message = "Schedule datetime must be in the format yyyy-MM-dd HH:mm."
+    regexp = "^\\d{2}:\\d{2}$",
+    message = "Time must be in the format HH:mm."
     )
-    private String scheduleDate;
+    //@NotBlank(message = "Time is required.")
+    private String time;
+    private Long dayOfMonth;
+    private String dayOfWeek;
     
 }

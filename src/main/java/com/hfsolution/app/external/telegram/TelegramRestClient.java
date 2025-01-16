@@ -15,6 +15,8 @@ public interface TelegramRestClient {
     @GetMapping("/sendMessage")
     Object sentMonitorMsg(@RequestParam("chat_id") String chatId, @RequestParam("text") String message);
 
+    
+
 
 }
 
