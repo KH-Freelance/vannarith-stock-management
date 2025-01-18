@@ -8,6 +8,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.DecimalFormat;
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.HashMap;
 import java.util.List;
@@ -18,6 +19,7 @@ import java.util.stream.Collectors;
 
 import org.apache.commons.math3.analysis.function.Log;
 import org.springframework.beans.BeanUtils;
+import org.springframework.cglib.core.Local;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
@@ -301,6 +303,7 @@ public class PurchaseServicelmp implements PurchaseService {
         SuccessResponse<Purchase> response = new SuccessResponse<>();
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
         long startTime = System.currentTimeMillis();
+        LocalDate currentDate = LocalDate.now();
         try {
 
             CompletableFuture<BaseEntityResponseDto<Configuration>> futureFunctionTypeNotification = configurationDao.findFunctionTypeAndActiveTrue(functionTypeNotification); 
@@ -370,12 +373,26 @@ public class PurchaseServicelmp implements PurchaseService {
                 Product product = stock.getProduct();
                 productMap.put(stock.getProductId(),product);
                 stockMap.put(data.getStockId(), stock);
+                if(stock.getExpiryDate().toLocalDateTime().toLocalDate().compareTo(currentDate) <= 0){
+                    String msg = AppTools.appGetMessage("074")
+                    .replace("[batch]",stock.getBatchId())
+                    .replace("[product]",product.getProductName())
+                    .replace("[expiry_date]",String.valueOf(stock.getExpiryDate().toLocalDateTime().toLocalDate()));
+                    throw new AppException("074",msg,"Y");
+                }
                 if(stock.getQty() == null || stock.getQty() <= 0){
-                    String msg = AppTools.appGetMessage("047").replace("[product]",stock.getBatchId()+":"+product.getProductName());;
+                    // String msg = AppTools.appGetMessage("047")
+                    // .replace("[product]",stock.getBatchId()+":"+product.getProductName());;
+                    String msg = AppTools.appGetMessage("047")
+                    .replace("[batch]",stock.getBatchId())
+                    .replace("[product]",product.getProductName());
                     throw new AppException("047",msg,"Y");
                 }
                 if(stock.getQty() < data.getQty()){
-                    String msg = AppTools.appGetMessage("047").replace("[product]",stock.getBatchId()+":"+product.getProductName());;
+                    // String msg = AppTools.appGetMessage("047").replace("[product]",stock.getBatchId()+":"+product.getProductName());;
+                    String msg = AppTools.appGetMessage("047")
+                    .replace("[batch]",stock.getBatchId())
+                    .replace("[product]",product.getProductName());
                     throw new AppException("047",msg,"Y");
                 }
                 
