@@ -108,55 +108,135 @@ public class CustomSpecification<T> implements Specification<T> {
 
     //     return null;
     // }
+    // @SuppressWarnings({ "rawtypes", "unchecked" })
+    // private Predicate handleStandardField(Root<T> root, CriteriaBuilder criteriaBuilder, String key, String value) {
+    //     String[] nestedKeys = key.split("\\.");
+        
+    //     // Handle nested properties using join
+    //     Path<?> path = root;
+    //     for (int i = 0; i < nestedKeys.length - 1; i++) {
+    //         path = ((From<?, ?>) path).join(nestedKeys[i]);
+    //     }
+    //     String field = nestedKeys[nestedKeys.length - 1];
+        
+    //     if (value.matches("^\\[.*~.*\\]$")) {
+    //         // Range match: k=[min~max]
+    //         String[] range = value.substring(1, value.length() - 1).split("~");
+    //         if (range.length == 2) {
+    //             Comparable min = (Comparable) parseValue(range[0].trim());
+    //             Comparable max = (Comparable) parseValue(range[1].trim());
+    //             Expression<? extends Comparable> nestedPath = path.get(field);
+    //             return criteriaBuilder.between(nestedPath, min, max);
+    //         }
+    //     } else if (value.matches("^\\{.*\\}$")) {
+    //         // Union list: k={v1 v2 v3}
+    //         String[] values = value.substring(1, value.length() - 1).split(" ");
+    //         return path.get(field).in(Arrays.asList(values));
+    //     } else if (value.matches("^\\(.*\\)$")) {
+    //         // Intersection list: k=(v1 v2 v3)
+    //         String[] values = value.substring(1, value.length() - 1).split(" ");
+    //         List<Predicate> orPredicates = new ArrayList<>();
+    //         for (String val : values) {
+    //             orPredicates.add(criteriaBuilder.equal(path.get(field), parseValue(val)));
+    //         }
+    //         return criteriaBuilder.and(orPredicates.toArray(new Predicate[0]));
+    //     } else if (value.startsWith("~")) {
+    //         // Fuzzy match: k=~v (case-insensitive)
+    //         return criteriaBuilder.like(
+    //             criteriaBuilder.lower(path.get(field)),
+    //             "%" + value.substring(1).toLowerCase() + "%"
+    //         );
+    //     } else if (value.startsWith("!{")) {
+    //         // Not in list: k=!{v1 v2 v3}
+    //         String[] values = value.substring(2, value.length() - 1).split(" ");
+    //         return criteriaBuilder.not(path.get(field).in(Arrays.asList(values)));
+    //     } else {
+    //         // Exact match: k=v
+    //         return criteriaBuilder.equal(path.get(field), parseValue(value));
+    //     }
+        
+    //     return null;
+    // }
+
     @SuppressWarnings({ "rawtypes", "unchecked" })
     private Predicate handleStandardField(Root<T> root, CriteriaBuilder criteriaBuilder, String key, String value) {
         String[] nestedKeys = key.split("\\.");
-        
+    
         // Handle nested properties using join
         Path<?> path = root;
         for (int i = 0; i < nestedKeys.length - 1; i++) {
             path = ((From<?, ?>) path).join(nestedKeys[i]);
         }
         String field = nestedKeys[nestedKeys.length - 1];
-        
-        if (value.matches("^\\[.*~.*\\]$")) {
-            // Range match: k=[min~max]
+    
+        Expression<? extends Comparable> nestedPath = path.get(field);
+    
+        // Comparison Operators
+        if (value.startsWith(">=")) {
+            return criteriaBuilder.greaterThanOrEqualTo(nestedPath, (Comparable) parseValue(value.substring(2).trim()));
+        } else if (value.startsWith("<=")) {
+            return criteriaBuilder.lessThanOrEqualTo(nestedPath, (Comparable) parseValue(value.substring(2).trim()));
+        } else if (value.startsWith(">")) {
+            return criteriaBuilder.greaterThan(nestedPath, (Comparable) parseValue(value.substring(1).trim()));
+        } else if (value.startsWith("<")) {
+            return criteriaBuilder.lessThan(nestedPath, (Comparable) parseValue(value.substring(1).trim()));
+        }
+    
+        // Range match: k=[min~max]
+        else if (value.matches("^\\[.*~.*\\]$")) {
             String[] range = value.substring(1, value.length() - 1).split("~");
             if (range.length == 2) {
                 Comparable min = (Comparable) parseValue(range[0].trim());
                 Comparable max = (Comparable) parseValue(range[1].trim());
-                Expression<? extends Comparable> nestedPath = path.get(field);
                 return criteriaBuilder.between(nestedPath, min, max);
             }
-        } else if (value.matches("^\\{.*\\}$")) {
-            // Union list: k={v1 v2 v3}
+        }
+    
+        // Union list: k={v1 v2 v3}
+        else if (value.matches("^\\{.*\\}$")) {
             String[] values = value.substring(1, value.length() - 1).split(" ");
-            return path.get(field).in(Arrays.asList(values));
-        } else if (value.matches("^\\(.*\\)$")) {
-            // Intersection list: k=(v1 v2 v3)
+            List<Object> parsedValues = Arrays.stream(values)
+                    .map(this::parseValue)
+                    .toList();
+            return path.get(field).in(parsedValues);
+        }
+    
+        // Intersection list: k=(v1 v2 v3)
+        else if (value.matches("^\\(.*\\)$")) {
             String[] values = value.substring(1, value.length() - 1).split(" ");
             List<Predicate> orPredicates = new ArrayList<>();
             for (String val : values) {
                 orPredicates.add(criteriaBuilder.equal(path.get(field), parseValue(val)));
             }
             return criteriaBuilder.and(orPredicates.toArray(new Predicate[0]));
-        } else if (value.startsWith("~")) {
-            // Fuzzy match: k=~v (case-insensitive)
+        }
+    
+        // Fuzzy match: k=~v (case-insensitive)
+        else if (value.startsWith("~")) {
             return criteriaBuilder.like(
                 criteriaBuilder.lower(path.get(field)),
                 "%" + value.substring(1).toLowerCase() + "%"
             );
-        } else if (value.startsWith("!{")) {
-            // Not in list: k=!{v1 v2 v3}
+        }
+    
+        // Not in list: k=!{v1 v2 v3}
+        else if (value.startsWith("!{")) {
             String[] values = value.substring(2, value.length() - 1).split(" ");
-            return criteriaBuilder.not(path.get(field).in(Arrays.asList(values)));
-        } else {
-            // Exact match: k=v
+            List<Object> parsedValues = Arrays.stream(values)
+                    .map(this::parseValue)
+                    .toList();
+            return criteriaBuilder.not(path.get(field).in(parsedValues));
+        }
+    
+        // Exact match: k=v
+        else {
             return criteriaBuilder.equal(path.get(field), parseValue(value));
         }
-        
+    
         return null;
     }
+    
+
 
 
 

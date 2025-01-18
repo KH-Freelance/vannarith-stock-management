@@ -9,11 +9,16 @@ import java.math.BigDecimal;
 import java.sql.Timestamp;
 import java.text.ParseException;
 import java.util.ArrayList;
+import java.util.Collections;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 import org.springframework.beans.BeanUtils;
 import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort.Direction;
 import org.springframework.data.jpa.domain.Specification;
@@ -61,73 +66,112 @@ public class CustomerServicelmp implements CustomerService {
     private final PurchaseDao purchaseDao;
     private final HttpServletRequest httpServletRequest;
     private final HttpServletResponse httpServletResponse;
-    private final String CSV_FILENAME= "customer";
 
     @Override
     @Transactional
     public Object search(String q, int pageNo, int pageSize, Direction sort, String sortByColum) {
+    httpServletRequest.setAttribute(ACTION, "SEARCH CUSTOMER");
+    SuccessResponse<Object> response = new SuccessResponse<>();
+    String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
+    long startTime = System.currentTimeMillis();
+    try {
 
-        httpServletRequest.setAttribute(ACTION,"SEARCH CUSTOMER");
-        SuccessResponse<Object> response = new SuccessResponse<>();
-        String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
-        long startTime = System.currentTimeMillis();
-        try {
-
-            Specification<Customer> customers = new CustomSpecification<>(q);
-            PageRequestDto pageRequestDto = new PageRequestDto();
-            pageRequestDto.setPageNo(pageNo);
-            pageRequestDto.setPageSize(pageSize);
-            pageRequestDto.setSort(sort);
-            pageRequestDto.setSortByColumn(sortByColum);
-            Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
-            BaseEntityResponseDto<Customer> customerResult = customerDao.search(customers,pageable);
-            if(!customerResult.getStatus().equals(SUCCESS) || customerResult.getPage()==null){
-                String msg = AppTools.appGetMessage("015");
-            
-                throw new AppException("015",msg);
-            }
-
-            for (Customer customer : customerResult.getPage().getContent()) {
-
-                // Calculate Credit
-                BigDecimal credit = BigDecimal.ZERO;
-                for (Purchase purchase : customer.getPurchases()) {
-                    if(purchase.getPaymentType().compareTo(PaymentType.CASH) == 0 || purchase.getPaymentStatus().compareTo(PaymentStatus.PAID) == 0) continue;
-                    BigDecimal totalAoumtPaid = BigDecimal.ZERO;
-                    for (Payment payment : purchase.getPayments()) {
-                        totalAoumtPaid = totalAoumtPaid.add(payment.getAmount());
-                    }
-                    credit = credit.add(purchase.getTotal().subtract(totalAoumtPaid));
-                    
-                }
-                customer.setCredit(credit);
-            }
-
-            Page<CustomerDto> customerDtoPage = customerResult.getPage().map(customer ->{
-                CustomerDto customerDto = new CustomerDto();
-                BeanUtils.copyProperties(customer, customerDto);
-
-                // Product product = productDao.findByProductID(stock.getProductId()).getEntity();
-
-                // stockDto.setProduct(new StockDto.Product(product.getId(), product.getProductName()));
-                return customerDto;
-            });
-            
-            
-            response.setStatus(SUCCESS);
-            response.setCode(SUCCESS_CODE);
-            response.setData(customerDtoPage);
-            return response;
-
-        }catch (DatabaseException e) {
-            throw e;   
-        }catch (AppException e) {
-            throw e;   
-        }catch(Exception e){
-            throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
+        Specification<Customer> customers = new CustomSpecification<>(this.removeCreditKey(q));
+        PageRequestDto pageRequestDto = new PageRequestDto();
+        pageRequestDto.setPageNo(pageNo);
+        pageRequestDto.setPageSize(pageSize);
+        pageRequestDto.setSort(sort);
+        pageRequestDto.setSortByColumn(sortByColum);
+        Pageable pageable = new PageRequestDto().getPageable(pageRequestDto);
+        BaseEntityResponseDto<Customer> customerResult = customerDao.search(customers, pageable);
+        if (!customerResult.getStatus().equals(SUCCESS) || customerResult.getPage() == null) {
+            String msg = AppTools.appGetMessage("015");
+            throw new AppException("015", msg);
         }
-       
-    } 
+
+        // Calculate credit for each customer
+        for (Customer customer : customerResult.getPage().getContent()) {
+            BigDecimal credit = BigDecimal.ZERO;
+            for (Purchase purchase : customer.getPurchases()) {
+                if (purchase.getPaymentType().compareTo(PaymentType.CASH) == 0 || purchase.getPaymentStatus().compareTo(PaymentStatus.PAID) == 0) continue;
+                BigDecimal totalAmountPaid = BigDecimal.ZERO;
+                for (Payment payment : purchase.getPayments()) {
+                    totalAmountPaid = totalAmountPaid.add(payment.getAmount());
+                }
+                credit = credit.add(purchase.getTotal().subtract(totalAmountPaid));
+            }
+            customer.setCredit(credit);
+        }
+
+        // Extract query parameters and apply filtering logic
+        List<Customer> finalResult = customerResult.getPage().getContent();
+        Map<String, String> resultParseQuery = this.parseQuery(q);
+        for (Map.Entry<String, String> entry : resultParseQuery.entrySet()) {
+            String value = entry.getValue();
+            if (entry.getKey().equalsIgnoreCase("credit")) {
+                if (value.matches("^\\[.*~.*\\]$")) {
+                    String[] range = value.substring(1, value.length() - 1).split("~");
+                    if (range.length == 2) {
+                        BigDecimal minCredit = new BigDecimal(range[0]);
+                        BigDecimal maxCredit = new BigDecimal(range[1]);
+                        finalResult = finalResult.stream()
+                                .filter(c -> c.getCredit() != null && c.getCredit().compareTo(minCredit) >= 0 && c.getCredit().compareTo(maxCredit) <= 0)
+                                .collect(Collectors.toList());
+                    }
+                }else if (value.startsWith(">=")) {
+                    BigDecimal minCredit = new BigDecimal(value.substring(2).trim());
+                    finalResult = finalResult.stream()
+                                .filter(c -> c.getCredit() != null && c.getCredit().compareTo(minCredit) >= 0)
+                                .collect(Collectors.toList());
+                } else if (value.startsWith("<=")) {
+                    BigDecimal minCredit = new BigDecimal(value.substring(2).trim());
+                    finalResult = finalResult.stream()
+                                .filter(c -> c.getCredit() != null &&  c.getCredit().compareTo(minCredit) <= 0)
+                                .collect(Collectors.toList());
+                } else if (value.startsWith(">")) {
+                    BigDecimal minCredit = new BigDecimal(value.substring(1).trim());
+                    finalResult = finalResult.stream()
+                                .filter(c -> c.getCredit() != null && c.getCredit().compareTo(minCredit) > 0 )
+                                .collect(Collectors.toList());
+                } else if (value.startsWith("<")) {
+                    BigDecimal minCredit = new BigDecimal(value.substring(1).trim());
+                    finalResult = finalResult.stream()
+                                .filter(c -> c.getCredit() != null && c.getCredit().compareTo(minCredit) < 0)
+                                .collect(Collectors.toList());
+                }
+            }
+        }
+
+        // Pagination on the filtered result
+        int fromIndex = (pageNo - 1) * pageSize;
+        int toIndex = Math.min(fromIndex + pageSize, finalResult.size());
+        if (fromIndex >= finalResult.size()) {
+            return new PageImpl<>(Collections.emptyList(), pageable, finalResult.size());
+        }
+
+        List<Customer> paginatedResult = finalResult.subList(fromIndex, toIndex);
+        Page<CustomerDto> customerDtoPage = new PageImpl<>(paginatedResult.stream()
+                .map(customer -> {
+                    CustomerDto customerDto = new CustomerDto();
+                    BeanUtils.copyProperties(customer, customerDto);
+                    return customerDto;
+                })
+                .collect(Collectors.toList()), pageable, finalResult.size());
+
+        response.setStatus(SUCCESS);
+        response.setCode(SUCCESS_CODE);
+        response.setData(customerDtoPage);
+        return response;
+
+    } catch (DatabaseException e) {
+        throw e;
+    } catch (AppException e) {
+        throw e;
+    } catch (Exception e) {
+        throw new AppException(FAIL_CODE, e.getMessage(), InfoGenerator.generateInfo(currentMethodName, startTime), true);
+    }
+}
+
 
     @Override
     public void export(String q) {
@@ -290,6 +334,50 @@ public class CustomerServicelmp implements CustomerService {
             throw new AppException(FAIL_CODE,e.getMessage(),InfoGenerator.generateInfo(currentMethodName, startTime),true);
         }
 
+    }
+
+
+    private Map<String, String> parseQuery(String queryString) {
+        Map<String, String> map = new HashMap<>();
+       if(queryString!=null&&!queryString.isEmpty()){
+        String[] queries = queryString.split(",");
+        for (String query : queries) {
+            String[] keyValue = query.split("=", 2);
+            if (keyValue.length == 2) {
+                map.put(keyValue[0].trim(), keyValue[1].trim());
+            }
+        }
+       }
+        return map;
+    }
+
+    private Object parseValue(String value) {
+        // Attempt to parse as Integer
+        try {
+            return Integer.parseInt(value);
+        } catch (NumberFormatException e1) {
+            // Attempt to parse as BigDecimal
+            try {
+                return new BigDecimal(value);
+            } catch (NumberFormatException e2) {
+                // Attempt to parse as Boolean
+                if (value.equalsIgnoreCase("true") || value.equalsIgnoreCase("false")) {
+                    return Boolean.parseBoolean(value);
+                }
+                // Attempt to parse as LocalDateTime
+                try {
+                    return AppTools.formatDateStringToTimestamp(value,"yyyy-MM-dd HH:mm:ss.SSS");
+                } catch (Exception e3) {
+                    // Handle strings with quotes
+                    return value;
+                }
+            }
+        }
+    }
+    
+    private  String removeCreditKey(String input) {
+        // Regex to match "credit=..." with different formats, including `>=`, `<=`, `<`, `>`, and `[...]`
+        return input.replaceAll("credit=(\\[.*?\\]|[<>]=?.*?),?\\s*", "").trim();
     }
    
     

@@ -72,7 +72,7 @@ public class ProductServicelmp implements ProductService {
         try {
 
             BaseEntityResponseDto<Product> productResult = productDao.findByProductName(productRequest.getProductName());
-            if(productResult.getEntity()!=null){
+            if(productResult.getEntity()!=null && !productResult.getEntity().isDeleted()){
                 String msg = AppTools.appGetMessage("010");
                 throw new AppException("010",msg);
             }
