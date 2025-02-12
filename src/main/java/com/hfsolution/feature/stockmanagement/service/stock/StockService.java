@@ -5,7 +5,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.dto.BaseEntityResponseDto;
-
+import com.hfsolution.feature.stockmanagement.dto.request.stock.AdjustQty;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 
@@ -19,8 +19,8 @@ public interface StockService {
     public void export(String q);
     public Object importData(MultipartFile file);
     public Object addStock(StockRequest productRequest);
-    public Object addQuantity(Long id ,StockUpdateRequest productRequest);
-    public Object removeQuantity(Long id ,StockUpdateRequest productRequest);
+    public Object addQuantity(Long id ,AdjustQty productRequest);
+    public Object removeQuantity(Long id ,AdjustQty productRequest);
     public Object updateStock(Long id , StockUpdateRequest productRequest);   
     public Object deleteStockById(Long id);
     

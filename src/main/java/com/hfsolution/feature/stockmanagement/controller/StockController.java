@@ -16,6 +16,7 @@ import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.hfsolution.app.util.AppTools;
+import com.hfsolution.feature.stockmanagement.dto.request.stock.AdjustQty;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.stockmanagement.service.product.ProductService;
@@ -96,15 +97,15 @@ public class StockController {
     }
 
     @PutMapping("/add-quantity/{id}")
-    private Object addQuantity(@PathVariable long id,@Valid @RequestBody StockUpdateRequest stockUpdateRequest){
-        httpServletRequest.setAttribute(REQ_INFO,"Stock ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(stockUpdateRequest));
-        return stockService.addQuantity(id,stockUpdateRequest);
+    private Object addQuantity(@PathVariable long id,@Valid @RequestBody AdjustQty adjustQty){
+        httpServletRequest.setAttribute(REQ_INFO,"Stock ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(adjustQty));
+        return stockService.addQuantity(id,adjustQty);
     }
 
     @PutMapping("/remove-quantity/{id}")
-    private Object removeQuantity(@PathVariable long id,@Valid @RequestBody StockUpdateRequest stockUpdateRequest){
-        httpServletRequest.setAttribute(REQ_INFO,"Stock ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(stockUpdateRequest));
-        return stockService.removeQuantity(id,stockUpdateRequest);
+    private Object removeQuantity(@PathVariable long id,@Valid @RequestBody AdjustQty adjustQty){
+        httpServletRequest.setAttribute(REQ_INFO,"Stock ID = " +id+",  Detail-Req = "+AppTools.convertObjectToJson(adjustQty));
+        return stockService.removeQuantity(id,adjustQty);
     }
 
     // @GetMapping("/{id}/stock-history/search")
