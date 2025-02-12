@@ -120,6 +120,21 @@ public class SecurityConfiguration {
                                 .requestMatchers(POST,"/report/**").hasAnyAuthority("report:CREATE", "*")
                                 .requestMatchers(DELETE,"/report/**").hasAnyAuthority("report:DELETE", "*")
                                 .requestMatchers(PUT,"/report/**").hasAnyAuthority("report:UPDATE", "*")
+                                
+                                .requestMatchers(GET,"/data/**").hasAnyAuthority("data:READ", "*")
+                                .requestMatchers(POST,"/data/**").hasAnyAuthority("data:CREATE", "*")
+                                .requestMatchers(DELETE,"/data/**").hasAnyAuthority("data:DELETE", "*")
+                                .requestMatchers(PUT,"/data/**").hasAnyAuthority("data:UPDATE", "*")
+
+                                .requestMatchers(GET,"/data/**").hasAnyAuthority("data:READ", "*")
+                                .requestMatchers(POST,"/data/**").hasAnyAuthority("data:CREATE", "*")
+                                .requestMatchers(DELETE,"/data/**").hasAnyAuthority("data:DELETE", "*")
+                                .requestMatchers(PUT,"/data/**").hasAnyAuthority("data:UPDATE", "*")
+
+                                .requestMatchers(GET,"/configuration/**").hasAnyAuthority("configuration:READ", "*")
+                                .requestMatchers(POST,"/configuration/**").hasAnyAuthority("configuration:CREATE", "*")
+                                .requestMatchers(DELETE,"/configuration/**").hasAnyAuthority("configuration:DELETE", "*")
+                                .requestMatchers(PUT,"/configuration/**").hasAnyAuthority("configuration:UPDATE", "*")
 
                                 // Any Endpoint
                                 .anyRequest()
