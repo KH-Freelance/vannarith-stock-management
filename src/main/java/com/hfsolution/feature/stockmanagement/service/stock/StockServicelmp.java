@@ -94,13 +94,18 @@ public class StockServicelmp implements StockService {
             Stock stock ;
 
             //check product id
-            BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(stockRequest.getProductId(),stockRequest.getBatchId());
+            // BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByProductIDAndBatchId(stockRequest.getProductId(),stockRequest.getBatchId());
+            // if(stockResult.getEntity()!=null){
+            //     String msg = AppTools.appGetMessage("0240");
+            //     throw new AppException("0240",msg);
+            //     // stock = stockResult.getEntity();
+            //     // stock.setQty(stock.getQty()+stockRequest.getQty());
+            //     // stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
+            // }
+            BaseEntityResponseDto<Stock> stockResult = stockDao.findStockByBatchId(stockRequest.getBatchId());
             if(stockResult.getEntity()!=null){
-                String msg = AppTools.appGetMessage("0240");
+                String msg = AppTools.appGetMessage("0240").replace("[batch_id]", stockRequest.getBatchId());
                 throw new AppException("0240",msg);
-                // stock = stockResult.getEntity();
-                // stock.setQty(stock.getQty()+stockRequest.getQty());
-                // stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
             }
             stock = new Stock();
             BaseEntityResponseDto<Product> product = productDao.findByProductID(stockRequest.getProductId());
@@ -651,7 +656,7 @@ public class StockServicelmp implements StockService {
             BeanUtils.copyProperties(stockResult.getEntity(), stockDetailDto);
 
             //COPY StockHistoryDto Property
-            List<StockHistoryDto> stockHistoryDtos = new ArrayList<>();
+            List<StockHistoryDto> stockHistoryDtos = new ArrayList<>();     
             for (StockHistory stockHistory : stockResult.getEntity().getStockHistories()) {
 
                 //COPY StockHistory Property

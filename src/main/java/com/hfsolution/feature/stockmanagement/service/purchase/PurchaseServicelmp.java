@@ -723,16 +723,28 @@ public class PurchaseServicelmp implements PurchaseService {
                 //     }
                 // }));
                 BigDecimal remainingPayment = purchase.getTotal();
-                for (Payment payment : purchase.getPayments()) {
-
-                    if (payment.getAmount().compareTo(BigDecimal.ZERO) > 0) {
-                        remainingPayment = remainingPayment.subtract(payment.getAmount());
-                    }else{
-                        remainingPayment = remainingPayment.add(payment.getAmount());
+                if(remainingPayment.compareTo(BigDecimal.ZERO)!=0 && !purchase.getPaymentStatus().equals(PaymentStatus.PAID)){
+                    for (Payment payment : purchase.getPayments()) {
+                        if (payment.getAmount().compareTo(BigDecimal.ZERO) > 0) {
+                            remainingPayment = remainingPayment.subtract(payment.getAmount());
+                        }else{
+                            remainingPayment = remainingPayment.add(payment.getAmount());
+                        }
                     }
-                    
-                   
                 }
+                // BigDecimal historyPay = BigDecimal.ZERO;
+                // BigDecimal remainingPayment = BigDecimal.ZERO;
+                // if(!purchase.getPaymentStatus().equals(PaymentStatus.PAID)){
+                //     for (Payment paymentInfo : purchase.getPayments()) {
+                //         historyPay = paymentInfo.getAmount().compareTo(BigDecimal.ZERO) > 0 
+                //             ? historyPay.subtract(paymentInfo.getAmount())
+                //             : historyPay.add(paymentInfo.getAmount());
+                //     } 
+                //     remainingPayment = historyPay.compareTo(BigDecimal.ZERO) > 0 
+                //         ? purchase.getTotal().subtract(historyPay)
+                //         : purchase.getTotal().add(historyPay);
+                    
+                // }
                 purchaseDto.setRemainingPayment(remainingPayment);
                 return purchaseDto;
             });
