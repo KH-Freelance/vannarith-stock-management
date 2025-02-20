@@ -94,13 +94,11 @@ public class PurchaseServicelmp implements PurchaseService {
     private final HttpServletResponse httpServletResponse;
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
-    private final ProductDao productDao;
     private final CustomerDao customerDao;
     private final PaymentDao paymentDao;
     private final ConfigurationDao configurationDao;
     private final String functionTypeNotification = "SALE";
     private final TelegramRestClientConsumer telegramRestClientConsumer;
-    // private final String CSV_FILENAME="purchase";
 
     @Override
     @Transactional

@@ -98,3 +98,13 @@ INSERT INTO permissions (id, description, name) VALUES
 (31, 'permission to UPDATE role', 'role:UPDATE'),
 (32, 'permission to CREATE role', 'role:CREATE'),
 (33, 'permission to READ role', 'role:READ');
+
+(34, 'permission to DELETE data', 'data:DELETE'),
+(35, 'permission to UPDATE data', 'data:UPDATE'),
+(36, 'permission to CREATE data', 'data:CREATE'),
+(37, 'permission to READ data', 'data:READ');
+
+(38, 'permission to DELETE configuration', 'configuration:DELETE'),
+(39, 'permission to UPDATE configuration', 'configuration:UPDATE'),
+(40, 'permission to CREATE configuration', 'configuration:CREATE'),
+(41, 'permission to READ configuration', 'configuration:READ');

@@ -47,6 +47,7 @@ import com.hfsolution.feature.stockmanagement.dao.StockDao;
 import com.hfsolution.feature.stockmanagement.dao.StockHistoryDao;
 import com.hfsolution.feature.stockmanagement.dto.CsvRepresentation.StockCsv;
 import com.hfsolution.feature.stockmanagement.dto.product.ProductDto;
+import com.hfsolution.feature.stockmanagement.dto.request.stock.AdjustQty;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockRequest;
 import com.hfsolution.feature.stockmanagement.dto.request.stock.StockUpdateRequest;
 import com.hfsolution.feature.stockmanagement.dto.stock.StockDetailDto;
@@ -512,7 +513,7 @@ public class StockServicelmp implements StockService {
 
     @Override
     @Transactional
-    public Object addQuantity(Long id, StockUpdateRequest stockUpdateRequest) {
+    public Object addQuantity(Long id, AdjustQty adjustQty) {
 
         httpServletRequest.setAttribute(ACTION,"ADD QUANTITY TO STOCK");
         SuccessResponse<Stock> response = new SuccessResponse<>();
@@ -526,8 +527,8 @@ public class StockServicelmp implements StockService {
                 throw new AppException("024",msg);
             }
             Stock stock = stockResult.getEntity();
-            if(stockUpdateRequest.getQty()>0){
-                stock.setQty(stock.getQty()+stockUpdateRequest.getQty());
+            if(adjustQty.getQty()>0){
+                stock.setQty(stock.getQty()+adjustQty.getQty());
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
 
                 // Need to be call async 
@@ -537,8 +538,8 @@ public class StockServicelmp implements StockService {
                 stockHistory.setId(stockHistoryDao.getStockHistoryId());
                 stockHistory.setFirstname(user.getFirstname());
                 stockHistory.setLastname(user.getLastname());
-                stockHistory.setRemark(stockUpdateRequest.getRemark());
-                stockHistory.setQty(stockUpdateRequest.getQty());
+                stockHistory.setRemark(adjustQty.getRemark());
+                stockHistory.setQty(adjustQty.getQty());
                 stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
                 stock.addStockHistory(stockHistory);
             }
@@ -559,7 +560,7 @@ public class StockServicelmp implements StockService {
 
     @Override
     @Transactional
-    public Object removeQuantity(Long id, StockUpdateRequest stockUpdateRequest) {
+    public Object removeQuantity(Long id, AdjustQty adjustQty) {
         httpServletRequest.setAttribute(ACTION,"REMOVE QUANTITY TO STOCK");
         SuccessResponse<Stock> response = new SuccessResponse<>();
         String currentMethodName = new Object() {}.getClass().getEnclosingMethod().getName();
@@ -573,13 +574,13 @@ public class StockServicelmp implements StockService {
             }
             Stock stock = stockResult.getEntity();
             // Check the remaining quantity of stock
-            if(stock.getQty()-stockUpdateRequest.getQty()<0){
+            if(stock.getQty()-adjustQty.getQty()<0){
                 String msg = AppTools.appGetMessage("0243").replace("[qty]", String.valueOf(stock.getQty()));
                 throw new AppException("0243",msg,"Y");
             }
 
-            if(stockUpdateRequest.getQty()>0){
-                stock.setQty(stock.getQty()-stockUpdateRequest.getQty());
+            if(adjustQty.getQty()>0){
+                stock.setQty(stock.getQty()-adjustQty.getQty());
                 stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
 
                 // Need to be call async 
@@ -589,8 +590,8 @@ public class StockServicelmp implements StockService {
                 stockHistory.setId(stockHistoryDao.getStockHistoryId());
                 stockHistory.setFirstname(user.getFirstname());
                 stockHistory.setLastname(user.getLastname());
-                stockHistory.setRemark(stockUpdateRequest.getRemark());
-                stockHistory.setQty(stockUpdateRequest.getQty()*-1);
+                stockHistory.setRemark(adjustQty.getRemark());
+                stockHistory.setQty(adjustQty.getQty()*-1);
                 stockHistory.setCreatedDate(new Timestamp(System.currentTimeMillis()));
                 stock.addStockHistory(stockHistory);
             }

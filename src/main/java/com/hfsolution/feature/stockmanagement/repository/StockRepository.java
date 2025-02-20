@@ -24,7 +24,10 @@ public interface StockRepository extends IBaseRepository<Stock,Long>, JpaSpecifi
         SELECT new com.hfsolution.feature.stockmanagement.dto.stock.StockPercentageDto(
             id,
             qty,
-            (qty * 100.0 / total_qty) AS percentage_qty
+            CASE 
+                WHEN total_qty <= 0 THEN 0.00
+                ELSE (qty * 100.0 / total_qty)
+            END AS percentage_qty
         )
 
         FROM
