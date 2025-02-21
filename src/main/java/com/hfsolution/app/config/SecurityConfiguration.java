@@ -104,12 +104,12 @@ public class SecurityConfiguration {
                                 .requestMatchers(DELETE,"/purchase/return/**").hasAnyAuthority("return:DELETE", "*")
                                 .requestMatchers(PUT,"/purchase/return/**").hasAnyAuthority("return:UPDATE", "*")
 
-                                .requestMatchers(GET,"/purchase/**").hasAnyAuthority("purchase:READ", "*")
-                                .requestMatchers(GET,"/purchase/product/**").hasAnyAuthority("purchase:CREATE","purchase:UPDATE", "*")
-                                .requestMatchers(GET,"/purchase/customer/**").hasAnyAuthority("purchase:CREATE","purchase:UPDATE", "*")
-                                .requestMatchers(POST,"/purchase/**").hasAnyAuthority("purchase:CREATE", "*")
-                                .requestMatchers(DELETE,"/purchase/**").hasAnyAuthority("purchase:DELETE", "*")
-                                .requestMatchers(PUT,"/purchase/**").hasAnyAuthority("purchase:UPDATE", "*")
+                                .requestMatchers(GET,"/purchase/**").hasAnyAuthority("sale:READ", "*")
+                                .requestMatchers(GET,"/purchase/product/**").hasAnyAuthority("sale:CREATE","sale:UPDATE", "*")
+                                .requestMatchers(GET,"/purchase/customer/**").hasAnyAuthority("sale:CREATE","sale:UPDATE", "*")
+                                .requestMatchers(POST,"/purchase/**").hasAnyAuthority("sale:CREATE", "*")
+                                .requestMatchers(DELETE,"/purchase/**").hasAnyAuthority("sale:DELETE", "*")
+                                .requestMatchers(PUT,"/purchase/**").hasAnyAuthority("sale:UPDATE", "*")
 
                                 .requestMatchers(GET,"/role/**").hasAnyAuthority("role:READ", "*")
                                 .requestMatchers(POST,"/role/**").hasAnyAuthority("role:CREATE", "*")
