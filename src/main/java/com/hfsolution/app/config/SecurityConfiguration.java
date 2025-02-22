@@ -75,6 +75,7 @@ public class SecurityConfiguration {
                                 .permitAll()
                                 
                                 .requestMatchers(GET, "/user/current-info").authenticated()
+                                .requestMatchers(PUT,"/user/**").authenticated()
                                 
                                 
                                 .requestMatchers(GET,"/stock/**").hasAnyAuthority("stock:READ", "*")
