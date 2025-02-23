@@ -3,7 +3,9 @@ package com.hfsolution.feature.stockmanagement.service.configuration;
 import static com.hfsolution.app.constant.AppResponseCode.FAIL_CODE;
 
 import java.io.File;
+import java.io.FileInputStream;
 import java.io.FileOutputStream;
+import java.io.IOException;
 import java.sql.Timestamp;
 import java.time.DayOfWeek;
 import java.time.LocalDate;
@@ -71,6 +73,8 @@ import org.springframework.core.io.Resource;
 
 import java.util.concurrent.ConcurrentHashMap;
 import java.util.concurrent.ScheduledFuture;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipOutputStream;
 @Service
 @RequiredArgsConstructor
 public class ConfigurationServiceImp implements ConfigurationService, SchedulingConfigurer {
@@ -138,7 +142,8 @@ public class ConfigurationServiceImp implements ConfigurationService, Scheduling
                 String caption = AppTools.appGetMessage("067").replace("[obj]",nameDetails[1]);
                 recoveryService.backup(fileName);
                 ResponseEntity<Resource> backupResponse = recoveryService.getExcelData(fileName);
-                telegramRestClientConsumer.sendFileToTelegram(backupResponse.getBody().getFile(),configuration.getTelegramToken(),configuration.getChatId(),caption);
+                File zippedFile = zipFile(backupResponse.getBody().getFile());
+                telegramRestClientConsumer.sendFileToTelegram(zippedFile,configuration.getTelegramToken(),configuration.getChatId(),caption);
                 
             } else {
                 action = "report";
@@ -149,7 +154,8 @@ public class ConfigurationServiceImp implements ConfigurationService, Scheduling
                 String fileName = nameDetails[0];
                 String caption = AppTools.appGetMessage("067").replace("[obj]",nameDetails[1]);
                 File reportSaleFile = reportService.reportSaleFile(startDateTime, endDateTime, fileName);
-                telegramRestClientConsumer.sendFileToTelegram(reportSaleFile,configuration.getTelegramToken(),configuration.getChatId(),caption);
+                File zippedFile = zipFile(reportSaleFile);
+                telegramRestClientConsumer.sendFileToTelegram(zippedFile,configuration.getTelegramToken(),configuration.getChatId(),caption);
 
             }
             configuration.setLastExecutedDate(new Timestamp(System.currentTimeMillis()));
@@ -165,6 +171,25 @@ public class ConfigurationServiceImp implements ConfigurationService, Scheduling
         }
     }
 
+    private File zipFile(File fileToZip) throws IOException {
+        String zipFilePath = fileToZip.getAbsolutePath() + ".zip";
+        try (FileOutputStream fos = new FileOutputStream(zipFilePath);
+             ZipOutputStream zipOut = new ZipOutputStream(fos);
+             FileInputStream fis = new FileInputStream(fileToZip)) {
+    
+            ZipEntry zipEntry = new ZipEntry(fileToZip.getName());
+            zipOut.putNextEntry(zipEntry);
+    
+            byte[] bytes = new byte[1024];
+            int length;
+            while ((length = fis.read(bytes)) >= 0) {
+                zipOut.write(bytes, 0, length);
+            }
+        }
+        return new File(zipFilePath);
+    }
+
+    
     //for report
     private LocalDateTime calculateStartDate(Configuration configuration) {
 
