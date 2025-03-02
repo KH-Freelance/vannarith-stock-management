@@ -36,11 +36,18 @@ public class Product {
     @Column(name = "id")
     private Long id;
 
+    @Column(name = "product_id")
+    private Long productId;
+
     @Column(name = "product_name")
     private String productName;
 
     @Column(name = "product_desc")
     private String productDesc;
+
+    @Column(name = "pack_size")
+    private String packSize;
+    
 
     @Column(name = "price")
     private BigDecimal price;

@@ -2,13 +2,11 @@ package com.hfsolution.feature.stockmanagement.dto.stock;
 
 import java.math.BigDecimal;
 import java.sql.Timestamp;
-
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
 import com.hfsolution.app.util.BigDecimalSerializer;
 import com.hfsolution.app.util.TimestampConverter;
-
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +23,8 @@ public class StockDto {
     private Double percentage;
     private String factory;
     private BigDecimal importPrice;
+    
+
 
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd HH:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp factoryDate;
@@ -42,5 +42,6 @@ public class StockDto {
         long id;
         String productName;
         BigDecimal price;
+        String packSize;
     }
 }

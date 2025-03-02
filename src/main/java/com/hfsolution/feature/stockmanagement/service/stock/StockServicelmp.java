@@ -391,7 +391,7 @@ public class StockServicelmp implements StockService {
             calculatePercentageOfQty(stockResult.getPage());
             Page<StockDto> stockDtoPage = stockResult.getPage().map(stock ->{
                 StockDto stockDto = new StockDto();
-                stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName(),stock.getProduct().getPrice()));
+                stockDto.setProduct(new StockDto.Product(stock.getProduct().getId(), stock.getProduct().getProductName(),stock.getProduct().getPrice(),stock.getProduct().getPackSize()));
                 BeanUtils.copyProperties(stock, stockDto);
                 return stockDto;
             });

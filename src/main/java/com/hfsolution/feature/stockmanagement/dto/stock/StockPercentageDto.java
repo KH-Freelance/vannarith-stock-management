@@ -9,6 +9,7 @@ import lombok.Setter;
 @Getter
 @Setter
 public class StockPercentageDto {
+    
     private Double percentage; // corresponds to SUM(total)
     private Long qty; // corresponds to SUM(total)
     private Long id;

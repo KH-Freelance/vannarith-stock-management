@@ -23,6 +23,8 @@ public class ProductDto {
 
     private BigDecimal discount;
 
+    private String packSize;
+
     @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd hh:mm:ss", timezone = "Asia/Phnom_Penh")
     private Timestamp createdDate;
 

@@ -5,13 +5,17 @@ import java.math.BigDecimal;
 import org.springframework.web.multipart.MultipartFile;
 
 import jakarta.validation.constraints.Pattern;
+import jakarta.validation.constraints.Positive;
 import lombok.Data;
 
 @Data
 public class ProductUpdateRequest {
     private String productName;
     private String productDesc;
+    private String packSize;
     private BigDecimal price;
+    @Positive(message = "productId must be greater than 0")
+    private Long productId; 
     private BigDecimal discount;
     //private String factory;
     // private BigDecimal importPrice;

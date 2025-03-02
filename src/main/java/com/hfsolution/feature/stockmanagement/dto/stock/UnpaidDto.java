@@ -9,5 +9,7 @@ import lombok.Setter;
 @Setter
 @Getter
 public class UnpaidDto {
+
     List<PurchaseDetailDto> content;
+    
 }

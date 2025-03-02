@@ -425,21 +425,25 @@ public class PurchaseServicelmp implements PurchaseService {
                     Product product = productMap.get(stock.getProductId());
     
                     //CALCULATE
-                    BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(productPurchase.getQty()));
-                    BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
-                                        .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
-                                        .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
-                    if (totalDiscount.compareTo(BigDecimal.valueOf(100)) > 0) {
-                        String msg = AppTools.appGetMessage("063");
-                        throw new AppException("063", msg);
-                    }
+                    // BigDecimal basePrice = product.getPrice().multiply(BigDecimal.valueOf(productPurchase.getQty()));
+                    // BigDecimal totalDiscount = Optional.ofNullable(product.getDiscount()).orElse(BigDecimal.ZERO)
+                    //                     .add(Optional.ofNullable(customer.getDiscount()).orElse(BigDecimal.ZERO))
+                    //                     .add(Optional.ofNullable(purchaseRequest.getDiscount()).orElse(BigDecimal.ZERO));
+                    // if (totalDiscount.compareTo(BigDecimal.valueOf(100)) > 0) {
+                    //     String msg = AppTools.appGetMessage("063");
+                    //     throw new AppException("063", msg);
+                    // }
+                    // BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
+                    // BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice).abs();
 
-                    BigDecimal discountPrice = basePrice.multiply(totalDiscount.divide(BigDecimal.valueOf(100)));
-                    BigDecimal totalProdcutPrice = basePrice.subtract(discountPrice).abs();
-    
+                    BigDecimal price = (productPurchase.getPrice()!=null && productPurchase.getPrice().compareTo(BigDecimal.ZERO)!=0 )
+                    ?  productPurchase.getPrice()
+                    : product.getPrice();
+                    price = price.multiply(BigDecimal.valueOf(productPurchase.getQty()));
+                    
                     purchaseItem.setBatchId(stock.getBatchId());
                     purchaseItem.setDiscount(product.getDiscount());
-                    purchaseItem.setPrice(totalProdcutPrice);
+                    purchaseItem.setPrice(price);
                     purchaseItem.setProductId(product.getId());
                     purchaseItem.setQty(productPurchase.getQty());
                     purchase.addPurchaseItem(purchaseItem);
@@ -457,7 +461,7 @@ public class PurchaseServicelmp implements PurchaseService {
                     stock.addStockHistory(stockHistory);
                     stock.setUpdatedDate(new Timestamp(System.currentTimeMillis()));
                     stock = stockDao.saveEntity(stock).getEntity();
-                    totalPrice = totalPrice.add(totalProdcutPrice);
+                    totalPrice = totalPrice.add(price);
                     totalQty += productPurchase.getQty();
                 }
 
@@ -493,7 +497,7 @@ public class PurchaseServicelmp implements PurchaseService {
                     //.replace("[product]",products)
                     .replace("[customer]", purchase.getCustomer().getCustomerName())
                     .replace("[qty]", String.valueOf(purchase.getQty()))
-                    .replace("[discount]", formatAmt.format(purchase.getDiscount()))
+                    //.replace("[discount]", formatAmt.format(purchase.getDiscount()))
                     .replace("[total]", formatAmt.format(purchase.getTotal()))
                     .replace("[payment_type]", String.valueOf(purchase.getPaymentType()))
                     .replace("[payment_status]",String.valueOf(purchase.getPaymentStatus()))

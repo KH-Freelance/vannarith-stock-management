@@ -47,6 +47,9 @@ public class ReportStockDto {
     @ExcelIgnore
     private String factory;
 
+    @ExcelProperty("Pack Size")
+    private String packSize;
+
     @ExcelProperty("Avg Cost")
     private BigDecimal avgCost;
 

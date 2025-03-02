@@ -16,9 +16,12 @@ public class ProductRequest {
     @NotBlank(message = "Product name is required.")
     private String productName;
     private String productDesc;
+    private String packSize;
     // @NotBlank(message = "Factory name is required.")
     //private String factory;
     private MultipartFile file;
+    @Positive(message = "productId must be greater than 0")
+    private Long productId; 
     @Positive(message = "Price must be greater than 0")
     private BigDecimal price; 
     private BigDecimal discount;

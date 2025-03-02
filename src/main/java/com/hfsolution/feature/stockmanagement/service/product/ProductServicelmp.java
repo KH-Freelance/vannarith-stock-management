@@ -79,8 +79,10 @@ public class ProductServicelmp implements ProductService {
 
             Product product = new Product();
             product.setId(productDao.getProductId());
+            product.setProductId(productRequest.getProductId());
             product.setProductName(productRequest.getProductName());
             product.setProductDesc(productRequest.getProductDesc());
+            product.setPackSize(productRequest.getPackSize());
             product.setPrice(productRequest.getPrice());
             // product.setImportPrice(productRequest.getImportPrice());
             //product.setFactory(productRequest.getFactory());
@@ -126,8 +128,10 @@ public class ProductServicelmp implements ProductService {
                 product.setImageUrl((String)uploadImage(file, STOCK_PRODUCT+"/"+productRequest.getProductName()).get("secure_url"));
             }
             product.setId(productDao.getProductId());
+            product.setProductId(productRequest.getProductId());
             product.setProductName(productRequest.getProductName());
             product.setProductDesc(productRequest.getProductDesc());
+            product.setPackSize(productRequest.getPackSize());
             product.setPrice(productRequest.getPrice());
             // product.setImportPrice(productRequest.getImportPrice());
             //product.setFactory(productRequest.getFactory());
@@ -206,7 +210,9 @@ public class ProductServicelmp implements ProductService {
             //updated
             Product existingProduct = productResult.getEntity();
             Optional.ofNullable(productUpdateRequest.getProductName()).ifPresent(existingProduct::setProductName);
+            Optional.ofNullable(productUpdateRequest.getProductId()).ifPresent(existingProduct::setProductId);
             Optional.ofNullable(productUpdateRequest.getProductDesc()).ifPresent(existingProduct::setProductDesc);
+            Optional.ofNullable(productUpdateRequest.getPackSize()).ifPresent(existingProduct::setPackSize);
             Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
             // Optional.ofNullable(productUpdateRequest.getImportPrice()).ifPresent(existingProduct::setImportPrice);
             //Optional.ofNullable(productUpdateRequest.getFactory()).ifPresent(existingProduct::setFactory);

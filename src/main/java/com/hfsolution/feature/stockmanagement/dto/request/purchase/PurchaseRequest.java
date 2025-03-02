@@ -38,6 +38,8 @@ public class PurchaseRequest {
         private Long stockId;
         @Positive(message = "Qty must be greater than 0")
         private Long qty;
+        //@Positive(message = "Qty must be greater than 0")
+        private BigDecimal price;
     }
     
 }
