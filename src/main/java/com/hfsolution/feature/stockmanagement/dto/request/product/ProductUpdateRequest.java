@@ -14,8 +14,7 @@ public class ProductUpdateRequest {
     private String productDesc;
     private String packSize;
     private BigDecimal price;
-    @Positive(message = "productId must be greater than 0")
-    private Long productId; 
+    private String customId; 
     private BigDecimal discount;
     //private String factory;
     // private BigDecimal importPrice;

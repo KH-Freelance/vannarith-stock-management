@@ -13,6 +13,7 @@ import org.hibernate.annotations.Where;
 
 import com.alibaba.excel.annotation.ExcelProperty;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.hfsolution.app.util.TimestampConverter;
 
 import jakarta.persistence.Column;
@@ -36,8 +37,8 @@ public class Product {
     @Column(name = "id")
     private Long id;
 
-    @Column(name = "product_id")
-    private Long productId;
+    @Column(name = "custom_id")
+    private String customId;
 
     @Column(name = "product_name")
     private String productName;
@@ -47,7 +48,6 @@ public class Product {
 
     @Column(name = "pack_size")
     private String packSize;
-    
 
     @Column(name = "price")
     private BigDecimal price;

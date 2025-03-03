@@ -79,7 +79,7 @@ public class ProductServicelmp implements ProductService {
 
             Product product = new Product();
             product.setId(productDao.getProductId());
-            product.setProductId(productRequest.getProductId());
+            product.setCustomId(productRequest.getCustomId());
             product.setProductName(productRequest.getProductName());
             product.setProductDesc(productRequest.getProductDesc());
             product.setPackSize(productRequest.getPackSize());
@@ -128,7 +128,7 @@ public class ProductServicelmp implements ProductService {
                 product.setImageUrl((String)uploadImage(file, STOCK_PRODUCT+"/"+productRequest.getProductName()).get("secure_url"));
             }
             product.setId(productDao.getProductId());
-            product.setProductId(productRequest.getProductId());
+            product.setCustomId(productRequest.getCustomId());
             product.setProductName(productRequest.getProductName());
             product.setProductDesc(productRequest.getProductDesc());
             product.setPackSize(productRequest.getPackSize());
@@ -210,7 +210,7 @@ public class ProductServicelmp implements ProductService {
             //updated
             Product existingProduct = productResult.getEntity();
             Optional.ofNullable(productUpdateRequest.getProductName()).ifPresent(existingProduct::setProductName);
-            Optional.ofNullable(productUpdateRequest.getProductId()).ifPresent(existingProduct::setProductId);
+            Optional.ofNullable(productUpdateRequest.getCustomId()).ifPresent(existingProduct::setCustomId);
             Optional.ofNullable(productUpdateRequest.getProductDesc()).ifPresent(existingProduct::setProductDesc);
             Optional.ofNullable(productUpdateRequest.getPackSize()).ifPresent(existingProduct::setPackSize);
             Optional.ofNullable(productUpdateRequest.getPrice()).ifPresent(existingProduct::setPrice);
