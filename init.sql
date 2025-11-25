@@ -1,110 +1,194 @@
-SELECT role,role_id FROM public._user;
-
-update _user set role_id=1 from;
-
-CREATE database authentication;
+CREATE database stockmanagement;
 
 
-INSERT INTO role (id, description, name) VALUES
-(1, 'Full permission', 'Super Admin'),
-(2, 'Full permission', 'Admin'),
-(3, 'manager permission', 'Manager');
+-- After Application runnniing then uncomment it and execute it 
+
+-- INSERT INTO role (id, description, name) VALUES
+-- (1, 'Full permission', 'Super Admin'),
+-- (2, 'Full permission', 'Admin'),
+-- (3, 'manager permission', 'Manager');
 
 
-INSERT INTO role_permissions (role_id, permission_id) VALUES
-(1, 21),
-(2, 1),
-(2, 2),
-(2, 3),
-(2, 4),
-(2, 5),
-(2, 6),
-(2, 7),
-(2, 8),
-(2, 9),
-(2, 10),
-(2, 11),
-(2, 12),
-(2, 13),
-(2, 14),
-(2, 15),
-(2, 16),
-(2, 19),
-(2, 21),
-(2, 22),
-(2, 23),
-(2, 24),
-(2, 25),
-(2, 26),
-(2, 27),
-(2, 28),
-(3, 2),
-(3, 3),
-(3, 4),
-(3, 5),
-(3, 6),
-(3, 7),
-(3, 8),
-(3, 9),
-(3, 10),
-(3, 11),
-(3, 12),
-(3, 13),
-(3, 14),
-(3, 15),
-(3, 16),
-(3, 21),
-(3, 22),
-(3, 23),
-(3, 24),
-(3, 25),
-(3, 26),
-(3, 27),
-(3, 28);
+-- INSERT INTO role_permissions (role_id, permission_id) VALUES
+-- (1, 21),
+-- (2, 1),
+-- (2, 2),
+-- (2, 3),
+-- (2, 4),
+-- (2, 5),
+-- (2, 6),
+-- (2, 7),
+-- (2, 8),
+-- (2, 9),
+-- (2, 10),
+-- (2, 11),
+-- (2, 12),
+-- (2, 13),
+-- (2, 14),
+-- (2, 15),
+-- (2, 16),
+-- (2, 19),
+-- (2, 21),
+-- (2, 22),
+-- (2, 23),
+-- (2, 24),
+-- (2, 25),
+-- (2, 26),
+-- (2, 27),
+-- (2, 28),
+-- (3, 2),
+-- (3, 3),
+-- (3, 4),
+-- (3, 5),
+-- (3, 6),
+-- (3, 7),
+-- (3, 8),
+-- (3, 9),
+-- (3, 10),
+-- (3, 11),
+-- (3, 12),
+-- (3, 13),
+-- (3, 14),
+-- (3, 15),
+-- (3, 16),
+-- (3, 21),
+-- (3, 22),
+-- (3, 23),
+-- (3, 24),
+-- (3, 25),
+-- (3, 26),
+-- (3, 27),
+-- (3, 28);
 
 
 
-INSERT INTO permissions (id, description, name) VALUES
-(1, 'permission to DELETE product', 'product:DELETE'),
-(2, 'permission to UPDATE product', 'product:UPDATE'),
-(3, 'permission to CREATE product', 'product:CREATE'),
-(4, 'permission to READ product', 'product:READ'),
-(5, 'permission to DELETE stock', 'stock:DELETE'),
-(6, 'permission to UPDATE stock', 'stock:UPDATE'),
-(7, 'permission to CREATE stock', 'stock:CREATE'),
-(8, 'permission to READ stock', 'stock:READ'),
-(9, 'permission to DELETE customer', 'customer:DELETE'),
-(10, 'permission to UPDATE customer', 'customer:UPDATE'),
-(11, 'permission to CREATE customer', 'customer:CREATE'),
-(12, 'permission to READ customer', 'customer:READ'),
-(13, 'permission to DELETE purchase', 'purchase:DELETE'),
-(14, 'permission to UPDATE purchase', 'purchase:UPDATE'),
-(15, 'permission to CREATE purchase', 'purchase:CREATE'),
-(16, 'permission to READ purchase', 'purchase:READ'),
-(17, 'permission to DELETE user', 'user:DELETE'),
-(18, 'permission to UPDATE user', 'user:UPDATE'),
-(19, 'permission to CREATE user', 'user:CREATE'),
-(20, 'permission to READ user', 'user:READ'),
-(21, 'permission to DELETE report', 'report:DELETE'),
-(22, 'permission to UPDATE report', 'report:UPDATE'),
-(23, 'permission to CREATE report', 'report:CREATE'),
-(24, 'permission to READ report', 'report:READ'),
-(25, 'permission to DELETE return', 'return:DELETE'),
-(26, 'permission to UPDATE return', 'return:UPDATE'),
-(27, 'permission to CREATE return', 'return:CREATE'),
-(28, 'permission to READ return', 'return:READ'),
-(29, 'Full permission for all action', '*'),
-(30, 'permission to DELETE role', 'role:DELETE'),
-(31, 'permission to UPDATE role', 'role:UPDATE'),
-(32, 'permission to CREATE role', 'role:CREATE'),
-(33, 'permission to READ role', 'role:READ');
+-- INSERT INTO permissions (id, description, name) VALUES
+-- (1, 'permission to DELETE product', 'product:DELETE'),
+-- (2, 'permission to UPDATE product', 'product:UPDATE'),
+-- (3, 'permission to CREATE product', 'product:CREATE'),
+-- (4, 'permission to READ product', 'product:READ'),
+-- (5, 'permission to DELETE stock', 'stock:DELETE'),
+-- (6, 'permission to UPDATE stock', 'stock:UPDATE'),
+-- (7, 'permission to CREATE stock', 'stock:CREATE'),
+-- (8, 'permission to READ stock', 'stock:READ'),
+-- (9, 'permission to DELETE customer', 'customer:DELETE'),
+-- (10, 'permission to UPDATE customer', 'customer:UPDATE'),
+-- (11, 'permission to CREATE customer', 'customer:CREATE'),
+-- (12, 'permission to READ customer', 'customer:READ'),
+-- (13, 'permission to DELETE purchase', 'purchase:DELETE'),
+-- (14, 'permission to UPDATE purchase', 'purchase:UPDATE'),
+-- (15, 'permission to CREATE purchase', 'purchase:CREATE'),
+-- (16, 'permission to READ purchase', 'purchase:READ'),
+-- (17, 'permission to DELETE user', 'user:DELETE'),
+-- (18, 'permission to UPDATE user', 'user:UPDATE'),
+-- (19, 'permission to CREATE user', 'user:CREATE'),
+-- (20, 'permission to READ user', 'user:READ'),
+-- (21, 'permission to DELETE report', 'report:DELETE'),
+-- (22, 'permission to UPDATE report', 'report:UPDATE'),
+-- (23, 'permission to CREATE report', 'report:CREATE'),
+-- (24, 'permission to READ report', 'report:READ'),
+-- (25, 'permission to DELETE return', 'return:DELETE'),
+-- (26, 'permission to UPDATE return', 'return:UPDATE'),
+-- (27, 'permission to CREATE return', 'return:CREATE'),
+-- (28, 'permission to READ return', 'return:READ'),
+-- (29, 'Full permission for all action', '*'),
+-- (30, 'permission to DELETE role', 'role:DELETE'),
+-- (31, 'permission to UPDATE role', 'role:UPDATE'),
+-- (32, 'permission to CREATE role', 'role:CREATE'),
+-- (33, 'permission to READ role', 'role:READ'),
 
-(34, 'permission to DELETE data', 'data:DELETE'),
-(35, 'permission to UPDATE data', 'data:UPDATE'),
-(36, 'permission to CREATE data', 'data:CREATE'),
-(37, 'permission to READ data', 'data:READ');
+-- (34, 'permission to DELETE data', 'data:DELETE'),
+-- (35, 'permission to UPDATE data', 'data:UPDATE'),
+-- (36, 'permission to CREATE data', 'data:CREATE'),
+-- (37, 'permission to READ data', 'data:READ');
 
-(38, 'permission to DELETE configuration', 'configuration:DELETE'),
-(39, 'permission to UPDATE configuration', 'configuration:UPDATE'),
-(40, 'permission to CREATE configuration', 'configuration:CREATE'),
-(41, 'permission to READ configuration', 'configuration:READ');
+-- (38, 'permission to DELETE configuration', 'configuration:DELETE'),
+-- (39, 'permission to UPDATE configuration', 'configuration:UPDATE'),
+-- (40, 'permission to CREATE configuration', 'configuration:CREATE'),
+-- (41, 'permission to READ configuration', 'configuration:READ');
+
+
+
+
+-- -- Insert ADMIN user
+-- -- Email: admin@example.com
+-- -- Password: password
+-- INSERT INTO _user (id, firstname, lastname, email, password, role_id, image_url) VALUES
+-- (1, 'System', 'Admin', 'admin@example.com', '$2a$12$z.IalY5S7lwoODPQM.awSOZxvPvcCPfk1FMAcyzQ845ma/J7.Ylza', 2, NULL);
+
+-- -- Insert MANAGER user  
+-- -- Email: manager@example.com
+-- -- Password: password
+-- INSERT INTO _user (id, firstname, lastname, email, password, role_id, image_url) VALUES
+-- (2, 'Store', 'Manager', 'manager@example.com', '$2a$12$z.IalY5S7lwoODPQM.awSOZxvPvcCPfk1FMAcyzQ845ma/J7.Ylza', 3, NULL);
+
+
+-- -- Create Seq
+
+-- CREATE SEQUENCE customer_id_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+
+
+-- CREATE SEQUENCE expense_id_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+
+-- CREATE SEQUENCE payment_id_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+
+
+-- CREATE SEQUENCE purchase_id_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+
+-- CREATE SEQUENCE purchase_code_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+
+
+-- CREATE SEQUENCE product_id_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+
+
+-- CREATE SEQUENCE return_id_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+
+-- CREATE SEQUENCE stock_history_id_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+
+-- CREATE SEQUENCE stock_id_seq
+--     INCREMENT BY 1
+--     MINVALUE 1
+--     START WITH 1
+--     NO CYCLE
+--     OWNED BY NONE;
+

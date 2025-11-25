@@ -1,7 +1,5 @@
 package com.hfsolution;
 
-import static com.hfsolution.feature.user.enums.Role.ADMIN;
-import static com.hfsolution.feature.user.enums.Role.MANAGER;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
@@ -9,9 +7,7 @@ import org.springframework.boot.autoconfigure.jdbc.DataSourceAutoConfiguration;
 import org.springframework.cloud.openfeign.EnableFeignClients;
 import org.springframework.context.annotation.Bean;
 import org.springframework.scheduling.annotation.EnableScheduling;
-
 import com.hfsolution.feature.auth.services.AuthenticationService;
-import com.hfsolution.feature.user.dto.RegisterRequest;
 
 @SpringBootApplication(exclude={DataSourceAutoConfiguration.class})
 @EnableFeignClients
@@ -61,7 +57,8 @@ public class HfSolutionApplication {
 			// 		.lastname("Admin")
 			// 		.email("admin@mail.com")
 			// 		.password("password")
-			// 		.role(new Role().)
+			// 		.roleId(1)
+			// 		// .role(ADMIN)
 			// 		.build();
 			// System.out.println("Admin token: " + service.register(admin).getAccessToken());
 
