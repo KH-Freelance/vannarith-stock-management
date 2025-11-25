@@ -114,13 +114,13 @@ CREATE database stockmanagement;
 -- -- Email: admin@example.com
 -- -- Password: password
 -- INSERT INTO _user (id, firstname, lastname, email, password, role_id, image_url) VALUES
--- (1, 'System', 'Admin', 'admin@example.com', '$2a$12$z.IalY5S7lwoODPQM.awSOZxvPvcCPfk1FMAcyzQ845ma/J7.Ylza', 2, NULL);
+-- (1, 'System', 'Admin', 'admin@example.com', '$2a$12$z.IalY5S7lwoODPQM.awSOZxvPvcCPfk1FMAcyzQ845ma/J7.Ylza', 2, 'https://res.cloudinary.com/dohtq6cbz/image/upload/v1731050338/stock-user/test2test2.png');
 
 -- -- Insert MANAGER user  
 -- -- Email: manager@example.com
 -- -- Password: password
 -- INSERT INTO _user (id, firstname, lastname, email, password, role_id, image_url) VALUES
--- (2, 'Store', 'Manager', 'manager@example.com', '$2a$12$z.IalY5S7lwoODPQM.awSOZxvPvcCPfk1FMAcyzQ845ma/J7.Ylza', 3, NULL);
+-- (2, 'Store', 'Manager', 'manager@example.com', '$2a$12$z.IalY5S7lwoODPQM.awSOZxvPvcCPfk1FMAcyzQ845ma/J7.Ylza', 3, 'https://res.cloudinary.com/dohtq6cbz/image/upload/v1731050338/stock-user/test2test2.png');
 
 
 -- -- Create Seq
